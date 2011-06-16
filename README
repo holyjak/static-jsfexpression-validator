@@ -1,0 +1,60 @@
+Perform analysis of (selected) JSF 1.1 JSP files and validate that
+all EL expressions reference only existing managed beans and their
+properties/action methods.
+
+USAGE
+See the main class net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer
+and perhaps try to run it from the command line (it prints usage info).
+
+MORE INFO
+
+<p>
+For local variables, such as the <var>var</var> produced by h:dataTable, you must first declare of
+what type they are as this cannot be determined based on the code, see {@link JsfElValidator#definePropertyTypeOverride(String, Class)}.
+<p>
+If there are some EL variables aside of managed beans in faces-config and the local ones you can
+declare them to the validator via {@link JsfElValidator#declareVariable(String, Object)}.
+<p>
+If there are other tags than h:dataTable that can create local variables, you must create and
+register an appropriate resolver for them as is done with the dataTable.
+
+<h3>Limitations</h3>
+<pre>
+- JSF 1.1 (switching to another one requires replacing the Sun's ValueBindingFactory and
+MethodBindingFactory used by the {@link JsfElValidator} by appropriate alternatives).
+- Currently it's assumed that a tag can declare only 1 local variable (var in dataTable).
+- Included files (statically or dynamically) are processed without taking their inclusion
+into account, i.e. variables defined in the including page aren't available when checking them.
+We have though all the information for taking inclusions into account available, it would just
+require more work (filter the included files out not to be processed as top-level files and
+when an inclusion tag is encountered, process the included file passing the current context on;
+see {@link org.apache.jasper.compiler.JsfElCheckingVisitor} and
+org.apache.jasper.compiler.Node.Visitor.visit(IncludeAction)
+, org.apache.jasper.compiler.Node.Visitor.visit(IncludeDirective)).
+</pre>
+ *
+
+TODO
+- add example JSF page
+- better error msg for
+    '#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}': PropertyNotFoundException - Property 'presAmount' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}, file=/lccbookingdetails.jsp, tagLine=126]
+ => make it clear the solution is st. like
+ propertyTypeOverrides.put("bookingHandler.lccBookingObj.lccAirLowFareIn.fares.*",  Fare.class);
+
+- reorganize packages
+- publish to Maven central
+
+...
+- Perform a separate run using the RegExp EL extractor to verify that the Jasper-based one
+has found all EL expressions.
+
+DEVELOPEMET
+
+Key classes
+- JsfStaticAnalyzer - the main method, wires all together
+- JsfElValidatingPageNodeListener - drives the validation based on JSP tags being processed
+    and composes the failures/successes report
+- ValidatingJsfElResolver - actual checks of JSF EL expressions
+
+---
+- net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding(String) - distinguish value and method binding
