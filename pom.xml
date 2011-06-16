@@ -6,6 +6,13 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
 
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
 	<contributors>
 		<contributor>
 			<name>Jakub Holy</name>
@@ -13,6 +20,11 @@
 		</contributor>
 	</contributors>
 
+	<scm>
+		<connection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
+		<developerConnection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
+		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
+	</scm>
 	<dependencies>
 
 		<dependency>
@@ -22,11 +34,10 @@
 		</dependency>
 
 		<dependency>
-		    <!--
-		    The publicly available 1.1_02 doesn't have the com.sun.faces.el.ValueBindingFactory we need
-		    http://fisheye5.cenqua.com/browse/javaserverfaces-sources/jsf-ri/src/com/sun/faces/el/ValueBindingFactory.java?r=1.19.4.7
-		    Maybe it can be fetched from CVS, see http://javaserverfaces.java.net/checkout.html#cvs .
-		     -->
+			<!-- The publicly available 1.1_02 doesn't have the com.sun.faces.el.ValueBindingFactory
+				we need http://fisheye5.cenqua.com/browse/javaserverfaces-sources/jsf-ri/src/com/sun/faces/el/ValueBindingFactory.java?r=1.19.4.7
+				Maybe it can be fetched from CVS, see http://javaserverfaces.java.net/checkout.html#cvs
+				. -->
 			<groupId>javax.faces</groupId>
 			<artifactId>jsf-impl</artifactId>
 			<version>1.1</version>
@@ -57,7 +68,7 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.8.5</version>
-			<scope>test</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-digester</groupId>
@@ -81,7 +92,7 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-		      <!--  only needed for SpringContextBeanFinder, if used -->
+			<!-- only needed for SpringContextBeanFinder, if used -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>2.5.6</version>
@@ -89,5 +100,35 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

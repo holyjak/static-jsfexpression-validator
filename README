@@ -35,6 +35,7 @@ org.apache.jasper.compiler.Node.Visitor.visit(IncludeAction)
  *
 
 TODO
+- remove dependency on jsf-impl-1.1.jar so that we can publish to Maven Central
 - add example JSF page
 - better error msg for
     '#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}': PropertyNotFoundException - Property 'presAmount' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}, file=/lccbookingdetails.jsp, tagLine=126]
