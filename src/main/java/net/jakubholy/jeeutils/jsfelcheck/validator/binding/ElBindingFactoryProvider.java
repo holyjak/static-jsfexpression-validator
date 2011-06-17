@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import javax.faces.application.Application;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_02ElBindingFactoryImpl;
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_legacyElBindingFactoryImpl;
 
 public class ElBindingFactoryProvider {
 
@@ -16,7 +15,9 @@ public class ElBindingFactoryProvider {
         try {
             Class.forName("com.sun.faces.el.ValueBindingFactory");
             LOG.info("Instantiating JSF EL Binding factory for the legacy jsf-impl 1.1 ...");
-            return new Sun11_legacyElBindingFactoryImpl();
+            return instantiate(
+                    "net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_legacyElBindingFactoryImpl"
+                    , "legacy Sun-based v1.1");
         } catch (ClassNotFoundException e) {}
 
         try {
@@ -26,6 +27,25 @@ public class ElBindingFactoryProvider {
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("No supported implementation of JSF found (jsf-impl 1.1 (legacy) and 1.1_02");
         }
+    }
+
+    private static ElBindingFactory instantiate(String implType, String jsfImlpVersion)  {
+        Exception failure = null;
+        try {
+            @SuppressWarnings("unchecked")
+            Class<ElBindingFactory> impl = (Class<ElBindingFactory>) Class.forName(implType);
+            return impl.newInstance();
+        } catch (ClassNotFoundException e) {
+            failure = e;
+        } catch (InstantiationException e) {
+            failure = e;
+        } catch (IllegalAccessException e) {
+            failure = e;
+        }
+
+        throw new IllegalStateException("Failed to load adapter class '"
+                + implType + "' for the detected jsf-impl version " + jsfImlpVersion
+                , failure);
     }
 
 }
