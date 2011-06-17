@@ -36,6 +36,7 @@ org.apache.jasper.compiler.Node.Visitor.visit(IncludeAction)
 
 TODO
 - remove dependency on jsf-impl-1.1.jar so that we can publish to Maven Central
+	- support correctly bean.property[22] not to fail for OutOfBound etc.
 - add example JSF page
 - better error msg for
     '#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}': PropertyNotFoundException - Property 'presAmount' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}, file=/lccbookingdetails.jsp, tagLine=126]
@@ -48,6 +49,7 @@ TODO
 ...
 - Perform a separate run using the RegExp EL extractor to verify that the Jasper-based one
 has found all EL expressions.
+- don't mock impls of Map/Collection, instantiate them instead (eg ArrayList)
 
 DEVELOPEMET
 

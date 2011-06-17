@@ -20,6 +20,7 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -159,7 +160,7 @@ public class ValidatingJsfElResolverTest {
 
     @Test
     public void map_property_returns_specified_type_if_set() throws Exception {
-        elResolver.declareVariable("myVariable", new BeanWithMap());
+        elResolver.declareVariable("myVariable", new BeanWithMapAndList());
         elResolver.definePropertyTypeOverride("myVariable.mapProperty.*", Integer.class);
         ValidationResult result = elResolver.validateValueElExpression("#{myVariable.mapProperty['dummyKey']}");
         assertResultValueType(result, Integer.class);
@@ -169,6 +170,38 @@ public class ValidatingJsfElResolverTest {
     public void should_try_to_resolve_unknown_variables_via_registry() throws Exception {
         elResolver.validateValueElExpression("#{unknownVariable}");
         verify(mockUnknownVariableResolver).resolveVariable("unknownVariable");
+    }
+
+    /**
+     * Having an indexed property such as bean.property[123] we should return a faked object even though
+     * the (fake) collection object doesn't have any such element. I.e. we shouldn't throw OutOfBoundExc.
+     * or do a similar thing.
+     */
+    @Test
+    public void should_correctly_resolve_indexed_property_to_declared_fake_value() throws Exception {
+        elResolver.declareVariable("myVariable", new BeanWithMapAndList());
+        elResolver.definePropertyTypeOverride("myVariable.arrayProperty.*", Integer.class);
+        int index = Integer.MAX_VALUE;
+        ValidationResult result = elResolver.validateValueElExpression("#{myVariable.arrayProperty[" + index + "]}");
+        // if we are here it's already good - the resolver hasn't thrown OutOfBound or similar exception but
+        // let's check the return value anyway
+        assertThat("The resolution should have succeeded even though no element with the index " + index
+               + " exists; actual result: " + result
+               , result
+               , is(instanceOf(SuccessfulValidationResult.class)));
+        assertResultValueType(result, Integer.class);
+    }
+    @Test
+    public void should_correctly_resolve_indexed_property_to_default_fake_value() throws Exception {
+        elResolver.declareVariable("myVariable", new BeanWithMapAndList());
+        // no override declared => a default value should be used so that no exception occurs
+        ValidationResult result = elResolver.validateValueElExpression("#{myVariable.arrayProperty[123]}");
+        // if we are here it's already good - the resolver hasn't thrown OutOfBound or similar exception but
+        // let's check the return value anyway
+        assertThat("The resolution should have succeeded even though no element with the index 123"
+               + " exists; actual result: " + result
+               , result
+               , is(instanceOf(SuccessfulValidationResult.class)));
     }
 
 }

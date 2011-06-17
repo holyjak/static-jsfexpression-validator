@@ -24,7 +24,7 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
  * (Use {@link ValidatingJsfElResolver#definePropertyTypeOverride(String, Class)} to force
  * a particular type.)
  */
-public final class MockObjectOfUnknownType {
+public class MockObjectOfUnknownType {
     private final Object propertyName;
 
     public MockObjectOfUnknownType(Object propertyName) {

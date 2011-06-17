@@ -133,6 +133,12 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
         }
     }
 
+    /**
+     * Determine the type to use using overrides and perhaps a default value.
+     * @param property
+     * @param originalType
+     * @return
+     */
     Class<?> determineFinalType(final Object property,
             final Class<?> originalType) {
 
@@ -146,6 +152,12 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
         } else {
             type = originalType;
         }
+
+        if (type == null) {
+            // Null is common for collections such as List where component type can't be determined
+            type = MockObjectOfUnknownType.class;
+        }
+
         return type;
     }
 
