@@ -43,6 +43,7 @@ public class FakeValueFactory {
     });
 
     private static Object createPropertMock(final Object property, final Class<?> type) {
+        // TBD Mock MockObjectOfUnknownType or just instantiate it?
         try {
             return Mockito.mock(type, "Mocked_class_" + type.getName() + "_for_property_" + property);
         } catch (MockitoException e) {

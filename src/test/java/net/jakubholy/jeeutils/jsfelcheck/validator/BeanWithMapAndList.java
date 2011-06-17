@@ -17,11 +17,15 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
-public class BeanWithMap {
+public class BeanWithMapAndList {
     private Map<String, Object> mapProperty = new Hashtable<String, Object>();
+    private ArrayList<Object> arrayProperty = new ArrayList<Object>();
 
     public void setMapProperty(Map<String, Object> mapProperty) {
         this.mapProperty = mapProperty;
@@ -29,5 +33,13 @@ public class BeanWithMap {
 
     public Map<String, Object> getMapProperty() {
         return mapProperty;
+    }
+
+    public void setArrayProperty(ArrayList<Object> arrayProperty) {
+        this.arrayProperty = arrayProperty;
+    }
+
+    public ArrayList<Object> getArrayProperty() {
+        return arrayProperty;
     }
 }

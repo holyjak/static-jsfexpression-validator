@@ -97,8 +97,9 @@ public class ValidatingJsfElResolver implements JsfElValidator {
     private ValidationResult produceFailureResult(final String elExpression,
             EvaluationException e) {
         LOG.log(Level.FINE, "Resolution failed", e);
+        Throwable unwrappedCause = (e.getCause() == null)? e : e.getCause();
         return new FailedValidationResult(
-                new InvalidExpressionException(elExpression, null, e.getCause()));
+                new InvalidExpressionException(elExpression, null, unwrappedCause));
     }
 
     /* (non-Javadoc)

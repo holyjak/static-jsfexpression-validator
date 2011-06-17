@@ -52,6 +52,10 @@ public class InternalValidatorFailureException extends RuntimeException {
                 + ", tag line " + jsfExpressionDescriptor.getTagLineNumber();
         }
 
+        if (getCause() != null) {
+            message += " Cause: " + getCause();
+        }
+
         return message;
     }
 
