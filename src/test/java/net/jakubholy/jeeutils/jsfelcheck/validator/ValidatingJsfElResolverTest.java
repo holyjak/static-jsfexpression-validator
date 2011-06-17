@@ -124,14 +124,16 @@ public class ValidatingJsfElResolverTest {
     public void should_fail_for_undefined_getter() throws Exception {
         elResolver.declareVariable("myObject", new Object());
         ValidationResult result = elResolver.validateValueElExpression("#{myObject.noSuchProperty}");
-        assertFailureWithMessageContaining(result, "Property 'noSuchProperty' not found");
+        //assertFailureWithMessageContaining(result, "Property 'noSuchProperty' not found"); //legacy jsf-impl 1.1
+        assertFailureWithMessageContaining(result, "Invalid EL expression '#{myObject.noSuchProperty}': "); // jsf-impl 1.1_02b
     }
 
     @Test
     public void should_fail_for_undefined_map_getter() throws Exception {
         elResolver.declareVariable("myObject", new Object());
         ValidationResult result = elResolver.validateValueElExpression("#{myObject['noSuchKeyedProp']}");
-        assertFailureWithMessageContaining(result, "Property 'noSuchKeyedProp' not found");
+        //assertFailureWithMessageContaining(result, "Property 'noSuchKeyedProp' not found"); // legacy jsf-impl 1.1
+        assertFailureWithMessageContaining(result, "Invalid EL expression '#{myObject['noSuchKeyedProp']}': "); // jsf-impl 1.1_02b
     }
 
     @Test

@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import javax.faces.application.Application;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -31,15 +30,14 @@ import javax.faces.el.EvaluationException;
 import javax.faces.el.MethodBinding;
 import javax.faces.el.ValueBinding;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
+import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
+import net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_02ElBindingFactoryImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
-
-
-import com.sun.faces.el.MethodBindingFactory;
-import com.sun.faces.el.ValueBindingFactory;
 
 /**
  * A "fake" resolver of JSF EL expression which only checks the validity of the expressions
@@ -58,9 +56,10 @@ public class ValidatingJsfElResolver implements JsfElValidator {
 
     private static final Logger LOG = Logger.getLogger(ValidatingJsfElResolver.class.getName());
 
-    private MockingPropertyResolver propertyResolver;
-    private PredefinedVariableResolver variableResolver;
-    private FacesContext mockFacesContext;
+    private final ElBindingFactory elBindingFactory;
+    private final MockingPropertyResolver propertyResolver;
+    private final PredefinedVariableResolver variableResolver;
+    private final FacesContext mockFacesContext;
 
     public ValidatingJsfElResolver(ElVariableResolver unknownVariableResolver) {
         propertyResolver = new MockingPropertyResolver();
@@ -75,6 +74,8 @@ public class ValidatingJsfElResolver implements JsfElValidator {
 
         when(application.getVariableResolver()).thenReturn(variableResolver);
         when(application.getPropertyResolver()).thenReturn(propertyResolver);
+
+        elBindingFactory = ElBindingFactoryProvider.getFactory(application);
     }
 
     /* (non-Javadoc)
@@ -84,7 +85,7 @@ public class ValidatingJsfElResolver implements JsfElValidator {
     public ValidationResult validateMethodElExpression(final String elExpression) {
         try {
             // Create binding - throws an exception if no matching method found
-            final MethodBinding binding = new MethodBindingFactory().createMethodBinding(elExpression, new Class[0]);
+            final MethodBinding binding = elBindingFactory.createMethodBinding(elExpression);
             return new SuccessfulValidationResult(binding);
         } catch (EvaluationException e) {
             return produceFailureResult(elExpression, e);
@@ -105,7 +106,7 @@ public class ValidatingJsfElResolver implements JsfElValidator {
      */
     @Override
     public ValidationResult validateValueElExpression(final String elExpression) {
-        final ValueBinding binding = new ValueBindingFactory().createValueBinding(elExpression);
+        final ValueBinding binding = elBindingFactory.createValueBinding(elExpression);
         try {
             final Object resolvedMockedValue = binding.getValue(mockFacesContext);
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
