@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
 
 import java.sql.ResultSet;
 import java.util.Hashtable;
@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.faces.model.DataModel;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.AttributesValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 

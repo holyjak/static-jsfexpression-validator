@@ -29,8 +29,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 /**
- * Register all Spring Beans defined in Spring applicationContext file as JSF
+ * Register all Spring Beans defined in Spring applicationContext file(s) as JSF
  * Managed Beans.
+ * Uses Spring itself to get the beans.
  */
 public class SpringContextBeanFinder implements ManagedBeanFinder {
 
@@ -40,7 +41,14 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
         if (springContextFiles == null || springContextFiles.isEmpty()) {
             throw new IllegalArgumentException("springContextFiles: Collection<File> cannot be null/empty, is: " + springContextFiles);
         }
-        // TODO verify the files exist
+
+        for (File file : springContextFiles) {
+            if (!file.canRead()) {
+                throw new IllegalArgumentException("The supplied Spring application context XML file " +
+                		"cannot be opened for reading: " + file);
+            }
+        }
+
         this.springContextFiles = new LinkedList<File>(springContextFiles);
     }
 

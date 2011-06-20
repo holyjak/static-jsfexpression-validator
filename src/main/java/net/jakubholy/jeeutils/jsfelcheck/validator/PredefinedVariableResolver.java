@@ -18,7 +18,6 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import javax.faces.context.FacesContext;

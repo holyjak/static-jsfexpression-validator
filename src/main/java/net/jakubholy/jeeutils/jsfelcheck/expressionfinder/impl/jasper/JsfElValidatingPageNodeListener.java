@@ -20,10 +20,16 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 import java.util.Stack;
 import java.util.logging.Logger;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 
+/**
+ * The main processing class for the Jasper-based implementation: retrieves information about
+ * JSP tags of interest and JSF EL extraction and validation while maintaining the local variable stack.
+ */
 public class JsfElValidatingPageNodeListener implements PageNodeListener {
 
     private static final Logger LOG = Logger.getLogger(JsfElValidatingPageNodeListener.class.getName());

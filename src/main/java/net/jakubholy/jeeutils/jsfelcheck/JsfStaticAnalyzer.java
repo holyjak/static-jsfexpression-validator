@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,33 +34,48 @@ import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.ContextVariableRegistry;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.DataTableVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 import org.apache.jasper.compiler.JsfElCheckingVisitor;
 
 /**
- * Perform analysis of (selected) JSF 1.1 JSP files and validate that
- * all EL expressions reference only existing managed beans and their
- * properties/action methods.
+ * Perform analysis of (selected) JSF 1.1 JSP files and validate that all EL
+ * expressions reference only existing managed beans and their properties/action
+ * methods.
  * <p>
- * For local variables, such as the <var>var</var> produced by h:dataTable, you must first declare of
- * what type they are as this cannot be determined based on the code, see {@link JsfElValidator#definePropertyTypeOverride(String, Class)}.
+ * For local variables, such as the <var>var</var> produced by h:dataTable, you
+ * must first declare of what type they are as this cannot be determined based
+ * on the code, see
+ * {@link DataTableVariableResolver#declareTypeFor(String, Class)}.
  * <p>
- * If there are some EL variables aside of managed beans in faces-config and the local ones you can
- * declare them to the validator via {@link JsfElValidator#declareVariable(String, Object)}.
+ * If there are some EL variables aside of managed beans in faces-config (and
+ * perhaps Spring config) and the local variables you can declare them to the
+ * validator via {@link JsfElValidator#declareVariable(String, Object)}.
  * <p>
- * If there are other tags than h:dataTable that can create local variables, you must create and
- * register an appropriate resolver for them as is done with the dataTable.
+ * If there are other tags than h:dataTable that can create local variables, you
+ * must create and register an appropriate resolver for them as is done with the
+ * dataTable.
+ *
+ * <h3>How it works</h3>
+ * We use "fake value resolvers" for a real JSF resolver; those resolvers do not retrieve
+ * variables and property values from the context as JSF normally does but instead produce
+ * a new fake value of the expected type using Mockito - thus we can check that expressions are
+ * valid. When the type of a variable/property cannot be determined (which is often the case for
+ * Collections, which can contain nay Object) and isn't defined via property override etc. then
+ * we use {@link MockObjectOfUnknownType} - if you see it in a failed JSF EL check then you need
+ * to declare the type to use.
  *
  * <h3>Limitations</h3>
+ *
  * <pre>
  * - JSF 1.1 (switching to another one requires replacing the Sun's ValueBindingFactory and
  * MethodBindingFactory used by the {@link JsfElValidator} by appropriate alternatives).
@@ -75,336 +91,416 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * </pre>
  *
  * <h3>TO DO</h3>
- * - Perform a separate run using the RegExp EL extractor to verify that the Jasper-based one
- * has found all EL expressions.
+ * - Perform a separate run using the RegExp EL extractor to verify that the
+ * Jasper-based one has found all EL expressions.
  *
  * @author jholy
  *
  */
 public class JsfStaticAnalyzer {
 
+    private static final Logger LOG = Logger.getLogger(JsfStaticAnalyzer.class
+            .getName());
+
     private boolean printCorrectExpressions = false;
     private String jspsToIncludeCommaSeparated = null;
+    private Collection<File> facesConfigFiles = Collections.emptyList();
+    private Collection<File> springConfigFiles = Collections.emptyList();
 
     /**
-     * Notion: Variable - the first element in an EL expression; property: any but the first element.
-     * Example: #{variable.propert1.property2['some.key']}
-     * @param jspDir (required) where to search for JSP pages
-     * @param localVariableTypes (required) type definitions for local EL variables such as produced by h:dataTable, see {@link  DataTableVariableResolver#declareTypeFor(String, Class)}
-     * @param extraVariables (required) extra variables/managed beans not defined in faces-context, see {@link JsfElValidator#declareVariable(String, Object)}
-     * @param propertyTypeOverrides  (required) override the type to use for a property; mostly useful for properties where the proper type cannot be derived
-     *  such as a Collection, see {@link JsfElValidator#definePropertyTypeOverride(String, Class)}
+     * Check expressions in all JSP files under the jspDir and print the failed (or all) ones
+     * to System out.
+     * <p>
+     * Notion: Variable - the first element in an EL expression; property: any
+     * but the first element. Example:
+     * #{variable.propert1.property2['some.key']}
+     *
+     * @param jspDir
+     *            (required) where to search for JSP pages
+     * @param localVariableTypes
+     *            (required) type definitions for local EL variables such as
+     *            produced by h:dataTable, see
+     *            {@link DataTableVariableResolver#declareTypeFor(String, Class)}
+     * @param extraVariables
+     *            (required) extra variables/managed beans not defined in
+     *            faces-context, see
+     *            {@link JsfElValidator#declareVariable(String, Object)}
+     * @param propertyTypeOverrides
+     *            (required) override the type to use for a property; mostly
+     *            useful for properties where the proper type cannot be derived
+     *            such as a Collection, see
+     *            {@link JsfElValidator#definePropertyTypeOverride(String, Class)}
      * @throws Exception
      */
-    public void validateElExpressions(String jspDir, Map<String, Class<?>> localVariableTypes, Map<String, Class<?>> extraVariables, Map<String, Class<?>> propertyTypeOverrides) throws Exception {
+    public void validateElExpressions(String jspDir,
+            Map<String, Class<?>> localVariableTypes,
+            Map<String, Class<?>> extraVariables,
+            Map<String, Class<?>> propertyTypeOverrides) throws Exception {
 
-            final long start = System.currentTimeMillis();
+        if (localVariableTypes == null) {
+            localVariableTypes = Collections.emptyMap();
+        }
+        if (extraVariables == null) {
+            extraVariables = Collections.emptyMap();
+        }
+        if (propertyTypeOverrides == null) {
+            propertyTypeOverrides = Collections.emptyMap();
+        }
 
-            // 1b. Set exclusions and type overrides
-            // SKIPPED NOW
+        LOG.info("validateElExpressions: entry for JSP root " + jspDir + ", " + extraVariables.size()
+                + " extra variables, " + localVariableTypes.size() + " type-defined local variables, "
+                + propertyTypeOverrides.size() + " property type overrides.");
 
-            // Context-local variables
-            DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
-            for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
-                dataTableResolver.declareTypeFor(variable.getKey(), variable.getValue());
-            }
+        final long start = System.currentTimeMillis();
 
-            ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
-            contextVarRegistry.registerResolverForTag("h:dataTable", dataTableResolver);
+        // 1b. Set exclusions and type overrides
+        // SKIPPED NOW
 
-            ValidatingJsfElResolver elValidator = new ValidatingJsfElResolver(contextVarRegistry);
-            elValidator.setIncludeKnownVariablesInException(false);
-            // FIXME Undeclared values w/o ComponentTypeOverride lead to st. like InternalValidatorFailureException:
-            // Failed for the expression #{requestScope.noFields == 5}: java.lang.IllegalArgumentException:
-            // Cannot convert MockObjectOfUnknownType[prop=noFields] of type class
-            // no.via.test.jsfunit.validator.MockObjectOfUnknownType to class java.lang.Long.
+        // Context-local variables
+        DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
+        for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
+            dataTableResolver.declareTypeFor(variable.getKey(),
+                    variable.getValue());
+        }
 
-            // DEFAULT EXTRA VARIABLES
-            // TODO Do we want to report all requestScope variables that are used in the pages?
-            elValidator.definePropertyTypeOverride("requestScope.*", String.class);
+        ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
+        contextVarRegistry.registerResolverForTag("h:dataTable",
+                dataTableResolver);
 
-            for (Entry<String, Class<?>> override : propertyTypeOverrides.entrySet()) {
-                elValidator.definePropertyTypeOverride(override.getKey(), override.getValue());
-            }
+        ValidatingJsfElResolver elValidator = new ValidatingJsfElResolver(
+                contextVarRegistry);
+        elValidator.setIncludeKnownVariablesInException(false);
 
-            elValidator.declareVariable("requestScope", Collections.EMPTY_MAP);
-            elValidator.declareVariable("sessionScope", Collections.EMPTY_MAP);
-            elValidator.declareVariable("request", FakeValueFactory.fakeValueOfType(HttpServletRequest.class, "request"));
+        for (Entry<String, Class<?>> override : propertyTypeOverrides
+                .entrySet()) {
+            elValidator.definePropertyTypeOverride(override.getKey(),
+                    override.getValue());
+        }
 
-            for (Entry<String, Class<?>> variable : extraVariables.entrySet()) {
-                Object fakedValue = FakeValueFactory.fakeValueOfType(variable.getValue(), variable.getKey());
-                elValidator.declareVariable(variable.getKey(), fakedValue);
-            }
+        // DEFAULT EXTRA VARIABLES
+        elValidator.declareVariable("requestScope", Collections.EMPTY_MAP);
+        // return an empty string, advantage: JSF can coalesce it to number/boolean/String as needed,
+        // ex: #{requestScope.myCnt == 5}
+        elValidator.definePropertyTypeOverride("requestScope.*", String.class);
+        elValidator.declareVariable("sessionScope", Collections.EMPTY_MAP);
+        elValidator.declareVariable("request", FakeValueFactory
+                .fakeValueOfType(HttpServletRequest.class, "request"));
 
-            registerKnownManagedBeans(elValidator);
+        for (Entry<String, Class<?>> variable : extraVariables.entrySet()) {
+            Object fakedValue = FakeValueFactory.fakeValueOfType(
+                    variable.getValue(), variable.getKey());
+            elValidator.declareVariable(variable.getKey(), fakedValue);
+        }
 
-            // Listener
-            JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
-                    elValidator, contextVarRegistry);
+        registerKnownManagedBeans(elValidator);
 
-            // Run it
-            JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir, pageNodeValidator);
-            jspc.execute();
+        // Listener
+        JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
+                elValidator, contextVarRegistry);
 
-            System.err.println(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR #########################################");
-            for (DeclareTypeOfVariableException untypedVar : pageNodeValidator.getValidationResults().getVariablesNeedingTypeDeclaration()) {
-                System.err.println(untypedVar);
-            }
+        // Run it
+        JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
+                pageNodeValidator);
+        jspc.execute();
 
-            System.err.println("\n>>> FAILED JSF EL EXPRESSIONS #########################################");
-            System.err.println("(Set logging to fine for " + ValidatingJsfElResolver.class + " to se failure details and stacktraces)");
+        System.err
+                .println(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR #########################################");
+        for (DeclareTypeOfVariableException untypedVar : pageNodeValidator
+                .getValidationResults().getVariablesNeedingTypeDeclaration()) {
+            System.err.println(untypedVar);
+        }
 
-            // TODO Log separately undefined variables Later: suppress derived errors w/ them
+        System.err
+                .println("\n>>> FAILED JSF EL EXPRESSIONS #########################################");
+        System.err.println("(Set logging to fine for "
+                + ValidatingJsfElResolver.class
+                + " to se failure details and stacktraces)");
 
-            int failureCnt = 0;
-            for (ValidationResult result : pageNodeValidator.getValidationResults().failures()) {
-                System.err.println(result);
-                ++failureCnt;
-            }
+        // TODO Log separately undefined variables Later: suppress derived
+        // errors w/ them
 
-            if (failureCnt > 0) {
-                System.err.println("\n>>> TOTAL FAILED EXPRESIONS: " + failureCnt);
-            }
+        int failureCnt = 0;
+        for (ValidationResult result : pageNodeValidator.getValidationResults()
+                .failures()) {
+            System.err.println(result);
+            ++failureCnt;
+        }
 
+        if (failureCnt > 0) {
+            System.err.println("\n>>> TOTAL FAILED EXPRESIONS: " + failureCnt);
+        }
+
+        if (printCorrectExpressions) {
+            System.out
+                    .println("\n>>> CORRECT EXPRESSIONS #########################################");
+        }
+
+        int successCnt = 0;
+        for (ValidationResult result : pageNodeValidator.getValidationResults()
+                .goodResults()) {
             if (printCorrectExpressions) {
-                System.out.println("\n>>> CORRECT EXPRESSIONS #########################################");
+                System.out.println(result);
             }
-
-            int successCnt = 0;
-            for (ValidationResult result : pageNodeValidator.getValidationResults().goodResults()) {
-                if (printCorrectExpressions) {
-                    System.out.println(result);
-                }
-                ++successCnt;
-            }
-
-            final long end = System.currentTimeMillis();
-            final long durationS = (end - start) / 1000;
-
-            final long seconds = durationS % 60;
-            final long minutes = durationS / 60;
-
-
-            System.out.println("\n\n>>> TOTAL EXPRESSIONS CHECKED: " + (failureCnt + successCnt)
-                    + " (FAILED: " + failureCnt + ") IN " + minutes + "min "
-                    + seconds + "s");
-
-            // TODO Verify all JSF ELs found & checked by comparing their number w/ regExp search
-
-            /*
-            Collection<File> viewFile = findViewFiles();
-            List<ExpressionFailure> failures = validateJsfExpressionsInViews(viewFile);
-            reportInvalidExpressions(failures);
-            */
+            ++successCnt;
         }
 
-        private JspCParsingToNodesOnly createJsfElValidatingJspParser(String jspDir, JsfElValidatingPageNodeListener tagJsfElValidator) {
-            JsfElCheckingVisitor.setNodeListener(tagJsfElValidator);
+        final long end = System.currentTimeMillis();
+        final long durationS = (end - start) / 1000;
 
-            JspCParsingToNodesOnly jspc = new JspCParsingToNodesOnly();
-            jspc.setUriroot(jspDir);
-            jspc.setVerbose(1); // 0 = false, 1 = true
-            if (jspsToIncludeCommaSeparated != null) {
-                jspc.setJspFiles(jspsToIncludeCommaSeparated); // leave unset to process all; comma-separated
-            }
-            return jspc;
-        }
+        final long seconds = durationS % 60;
+        final long minutes = durationS / 60;
+
+        System.out.println("\n\n>>> TOTAL EXPRESSIONS CHECKED: "
+                + (failureCnt + successCnt) + " (FAILED: " + failureCnt
+                + ") IN " + minutes + "min " + seconds + "s");
+
+        // TODO Verify all JSF ELs found & checked by comparing their number w/
+        // regExp search
 
         /*
-        private void reportInvalidExpressions(List<ExpressionFailure> failures) {
-            for (ExpressionFailure expressionFailure : failures) {
-                System.out.println("Invalid EL: " + expressionFailure.expression
-                        + " in " + expressionFailure.sourceFile
-                        + ", problem: " + expressionFailure.problem);
-            }
-        }*/
-
-        /*
-        // Using RegExp
-        private List<ExpressionFailure> validateJsfExpressionsInViews(
-                Collection<File> viewFile) throws IOException {
-            List<ExpressionFailure> failures = new LinkedList<ExpressionFailure>();
-            for (File file : viewFile) {
-                JsfElFinder expressionFinder = new JsfElFinder(
-                        FileUtils.readFileToString(file));
-
-                for (ExpressionInfo elExpression : expressionFinder) {
-                    final String expression = elExpression.getExpression();
-                    // check valid
-                        if (elExpression.getType() == ExpressionInfo.ElType.VALUE) {
-                            elValidator.validateValueElExpression(expression, null);
-                        } else {
-                            elValidator.validateMethodElExpression(expression, null);
-                        }
-                        //failures.add(new ExpressionFailure(expression, e.getMessage(), file));
-                }
-            }
-            return failures;
-        }
-
-        private Collection<File> findViewFilesInFilesystem() {
-            ViewFileFinder viewFinder = new FilesystemViewFinder(Collections.singleton(new File("web")));
-            Collection<File> viewFile = viewFinder.findViewFiles();
-
-            System.out.println(">>> VIEW FILES " + viewFile.toString().replace(',', '\n'));
-            System.out.println("#############################################################\n");
-            return viewFile;
-        }
-        */
-
-        /**
-         * Find out what managed beans are defined in faces-context and perhaps
-         * elsewhere and declare them to the validator.
-         * @param elValidator (required)
+         * Collection<File> viewFile = findViewFiles(); List<ExpressionFailure>
+         * failures = validateJsfExpressionsInViews(viewFile);
+         * reportInvalidExpressions(failures);
          */
-        private void registerKnownManagedBeans(JsfElValidator elValidator) {
-            Collection<ManagedBeanDescriptor> allDefinedBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
-            {
-                ManagedBeanFinder beanFinder = new FacesConfigXmlBeanFinder(
-                        new File("web/WEB-INF/faces-config.xml"));
-                Collection<ManagedBeanDescriptor> facesConfigBeans = beanFinder.findDefinedBackingBeans();
+    }
 
-                Collection<ManagedBeanDescriptor> springBeans = findSpringManagedBeans();
+    private JspCParsingToNodesOnly createJsfElValidatingJspParser(
+            String jspDir, JsfElValidatingPageNodeListener tagJsfElValidator) {
+        JsfElCheckingVisitor.setNodeListener(tagJsfElValidator);
 
-                allDefinedBeans.addAll(facesConfigBeans);
-                allDefinedBeans.addAll(springBeans);
-            }
+        JspCParsingToNodesOnly jspc = new JspCParsingToNodesOnly();
+        jspc.setUriroot(jspDir);
+        jspc.setVerbose(1); // 0 = false, 1 = true
+        if (jspsToIncludeCommaSeparated != null) {
+            jspc.setJspFiles(jspsToIncludeCommaSeparated); // leave unset to
+                                                           // process all;
+                                                           // comma-separated
+        }
+        return jspc;
+    }
 
-            System.out.println(">>> KNOWN BEANS: " + allDefinedBeans);
-            System.out.println("#############################################################\n");
+    /*
+     * private void reportInvalidExpressions(List<ExpressionFailure> failures) {
+     * for (ExpressionFailure expressionFailure : failures) {
+     * System.out.println("Invalid EL: " + expressionFailure.expression + " in "
+     * + expressionFailure.sourceFile + ", problem: " +
+     * expressionFailure.problem); } }
+     */
 
-            // TODO where is messages defined?
-            elValidator.declareVariable("messages", Collections.emptyMap());
+    /*
+     * // Using RegExp private List<ExpressionFailure>
+     * validateJsfExpressionsInViews( Collection<File> viewFile) throws
+     * IOException { List<ExpressionFailure> failures = new
+     * LinkedList<ExpressionFailure>(); for (File file : viewFile) { JsfElFinder
+     * expressionFinder = new JsfElFinder( FileUtils.readFileToString(file));
+     *
+     * for (ExpressionInfo elExpression : expressionFinder) { final String
+     * expression = elExpression.getExpression(); // check valid if
+     * (elExpression.getType() == ExpressionInfo.ElType.VALUE) {
+     * elValidator.validateValueElExpression(expression, null); } else {
+     * elValidator.validateMethodElExpression(expression, null); }
+     * //failures.add(new ExpressionFailure(expression, e.getMessage(), file));
+     * } } return failures; }
+     *
+     * private Collection<File> findViewFilesInFilesystem() { ViewFileFinder
+     * viewFinder = new FilesystemViewFinder(Collections.singleton(new
+     * File("web"))); Collection<File> viewFile = viewFinder.findViewFiles();
+     *
+     * System.out.println(">>> VIEW FILES " + viewFile.toString().replace(',',
+     * '\n')); System.out.println(
+     * "#############################################################\n");
+     * return viewFile; }
+     */
 
-            for (ManagedBeanDescriptor beanDescriptor : allDefinedBeans) {
-                Object fakeValue = mock(beanDescriptor.getType());
-                elValidator.declareVariable(beanDescriptor.getName(), fakeValue);
-            }
+    /**
+     * Find out what managed beans are defined in faces-context and perhaps
+     * elsewhere and declare them to the validator.
+     *
+     * @param elValidator
+     *            (required)
+     */
+    private void registerKnownManagedBeans(JsfElValidator elValidator) {
+        Collection<ManagedBeanDescriptor> allDefinedBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
+
+        allDefinedBeans.addAll(findFacesManagedBeans());
+        int facesBeans = allDefinedBeans.size();
+        allDefinedBeans.addAll(findSpringManagedBeans());
+        int springBeans = allDefinedBeans.size() - facesBeans;
+
+        System.out.println(">>> KNOWN BEANS [total: " + allDefinedBeans.size()
+                + ", faces-config: " + facesBeans + ", Spring: " + springBeans
+                + "]: " + allDefinedBeans);
+        System.out
+                .println("#############################################################\n");
+
+        for (ManagedBeanDescriptor beanDescriptor : allDefinedBeans) {
+            Object fakeValue = mock(beanDescriptor.getType());
+            elValidator.declareVariable(beanDescriptor.getName(), fakeValue);
+        }
+    }
+
+    private Collection<ManagedBeanDescriptor> findFacesManagedBeans() {
+        if (getFacesConfigFiles().isEmpty()) {
+            return Collections.emptyList();
         }
 
-        private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
-            File springConfig = new File("web/WEB-INF/applicationContext.xml");
+        LOG.info("Loading faces-config managed beans from "
+                + getFacesConfigFiles());
 
-            if (!springConfig.canRead()) {
-                return Collections.emptyList();
-            }
+        ManagedBeanFinder beanFinder = new FacesConfigXmlBeanFinder(
+                getFacesConfigFiles());
+        Collection<ManagedBeanDescriptor> facesConfigBeans = beanFinder
+                .findDefinedBackingBeans();
+        return facesConfigBeans;
+    }
 
-            ManagedBeanFinder beanFinder = new SpringContextBeanFinder(
-                    Collections.singleton(springConfig));
-
-            String oldViaDeploymentEnvironment = System.getProperty("via.deploymentEnvironment");
-            System.setProperty("via.deploymentEnvironment", "production");
-
-            try {
-                return beanFinder.findDefinedBackingBeans();
-            } finally {
-                if (oldViaDeploymentEnvironment == null) {
-                    System.clearProperty("via.deploymentEnvironment");
-                } else {
-                    System.setProperty("via.deploymentEnvironment", oldViaDeploymentEnvironment);
-                }
-            }
+    private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
+        if (getSpringConfigFiles().isEmpty()) {
+            return Collections.emptyList();
         }
 
-        public static class ExpressionFailure {
+        LOG.info("Loading Spring managed beans from " + getSpringConfigFiles());
 
-            private final String expression;
-            private final String problem;
-            private final File sourceFile;
+        ManagedBeanFinder beanFinder = new SpringContextBeanFinder(
+                getSpringConfigFiles());
+        return beanFinder.findDefinedBackingBeans();
+    }
 
-            public ExpressionFailure(String expression, String problem,
-                    File sourceFile) {
-                this.expression = expression;
-                this.problem = problem;
-                this.sourceFile = sourceFile;
-            }
+    public static class ExpressionFailure {
 
-            @Override
-            public String toString() {
-                return "ExpressionFailure [expression=" + expression + ", problem="
-                        + problem + ", sourceFile=" + sourceFile + "]";
-            }
+        private final String expression;
+        private final String problem;
+        private final File sourceFile;
 
+        public ExpressionFailure(String expression, String problem,
+                File sourceFile) {
+            this.expression = expression;
+            this.problem = problem;
+            this.sourceFile = sourceFile;
         }
 
-        public static void main(String[] args) throws Exception {
-
-            String jspRoot = null;
-            Map<String, Class<?>> componentTypeOverrides = new Hashtable<String, Class<?>>();
-            Map<String, Class<?>> extraVariables = new Hashtable<String, Class<?>>();
-            Map<String, Class<?>> propertyOverrides = new Hashtable<String, Class<?>>();
-
-            for (int i = 0; i < args.length; i += 2) {
-                String argument = args[i];
-
-                if ("--localVariableTypes".equals(argument)) {
-                    parseNameToTypeMappings(args[i+1], componentTypeOverrides);
-                }
-
-                if ("--propertyOverrides".equals(argument)) {
-                    parseNameToTypeMappings(args[i+1], propertyOverrides);
-                }
-
-                if ("--extraVariables".equals(argument)) {
-                    parseNameToTypeMappings(args[i+1], extraVariables);
-                }
-
-                if ("--jspRoot".equals(argument)) {
-                    jspRoot = args[i+1];
-                }
-
-            }
-
-            if (jspRoot == null) {
-                System.err.println("USAGE: java -jar ... <options>; options are:\n"
-                		+ " --jspRoot <directory> (required)\n"
-                		+ " --localVariableTypes <bean1.property=package.SomeType,bean2.p2.p3=...> (optional) - types of components in colections used as value of h:dataTable\n"
-                		+ " --extraVariables <bean1=SomeType1,bean2=AnotherType,...> (optional) - define managed beans not in faces-config\n"
-                	    + " --propertyOverrides bean1.property=package.SomeType,..> (optional) - types of objects in collections used for iterating etc.\n");
-                System.exit(-1);
-            }
-
-            new JsfStaticAnalyzer().validateElExpressions(jspRoot, componentTypeOverrides, extraVariables, propertyOverrides);
+        @Override
+        public String toString() {
+            return "ExpressionFailure [expression=" + expression + ", problem="
+                    + problem + ", sourceFile=" + sourceFile + "]";
         }
 
-        private static void parseNameToTypeMappings(
-                String argumentValue, Map<String, Class<?>> parsedMappings) {
+    }
 
-            String[] individualMappings = argumentValue.split(",");
+    public static void main(String[] args) throws Exception {
 
-            try {
-                for (String mapping : individualMappings) {
-                    String[] mappingParts = mapping.split("=");
-                    String expression = mappingParts[0];
-                    Class<?> type = Class.forName(mappingParts[1]);
-                    parsedMappings.put(expression, type);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse argument '"
-                        + argumentValue + "'; expected format: 'string1=package.Type1,string2=Type2' etc. "
-                        + " Problem: " + e);
+        String jspRoot = null;
+        Map<String, Class<?>> componentTypeOverrides = new Hashtable<String, Class<?>>();
+        Map<String, Class<?>> extraVariables = new Hashtable<String, Class<?>>();
+        Map<String, Class<?>> propertyOverrides = new Hashtable<String, Class<?>>();
+
+        for (int i = 0; i < args.length; i += 2) {
+            String argument = args[i];
+
+            if ("--localVariableTypes".equals(argument)) {
+                parseNameToTypeMappings(args[i + 1], componentTypeOverrides);
+            }
+
+            if ("--propertyOverrides".equals(argument)) {
+                parseNameToTypeMappings(args[i + 1], propertyOverrides);
+            }
+
+            if ("--extraVariables".equals(argument)) {
+                parseNameToTypeMappings(args[i + 1], extraVariables);
+            }
+
+            if ("--jspRoot".equals(argument)) {
+                jspRoot = args[i + 1];
             }
 
         }
 
-        public void setPrintCorrectExpressions(boolean printCorrectExpressions) {
-            this.printCorrectExpressions = printCorrectExpressions;
+        if (jspRoot == null) {
+            System.err
+                    .println("USAGE: java -jar ... <options>; options are:\n"
+                            + " --jspRoot <directory> (required)\n"
+                            + " --localVariableTypes <bean1.property=package.SomeType,bean2.p2.p3=...> (optional) - types of components in colections used as value of h:dataTable\n"
+                            + " --extraVariables <bean1=SomeType1,bean2=AnotherType,...> (optional) - define managed beans not in faces-config\n"
+                            + " --propertyOverrides bean1.property=package.SomeType,..> (optional) - types of objects in collections used for iterating etc.\n");
+            System.exit(-1);
         }
 
-        public boolean isPrintCorrectExpressions() {
-            return printCorrectExpressions;
+        new JsfStaticAnalyzer().validateElExpressions(jspRoot,
+                componentTypeOverrides, extraVariables, propertyOverrides);
+    }
+
+    private static void parseNameToTypeMappings(String argumentValue,
+            Map<String, Class<?>> parsedMappings) {
+
+        String[] individualMappings = argumentValue.split(",");
+
+        try {
+            for (String mapping : individualMappings) {
+                String[] mappingParts = mapping.split("=");
+                String expression = mappingParts[0];
+                Class<?> type = Class.forName(mappingParts[1]);
+                parsedMappings.put(expression, type);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to parse argument '"
+                            + argumentValue
+                            + "'; expected format: 'string1=package.Type1,string2=Type2' etc. "
+                            + " Problem: " + e);
         }
 
-        /**
-         * Process only the given files; set to null to process all.
-         */
-        public void setJspsToIncludeCommaSeparated(
-                String jspsToIncludeCommaSeparated) {
-            this.jspsToIncludeCommaSeparated = jspsToIncludeCommaSeparated;
-        }
+    }
 
-        public String getJspsToIncludeCommaSeparated() {
-            return jspsToIncludeCommaSeparated;
+    public void setPrintCorrectExpressions(boolean printCorrectExpressions) {
+        this.printCorrectExpressions = printCorrectExpressions;
+    }
+
+    public boolean isPrintCorrectExpressions() {
+        return printCorrectExpressions;
+    }
+
+    /**
+     * Process only the given files; set to null to process all.
+     */
+    public void setJspsToIncludeCommaSeparated(
+            String jspsToIncludeCommaSeparated) {
+        this.jspsToIncludeCommaSeparated = jspsToIncludeCommaSeparated;
+    }
+
+    public String getJspsToIncludeCommaSeparated() {
+        return jspsToIncludeCommaSeparated;
+    }
+
+    /**
+     * The faces-config.xml files to read managed beans from. Default: empty.
+     * Set to empty or null not to process any.
+     */
+    public void setFacesConfigFiles(Collection<File> facesConfigFiles) {
+        if (facesConfigFiles == null) {
+            this.facesConfigFiles = Collections.emptyList();
+        } else {
+            this.facesConfigFiles = facesConfigFiles;
         }
+    }
+
+    public Collection<File> getFacesConfigFiles() {
+        return facesConfigFiles;
+    }
+
+    /**
+     * The Spring application context XML files to read managed beans from.
+     * Default: empty. Set to empty or null not to process any.
+     */
+    public void setSpringConfigFiles(Collection<File> springConfigFiles) {
+        if (springConfigFiles == null) {
+            this.springConfigFiles = Collections.emptyList();
+        } else {
+            this.springConfigFiles = springConfigFiles;
+        }
+    }
+
+    public Collection<File> getSpringConfigFiles() {
+        return springConfigFiles;
+    }
 
 }

@@ -17,7 +17,6 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
-import org.apache.jasper.JasperException;
 import org.apache.jasper.JspC;
 import org.apache.jasper.compiler.OnlyReadingJspPseudoCompiler;
 
@@ -30,23 +29,6 @@ public class JspCParsingToNodesOnly extends JspC {
     @Override
     public String getCompilerClassName() {
         return OnlyReadingJspPseudoCompiler.class.getName();
-    }
-
-    public static void main(String[] args) {
-        JspCParsingToNodesOnly jspc = new JspCParsingToNodesOnly();
-
-        // Required settings
-        jspc.setUriroot("web");
-
-        // Optional
-        jspc.setVerbose(1); // 0 = false, 1 = true
-        jspc.setJspFiles("addhotel.jsp"); // leave unset to process all; comma-separated
-
-        try {
-            jspc.execute();
-        } catch (JasperException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

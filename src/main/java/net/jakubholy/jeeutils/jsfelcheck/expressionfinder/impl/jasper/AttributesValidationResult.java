@@ -23,6 +23,9 @@ import java.util.Map;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
+/**
+ * Results of validation JSF EL expressions in attributes of a (JSF) tag.
+ */
 public class AttributesValidationResult extends ValidationResult {
 
     private Map<String, ValidationResult> results = new Hashtable<String, ValidationResult>();

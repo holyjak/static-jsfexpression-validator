@@ -20,7 +20,6 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.regexp;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.jakubholy.jeeutils.jsfelcheck.ExpressionInfo;
 
 /**
  * RegExp matcher for JSF EL expression attributes.

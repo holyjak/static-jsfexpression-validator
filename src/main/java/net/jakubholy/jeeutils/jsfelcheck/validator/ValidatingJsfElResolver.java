@@ -32,7 +32,6 @@ import javax.faces.el.ValueBinding;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_02ElBindingFactoryImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;

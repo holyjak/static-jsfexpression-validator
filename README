@@ -35,16 +35,11 @@ org.apache.jasper.compiler.Node.Visitor.visit(IncludeAction)
  *
 
 TODO
-- remove dependency on jsf-impl-1.1.jar so that we can publish to Maven Central
-	- support correctly bean.property[22] not to fail for OutOfBound etc.
 - add example JSF page
 - better error msg for
-    '#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}': PropertyNotFoundException - Property 'presAmount' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bookingHandler.lccBookingObj.lccAirLowFareIn.fares[0].presAmount}, file=/lccbookingdetails.jsp, tagLine=126]
+    '#{bean.listProperty[0].elementProperty}': PropertyNotFoundException - Property 'elementProperty' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bean.listProperty[0].elementProperty}, file=/mypage.jsp, tagLine=126]
  => make it clear the solution is st. like
- propertyTypeOverrides.put("bookingHandler.lccBookingObj.lccAirLowFareIn.fares.*",  Fare.class);
-
-- reorganize packages
-- publish to Maven central
+ propertyTypeOverrides.put("bean.listProperty.*",  TheElementType.class);
 
 ...
 - Perform a separate run using the RegExp EL extractor to verify that the Jasper-based one

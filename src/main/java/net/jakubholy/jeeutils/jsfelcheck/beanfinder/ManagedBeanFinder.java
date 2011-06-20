@@ -19,6 +19,9 @@ package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 import java.util.Collection;
 
+/**
+ * Locate defined JSF managed bean so that we can resolve variables used in JSF EL expressions.
+ */
 public interface ManagedBeanFinder {
 
     public static class ManagedBeanDescriptor {
@@ -78,8 +81,7 @@ public interface ManagedBeanFinder {
 
         @Override
         public String toString() {
-            return "ManagedBeanDescriptor [name=" + name + ", type=" + type
-                    + "]";
+            return name + " (" + type.getName() + ")";
         }
     }
 

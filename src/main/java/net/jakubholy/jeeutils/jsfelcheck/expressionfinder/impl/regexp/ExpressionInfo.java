@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.regexp;
 
 
 public class ExpressionInfo {

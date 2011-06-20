@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;

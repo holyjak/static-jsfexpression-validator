@@ -36,24 +36,44 @@ import com.sun.faces.config.beans.FacesConfigBean;
 import com.sun.faces.config.beans.ManagedBeanBean;
 import com.sun.faces.config.rules.FacesConfigRuleSet;
 
+/**
+ * Find managed bean defined in (a) faces-config file(s).
+ * Uses the available JSF implementation to parse the file(s).
+ */
 public class FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
     private static final String[][] DTD_INFO = { { "/com/sun/faces/web-facesconfig_1_0.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN" }, { "/com/sun/faces/web-facesconfig_1_1.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" } };
 
     private static final  Logger log = Logger.getLogger(FacesConfigXmlBeanFinder.class.getName());
 
-    private final File facesConfigXml;
+    private final Collection<File> facesConfigFiles;
 
-    public FacesConfigXmlBeanFinder(final File facesConfigXml) {
-        this.facesConfigXml = facesConfigXml; // TODO verify it's valid
+    public FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
+        if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
+            throw new IllegalArgumentException("facesConfigFiles: Collection<File> cannot be null/empty, is: " + facesConfigFiles);
+        }
+
+        for (File file : facesConfigFiles) {
+            if (!file.canRead()) {
+                throw new IllegalArgumentException("The supplied faces-config XML file " +
+                        "cannot be opened for reading: " + file);
+            }
+        }
+
+        this.facesConfigFiles = new LinkedList<File>(facesConfigFiles);
     }
 
     @Override
     public Collection<ManagedBeanDescriptor> findDefinedBackingBeans() {
-        //facesBeanFinder = new FacesConfigXmlBeanFinder(new File("web/WEB-INF/faces-config.xml"));
-        FacesConfigBean facesConfig = parseFacesConfig();
-        ManagedBeanBean[] beansFound = facesConfig.getManagedBeans();
-        return toManagedBeanDescriptors(beansFound);
+        Collection<ManagedBeanDescriptor> allBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
+
+        for (File facesConfigXml : facesConfigFiles) {
+            FacesConfigBean facesConfig = parseFacesConfig(facesConfigXml);
+            ManagedBeanBean[] beansFound = facesConfig.getManagedBeans();
+            allBeans.addAll(toManagedBeanDescriptors(beansFound));
+        }
+
+        return allBeans;
     }
 
     /*private String getManagedBeanClassName(String configFilePath, Node managedBeanNode) {
@@ -85,7 +105,7 @@ public class FacesConfigXmlBeanFinder implements ManagedBeanFinder {
         }
     }
 
-    protected FacesConfigBean parseFacesConfig() {
+    protected FacesConfigBean parseFacesConfig(File facesConfigXml) {
         Digester digester = digester(false);
 
         try {

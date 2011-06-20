@@ -15,10 +15,16 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
 
 import java.util.Map;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.AttributesValidationResult;
+
+/**
+ * Extract local JSF EL variables defined in a tag such as h:dataTable
+ * so that they are available when checking expressions in the nested tags.
+ */
 public interface TagJsfVariableResolver {
 
     VariableInfo extractContextVariables(Map<String, String> attributes,

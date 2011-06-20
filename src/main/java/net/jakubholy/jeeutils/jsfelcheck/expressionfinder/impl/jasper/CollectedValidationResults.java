@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.MultipleValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;

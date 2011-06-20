@@ -19,7 +19,6 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.regexp;
 
 import java.util.Iterator;
 
-import net.jakubholy.jeeutils.jsfelcheck.ExpressionInfo;
 
 /**
  * Find JSF EL expressions in text using regular expressions and

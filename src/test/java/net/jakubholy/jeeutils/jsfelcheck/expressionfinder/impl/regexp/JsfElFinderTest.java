@@ -3,8 +3,7 @@ import static org.junit.Assert.*;
 
 import java.util.Iterator;
 
-import net.jakubholy.jeeutils.jsfelcheck.ExpressionInfo;
-import net.jakubholy.jeeutils.jsfelcheck.ExpressionInfo.ElType;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.regexp.ExpressionInfo.ElType;
 
 import org.junit.Test;
 
