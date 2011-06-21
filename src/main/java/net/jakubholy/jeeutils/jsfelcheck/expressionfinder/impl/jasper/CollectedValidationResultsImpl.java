@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.MultipleValidationResults;
@@ -29,7 +30,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 /**
  * Collected results of validation of one of more pages.
  */
-public class CollectedValidationResults extends MultipleValidationResults {
+public class CollectedValidationResultsImpl extends MultipleValidationResults implements CollectedValidationResults {
 
     private int currentTagLineNumber = -1;
     private final List<DeclareTypeOfVariableException> variablesNeedingTypeDeclaration =
@@ -59,6 +60,10 @@ public class CollectedValidationResults extends MultipleValidationResults {
         getVariablesNeedingTypeDeclaration().add(e);
     }
 
+    /* (non-Javadoc)
+     * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResults#getVariablesNeedingTypeDeclaration()
+     */
+    @Override
     public List<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration() {
         return variablesNeedingTypeDeclaration;
     }

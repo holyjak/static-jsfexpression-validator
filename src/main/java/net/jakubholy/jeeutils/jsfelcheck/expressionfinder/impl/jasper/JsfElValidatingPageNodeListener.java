@@ -36,7 +36,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
 
     private final ContextVariableRegistry contextVarRegistry;
     private final PageNodeExpressionValidator nodeValidator;
-    private final CollectedValidationResults validationResults = new CollectedValidationResults();
+    private final CollectedValidationResultsImpl validationResults = new CollectedValidationResultsImpl();
 
     private Stack<String> jspFileInclusionStack = new Stack<String>();
     private String jspFile;
@@ -85,7 +85,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
         LOG.info(">>> STARTED FOR '" + jspFile + " #############################################");
     }
 
-    public CollectedValidationResults getValidationResults() {
+    public CollectedValidationResultsImpl getValidationResults() {
         return validationResults;
     }
 

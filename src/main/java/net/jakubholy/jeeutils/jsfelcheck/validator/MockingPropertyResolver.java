@@ -17,7 +17,9 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -26,6 +28,7 @@ import javax.faces.el.PropertyNotFoundException;
 import javax.faces.el.PropertyResolver;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 
 
@@ -41,8 +44,9 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
 
     private final Logger log = Logger.getLogger(getClass().getName());
     private PropertyResolver realResolver = new PropertyResolverImpl();
-    private String currentExpression;
+    private ParsedElExpression currentExpression = new ParsedElExpression();
     private Map<String, Class<?>> typeOverrides = new Hashtable<String, Class<?>>();
+    private final Collection<ElExpressionFilter> filters = new LinkedList<ElExpressionFilter>();
 
     /**
      * Define what type to produce for a JSF EL expression.
@@ -70,8 +74,8 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     }
 
     private void appendCurrentPropertyToExpression(final String property) {
-        if (currentExpression != null)
-            currentExpression += '.' + property;
+        currentExpression.addProperty(property);
+        applyFilters(currentExpression);
     }
 
     @Override
@@ -95,16 +99,16 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     }
 
     @Override
-    public Object getValue(Object arg0, Object arg1)
+    public Object getValue(Object target, Object property)
             throws EvaluationException, PropertyNotFoundException {
         //return realResolver.getValue(arg0, arg1);
-        return getValue(arg0, arg1, getType(arg0, arg1));
+        return getValue(target, property, getType(target, property));
     }
 
     @Override
-    public Object getValue(Object arg0, int arg1)
+    public Object getValue(Object target, int property)
             throws EvaluationException, PropertyNotFoundException {
-        return getValue(arg0, arg1, getType(arg0, arg1));
+        return getValue(target, property, getType(target, property));
     }
 
     /**
@@ -115,6 +119,7 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
             throws EvaluationException, PropertyNotFoundException {
 
         final Class type = determineFinalType(property, originalType);
+        // Append property only after type has been determined !!!!
         appendCurrentPropertyToExpression(property.toString());
         return fakePropertValue(target, property, type);
     }
@@ -204,7 +209,30 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
 
     @Override
     public void handleNewVariableEncountered(final String variableName) {
-        currentExpression = variableName;
+        currentExpression.setVariable(variableName);
+        applyFilters(currentExpression);
+    }
+
+    private void applyFilters(ParsedElExpression currentExpression) throws ExpressionRejectedByFilterException {
+        if (!filters.isEmpty()) {
+            for (ElExpressionFilter filter : filters) {
+                if (!filter.accept(currentExpression)) {
+                    throw new ExpressionRejectedByFilterException(currentExpression.toString(), filter);
+                }
+            }
+        }
+    }
+
+    /**
+     * Throw {@link ExpressionRejectedByFilterException} for any expression not accepted by the supplied filter.
+     * @param elExpressionFilter (required)
+     */
+    public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
+        filters.add(elExpressionFilter);
+    }
+
+    public void clearElExpressionFilters() {
+        filters.clear();
     }
 
 }

@@ -32,8 +32,10 @@ import javax.faces.el.ValueBinding;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -60,9 +62,9 @@ public class ValidatingJsfElResolver implements JsfElValidator {
     private final PredefinedVariableResolver variableResolver;
     private final FacesContext mockFacesContext;
 
-    public ValidatingJsfElResolver(ElVariableResolver unknownVariableResolver) {
+    public ValidatingJsfElResolver() {
         propertyResolver = new MockingPropertyResolver();
-        variableResolver = new PredefinedVariableResolver(propertyResolver, unknownVariableResolver);
+        variableResolver = new PredefinedVariableResolver(propertyResolver);
 
         mockFacesContext = mock(FacesContext.class);
         final Application application = mock(Application.class);
@@ -75,6 +77,11 @@ public class ValidatingJsfElResolver implements JsfElValidator {
         when(application.getPropertyResolver()).thenReturn(propertyResolver);
 
         elBindingFactory = ElBindingFactoryProvider.getFactory(application);
+    }
+
+
+    public void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver) {
+        variableResolver.setUnknownVariableResolver(unknownVariableResolver);
     }
 
     /* (non-Javadoc)
@@ -97,8 +104,13 @@ public class ValidatingJsfElResolver implements JsfElValidator {
             EvaluationException e) {
         LOG.log(Level.FINE, "Resolution failed", e);
         Throwable unwrappedCause = (e.getCause() == null)? e : e.getCause();
-        return new FailedValidationResult(
+
+        if (unwrappedCause instanceof ExpressionRejectedByFilterException) {
+            return new ExpressionRejectedByFilterResult((ExpressionRejectedByFilterException) unwrappedCause);
+        } else {
+            return new FailedValidationResult(
                 new InvalidExpressionException(elExpression, null, unwrappedCause));
+        }
     }
 
     /* (non-Javadoc)
@@ -150,6 +162,14 @@ public class ValidatingJsfElResolver implements JsfElValidator {
     public void setIncludeKnownVariablesInException(
             boolean includeKnownVariablesInException) {
         variableResolver.setIncludeKnownVariablesInException(includeKnownVariablesInException);
+    }
+
+    /**
+     * Throw {@link ExpressionRejectedByFilterException} for any expression not accepted by the supplied filter.
+     * @param elExpressionFilter (required)
+     */
+    public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
+        propertyResolver.addElExpressionFilter(elExpressionFilter);
     }
 
     public boolean isIncludeKnownVariablesInException() {

@@ -28,6 +28,8 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         new LinkedList<SuccessfulValidationResult>();
     private final Collection<FailedValidationResult> failures =
         new LinkedList<FailedValidationResult>();
+    private final Collection<ExpressionRejectedByFilterResult> exclusions =
+        new LinkedList<ExpressionRejectedByFilterResult>();
 
     private boolean errors = false;
 
@@ -49,6 +51,8 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         results.add(singleResult);
         if (singleResult instanceof SuccessfulValidationResult) {
             goodResults.add((SuccessfulValidationResult) singleResult);
+        } else if (singleResult instanceof ExpressionRejectedByFilterResult) {
+            exclusions.add((ExpressionRejectedByFilterResult) singleResult);
         } else {
             failures.add((FailedValidationResult) singleResult);
         }
@@ -68,24 +72,16 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         return results.iterator();
     }
 
-    public Iterable<SuccessfulValidationResult> goodResults() {
-        return new Iterable<SuccessfulValidationResult>() {
-
-            @Override
-            public Iterator<SuccessfulValidationResult> iterator() {
-                return goodResults.iterator();
-            }
-        };
+    public ResultsIterable<SuccessfulValidationResult> goodResults() {
+        return new ResultsIterable<SuccessfulValidationResult>(goodResults);
     }
 
-    public Iterable<FailedValidationResult> failures() {
-        return new Iterable<FailedValidationResult>() {
+    public ResultsIterable<FailedValidationResult> failures() {
+        return new ResultsIterable<FailedValidationResult>(failures);
+    }
 
-            @Override
-            public Iterator<FailedValidationResult> iterator() {
-                return failures.iterator();
-            }
-        };
+    public ResultsIterable<ExpressionRejectedByFilterResult> excluded() {
+        return new ResultsIterable<ExpressionRejectedByFilterResult>(exclusions);
     }
 
 }

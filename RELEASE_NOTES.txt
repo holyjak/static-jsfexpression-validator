@@ -1,0 +1,4 @@
+Version 0.9.1
+=============
+- added support for ElExpressionFilters
+- return the collected results

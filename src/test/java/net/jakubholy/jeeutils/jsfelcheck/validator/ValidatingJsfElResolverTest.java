@@ -20,7 +20,6 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -31,6 +30,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -52,7 +52,8 @@ public class ValidatingJsfElResolverTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        elResolver = new ValidatingJsfElResolver(mockUnknownVariableResolver);
+        elResolver = new ValidatingJsfElResolver();
+        elResolver.setUnknownVariableResolver(mockUnknownVariableResolver);
     }
 
     @Test
@@ -202,6 +203,19 @@ public class ValidatingJsfElResolverTest {
                + " exists; actual result: " + result
                , result
                , is(instanceOf(SuccessfulValidationResult.class)));
+    }
+
+    @Test
+    public void should_return_expresseion_rejected_by_filter_result_for_filtered_out_expr() throws Exception {
+        elResolver.declareVariable("myVariable", "my value");
+        elResolver.addElExpressionFilter(new ElExpressionFilter() {
+            @Override public boolean accept(ParsedElExpression expression) {
+                return false;
+            }
+        });
+
+        ValidationResult result = elResolver.validateValueElExpression("#{myVariable}");
+        assertThat(result, is(instanceOf(ExpressionRejectedByFilterResult.class)));
     }
 
 }

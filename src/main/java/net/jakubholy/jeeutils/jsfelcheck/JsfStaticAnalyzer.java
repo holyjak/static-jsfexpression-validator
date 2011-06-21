@@ -20,12 +20,15 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,15 +37,18 @@ import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 import org.apache.jasper.compiler.JsfElCheckingVisitor;
@@ -99,13 +105,38 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  */
 public class JsfStaticAnalyzer {
 
+    public static class ExpressionFailure {
+
+        private final String expression;
+        private final String problem;
+        private final File sourceFile;
+
+        public ExpressionFailure(String expression, String problem,
+                File sourceFile) {
+            this.expression = expression;
+            this.problem = problem;
+            this.sourceFile = sourceFile;
+        }
+
+        @Override
+        public String toString() {
+            return "ExpressionFailure [expression=" + expression + ", problem="
+                    + problem + ", sourceFile=" + sourceFile + "]";
+        }
+
+    }
+
     private static final Logger LOG = Logger.getLogger(JsfStaticAnalyzer.class
             .getName());
+
+    private final ValidatingJsfElResolver elValidator = new ValidatingJsfElResolver();
 
     private boolean printCorrectExpressions = false;
     private String jspsToIncludeCommaSeparated = null;
     private Collection<File> facesConfigFiles = Collections.emptyList();
     private Collection<File> springConfigFiles = Collections.emptyList();
+    private boolean suppressOutput = false;
+
 
     /**
      * Check expressions in all JSP files under the jspDir and print the failed (or all) ones
@@ -130,9 +161,10 @@ public class JsfStaticAnalyzer {
      *            useful for properties where the proper type cannot be derived
      *            such as a Collection, see
      *            {@link JsfElValidator#definePropertyTypeOverride(String, Class)}
+     * @return
      * @throws Exception
      */
-    public void validateElExpressions(String jspDir,
+    public CollectedValidationResults validateElExpressions(String jspDir,
             Map<String, Class<?>> localVariableTypes,
             Map<String, Class<?>> extraVariables,
             Map<String, Class<?>> propertyTypeOverrides) throws Exception {
@@ -167,8 +199,7 @@ public class JsfStaticAnalyzer {
         contextVarRegistry.registerResolverForTag("h:dataTable",
                 dataTableResolver);
 
-        ValidatingJsfElResolver elValidator = new ValidatingJsfElResolver(
-                contextVarRegistry);
+        elValidator.setUnknownVariableResolver(contextVarRegistry);
         elValidator.setIncludeKnownVariablesInException(false);
 
         for (Entry<String, Class<?>> override : propertyTypeOverrides
@@ -203,45 +234,54 @@ public class JsfStaticAnalyzer {
                 pageNodeValidator);
         jspc.execute();
 
-        System.err
-                .println(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR #########################################");
-        for (DeclareTypeOfVariableException untypedVar : pageNodeValidator
-                .getValidationResults().getVariablesNeedingTypeDeclaration()) {
+        // Handle results
+        CollectedValidationResultsImpl results = pageNodeValidator.getValidationResults();
+
+        printErr(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR ["
+                + results.getVariablesNeedingTypeDeclaration().size()
+        		+ "] #########################################");
+        for (DeclareTypeOfVariableException untypedVar : results.getVariablesNeedingTypeDeclaration()) {
             System.err.println(untypedVar);
         }
 
-        System.err
-                .println("\n>>> FAILED JSF EL EXPRESSIONS #########################################");
-        System.err.println("(Set logging to fine for "
+        printErr("\n>>> FAILED JSF EL EXPRESSIONS ["
+                + results.failures().size()
+        		+ "] #########################################");
+        printErr("(Set logging to fine for "
                 + ValidatingJsfElResolver.class
                 + " to se failure details and stacktraces)");
 
         // TODO Log separately undefined variables Later: suppress derived
         // errors w/ them
 
-        int failureCnt = 0;
-        for (ValidationResult result : pageNodeValidator.getValidationResults()
-                .failures()) {
+        for (ValidationResult result : results.failures()) {
             System.err.println(result);
-            ++failureCnt;
         }
 
-        if (failureCnt > 0) {
-            System.err.println("\n>>> TOTAL FAILED EXPRESIONS: " + failureCnt);
+        if (results.failures().size() > 0) {
+            printErr("\n>>> TOTAL FAILED EXPRESIONS: " + results.failures().size());
+        }
+
+        if (results.excluded().size() > 0) {
+            Set<ElExpressionFilter> filters = new HashSet<ElExpressionFilter>();
+            for (ExpressionRejectedByFilterResult exclusionResult : results.excluded()) {
+                filters.add(exclusionResult.getFilter());
+            }
+            String filtersList = filters.isEmpty()? "" : " by filters: " + filters;
+            printErr("\n>>> TOTAL EXCLUDED EXPRESIONS: " + results.excluded().size() + filtersList);
         }
 
         if (printCorrectExpressions) {
-            System.out
-                    .println("\n>>> CORRECT EXPRESSIONS #########################################");
+            printOut("\n>>> CORRECT EXPRESSIONS ["
+                    + results.goodResults().size()
+            		+ "] #########################################");
         }
 
-        int successCnt = 0;
-        for (ValidationResult result : pageNodeValidator.getValidationResults()
+        for (ValidationResult result : results
                 .goodResults()) {
             if (printCorrectExpressions) {
                 System.out.println(result);
             }
-            ++successCnt;
         }
 
         final long end = System.currentTimeMillis();
@@ -250,8 +290,10 @@ public class JsfStaticAnalyzer {
         final long seconds = durationS % 60;
         final long minutes = durationS / 60;
 
-        System.out.println("\n\n>>> TOTAL EXPRESSIONS CHECKED: "
-                + (failureCnt + successCnt) + " (FAILED: " + failureCnt
+        printOut("\n\n>>> TOTAL EXPRESSIONS CHECKED: "
+                + (results.failures().size() + results.goodResults().size())
+                + " (FAILED: " + results.failures().size()
+                + ", IGNORED EXPRESSIONS: " + results.excluded().size()
                 + ") IN " + minutes + "min " + seconds + "s");
 
         // TODO Verify all JSF ELs found & checked by comparing their number w/
@@ -262,6 +304,22 @@ public class JsfStaticAnalyzer {
          * failures = validateJsfExpressionsInViews(viewFile);
          * reportInvalidExpressions(failures);
          */
+
+        return results;
+    }
+
+    private void printOut(String message) {
+        print(System.out, message);
+    }
+
+    private void printErr(String message) {
+        print(System.err, message);
+    }
+
+    private void print(PrintStream out, String message) {
+        if (!suppressOutput) {
+            out.println(message);
+        }
     }
 
     private JspCParsingToNodesOnly createJsfElValidatingJspParser(
@@ -366,25 +424,12 @@ public class JsfStaticAnalyzer {
         return beanFinder.findDefinedBackingBeans();
     }
 
-    public static class ExpressionFailure {
-
-        private final String expression;
-        private final String problem;
-        private final File sourceFile;
-
-        public ExpressionFailure(String expression, String problem,
-                File sourceFile) {
-            this.expression = expression;
-            this.problem = problem;
-            this.sourceFile = sourceFile;
-        }
-
-        @Override
-        public String toString() {
-            return "ExpressionFailure [expression=" + expression + ", problem="
-                    + problem + ", sourceFile=" + sourceFile + "]";
-        }
-
+    /**
+     * Used to ignore some expressions, i.e. not to validate them.
+     * @param elExpressionFilter (required)
+     */
+    public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
+        elValidator.addElExpressionFilter(elExpressionFilter);
     }
 
     public static void main(String[] args) throws Exception {
@@ -501,6 +546,17 @@ public class JsfStaticAnalyzer {
 
     public Collection<File> getSpringConfigFiles() {
         return springConfigFiles;
+    }
+
+    /**
+     * True - do not print results to the standard output / error stream. Defaul: false.
+     */
+    public void setSuppressOutput(boolean suppressOutput) {
+        this.suppressOutput = suppressOutput;
+    }
+
+    public boolean isSuppressOutput() {
+        return suppressOutput;
     }
 
 }

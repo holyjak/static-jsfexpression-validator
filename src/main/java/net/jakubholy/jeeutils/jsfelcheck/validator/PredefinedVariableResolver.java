@@ -40,17 +40,12 @@ public final class PredefinedVariableResolver extends VariableResolver {
 
     private final Map<String, Object> knownVariables = new HashMap<String, Object>();
     private final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener;
-    private final ElVariableResolver unknownVariableResolver;
+    private ElVariableResolver unknownVariableResolver;
 
     public PredefinedVariableResolver(
-            final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener, ElVariableResolver unknownVariableResolver) {
-
-        if (unknownVariableResolver == null) {
-            throw new IllegalArgumentException("ElVariableResolver unknownVariableResolver may not be null");
-        }
+            final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener) {
 
         this.newVariableEncounteredListener = newVariableEncounteredListener;
-        this.unknownVariableResolver = unknownVariableResolver;
     }
 
     @Override
@@ -65,7 +60,8 @@ public final class PredefinedVariableResolver extends VariableResolver {
             return knownVariables.get(variableName);
         }
 
-        Class<?> contextLocalVarType = unknownVariableResolver.resolveVariable(variableName);
+        Class<?> contextLocalVarType = (unknownVariableResolver == null)?
+                null : unknownVariableResolver.resolveVariable(variableName);
         if (contextLocalVarType != null) {
             return FakeValueFactory.fakeValueOfType(contextLocalVarType, variableName);
         }
@@ -91,6 +87,14 @@ public final class PredefinedVariableResolver extends VariableResolver {
 
     public boolean isIncludeKnownVariablesInException() {
         return includeKnownVariablesInException;
+    }
+
+    public void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver) {
+        this.unknownVariableResolver = unknownVariableResolver;
+    }
+
+    public ElVariableResolver getUnknownVariableResolver() {
+        return unknownVariableResolver;
     }
 
 }

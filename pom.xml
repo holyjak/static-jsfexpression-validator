@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.jakubholy.jeeutils</groupId>
 	<artifactId>static-jsfexpression-validator</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.9.1</version>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
 
 	<parent>
@@ -172,10 +172,7 @@
 
 			<build>
 				<plugins>
-					<!-- Enable signing of the artifacts For gpg:sign-and-deploy-file it's
-						necessary to have a <server> with the repositoryId provided or id="remote-repository"
-						defined in settings.xml (it contains the repository's login, psw) Signing
-						1: mvn -DperformRelease=true verify or just: mvn -DperformRelease=true deploy -->
+					<!-- Build, sign and deploy: mvn -DperformRelease=true  deploy -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -208,21 +205,6 @@
 				</plugins>
 			</build>
 
-		</profile>
-		<profile>
-			<id>include-sources</id>
-			<build>
-				<resources>
-					<resource>
-						<targetPath>/</targetPath>
-						<filtering>true</filtering>
-						<directory>src/main/java</directory>
-						<includes>
-							<include>**/*.java</include>
-						</includes>
-					</resource>
-				</resources>
-			</build>
 		</profile>
 
 	</profiles>
