@@ -268,7 +268,7 @@ public class JsfStaticAnalyzer {
                 filters.add(exclusionResult.getFilter());
             }
             String filtersList = filters.isEmpty()? "" : " by filters: " + filters;
-            printErr("\n>>> TOTAL EXCLUDED EXPRESIONS: " + results.excluded().size() + filtersList);
+            printErr(">>> TOTAL EXCLUDED EXPRESIONS: " + results.excluded().size() + filtersList);
         }
 
         if (printCorrectExpressions) {

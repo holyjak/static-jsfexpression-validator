@@ -28,7 +28,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundExc
 
 /**
  * Resolve variables from a pre-defined list initialized via {@link PredefinedVariableResolver#declareVariable(String, Object)}.
- * Throws {@link VariableNotFoundException} if it encounteres a variable not present on the list.
+ * Throws {@link VariableNotFoundException} if it encounters a variable not present on the list.
  */
 public final class PredefinedVariableResolver extends VariableResolver {
 

@@ -33,7 +33,7 @@ abstract public class ValidationResult {
 
     @Override
     public String toString() {
-        return "" + expressionDescriptor;
+        return (expressionDescriptor == null)? super.toString() : getClass().getSimpleName() + "[" + expressionDescriptor + "]";
     }
 
 

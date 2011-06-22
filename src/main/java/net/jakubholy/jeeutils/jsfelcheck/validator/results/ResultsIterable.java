@@ -37,4 +37,13 @@ public class ResultsIterable<T> implements Iterable<T> {
         return results.size();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder resultList = new StringBuilder("RESULTS [").append(size()).append("]:\n");
+        for (T result : results) {
+            resultList.append(result).append('\n');
+        }
+        return resultList.toString();
+    }
+
 }

@@ -84,4 +84,15 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         return new ResultsIterable<ExpressionRejectedByFilterResult>(exclusions);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + getResultsSummary() + "]";
+    }
+
+    protected final String getResultsSummary() {
+        return "failures=" + failures.size()
+                		+ ",valid expressions=" + goodResults.size()
+                		+ ",ignored expressions=" + exclusions.size();
+    }
+
 }

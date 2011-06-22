@@ -91,7 +91,7 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
         if (/*iterationVariableName != null &&*/ declaredVariableType == null) {
             throw new DeclareTypeOfVariableException(iterationVariableName, sourceExpression);
         } else {
-            LOG.info("Variable extracted: name=" + iterationVariableName + ", type " + declaredVariableType);
+            LOG.fine("Variable extracted: name=" + iterationVariableName + ", type " + declaredVariableType);
             return new VariableInfo(iterationVariableName, declaredVariableType);
         }
 

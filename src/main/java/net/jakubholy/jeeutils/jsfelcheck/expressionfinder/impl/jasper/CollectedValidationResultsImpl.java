@@ -72,4 +72,10 @@ public class CollectedValidationResultsImpl extends MultipleValidationResults im
         this.currentJspFile = jspFile;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + super.getResultsSummary()
+            + ", local variables needing type declaration: " + variablesNeedingTypeDeclaration.size() + "]";
+    }
+
 }
