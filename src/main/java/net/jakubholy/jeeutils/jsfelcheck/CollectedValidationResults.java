@@ -1,6 +1,6 @@
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import java.util.List;
+import java.util.Collection;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
@@ -10,7 +10,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationR
 
 public interface CollectedValidationResults {
 
-    public List<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration();
+    public Collection<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration();
 
     public ResultsIterable<SuccessfulValidationResult> goodResults();
 

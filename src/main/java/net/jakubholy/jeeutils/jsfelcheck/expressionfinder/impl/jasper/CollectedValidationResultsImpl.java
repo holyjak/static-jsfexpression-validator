@@ -64,7 +64,7 @@ public class CollectedValidationResultsImpl extends MultipleValidationResults im
      * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResults#getVariablesNeedingTypeDeclaration()
      */
     @Override
-    public List<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration() {
+    public Collection<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration() {
         return variablesNeedingTypeDeclaration;
     }
 

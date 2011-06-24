@@ -51,6 +51,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
+import org.apache.jasper.JasperException;
 import org.apache.jasper.compiler.JsfElCheckingVisitor;
 
 /**
@@ -167,7 +168,7 @@ public class JsfStaticAnalyzer {
     public CollectedValidationResults validateElExpressions(String jspDir,
             Map<String, Class<?>> localVariableTypes,
             Map<String, Class<?>> extraVariables,
-            Map<String, Class<?>> propertyTypeOverrides) throws Exception {
+            Map<String, Class<?>> propertyTypeOverrides) {
 
         if (localVariableTypes == null) {
             localVariableTypes = Collections.emptyMap();
@@ -232,7 +233,11 @@ public class JsfStaticAnalyzer {
         // Run it
         JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
                 pageNodeValidator);
-        jspc.execute();
+        try {
+            jspc.execute();
+        } catch (JasperException e) {
+            throw new RuntimeException("Jasper failed to parse your JSP files", e);
+        }
 
         // Handle results
         CollectedValidationResultsImpl results = pageNodeValidator.getValidationResults();
