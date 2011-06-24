@@ -105,8 +105,18 @@
 			<artifactId>spring-context</artifactId>
 			<version>2.5.6</version>
 			<type>jar</type>
-			<scope>compile</scope>
+			<scope>provided</scope> <!-- don't force it on users who don't use Spring -->
 		</dependency>
+
+		<dependency>
+		  <!-- Actually not needed when executing from Ant => exclude in such a case. -->
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.2</version>
+            <type>jar</type>
+            <scope>runtime</scope>
+        </dependency>
+
 	</dependencies>
 
 	<build>
