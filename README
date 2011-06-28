@@ -37,3 +37,29 @@ Key classes
 
 ---
 - net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding(String) - distinguish value and method binding
+
+UPGRADING TO JSF 1.2 AND 2.0
+ JSF 1.2
+ - Unified EL for JSP and JSF, introduced ELResolver => support for setters, calling methods
+
+ JSF 2.0
+ - The Java EE 6 EL: "The expression language has changed in minor ways. Perhaps the most useful enhancement for JSF programmers is the use of arguments in action methods."
+
+ IMPLEMENTATIONS
+ JSF 1.2: org.apache.tomcat:el-api:6.0.29 and org.apache.tomcat:jasper-el:6.0.29
+ JSF 2.0: likely org.apache.tomcat:tomcat-jasper-el:7.0.16 and org.apache.tomcat:tomcat-el-api:7.0.16
+
+ Note:
+ - JSF 2.0 <=> JavaEE 6 => Servlet 3.0 and JSP/EL 2.2 => Tomcat 7.0.x
+ - JSF 1.2 <=> JavaEE 5 => Servlet 2.5 and JSP 2.1 =>Tomcat 6.0.x
+
+ Sources:
+ - http://en.wikipedia.org/wiki/JavaServer_Faces#JSF_versions
+ - and http://en.wikipedia.org/wiki/Java_EE_version_history#Java_EE_5_.28May_11.2C_2006.29
+ - and http://tomcat.apache.org/whichversion.html
+
+Interesting Links
+-----------------
+- http://stackoverflow.com/questions/4441713/migrating-from-jsf-1-2-to-jsf-2-0
+
+---------
