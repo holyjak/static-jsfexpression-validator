@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.jakubholy.jeeutils</groupId>
 	<artifactId>static-jsfexpression-validator</artifactId>
-	<version>0.9.2-SNAPSHOT</version>
+	<version>0.9.2</version>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
 
 	<parent>
