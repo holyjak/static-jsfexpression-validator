@@ -180,6 +180,8 @@ public class JsfStaticAnalyzer {
             propertyTypeOverrides = Collections.emptyMap();
         }
 
+        assertJspDirValid(jspDir);
+
         LOG.info("validateElExpressions: entry for JSP root " + jspDir + ", " + extraVariables.size()
                 + " extra variables, " + localVariableTypes.size() + " type-defined local variables, "
                 + propertyTypeOverrides.size() + " property type overrides.");
@@ -311,6 +313,21 @@ public class JsfStaticAnalyzer {
          */
 
         return results;
+    }
+
+    private void assertJspDirValid(String jspDir) throws IllegalArgumentException {
+        if (jspDir == null) {
+            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) may not be null");
+        }
+
+        File jspDirFile = new File(jspDir);
+        if (!jspDirFile.isDirectory()) {
+            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) is not a directory! "
+                    + "Path: " + jspDir + " (absolute: " + jspDirFile.getAbsolutePath() + ")");
+        } else if (!jspDirFile.canRead()) {
+            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) is not readable! "
+                    + "Path: " + jspDir + " (absolute: " + jspDirFile.getAbsolutePath() + ")");
+        }
     }
 
     private void printOut(String message) {
