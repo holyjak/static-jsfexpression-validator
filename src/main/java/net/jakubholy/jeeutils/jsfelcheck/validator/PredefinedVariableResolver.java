@@ -52,9 +52,22 @@ public final class PredefinedVariableResolver extends VariableResolver {
     public Object resolveVariable(FacesContext fc, String variableName)
             throws EvaluationException {
 
+        final Object resolvedValue = tryResolveVariable(fc, variableName);
+
+        if (resolvedValue == null) {
+            throw new VariableNotFoundException("No variable '" + variableName + "' among the predefined ones"
+                    + (isIncludeKnownVariablesInException()? ": " + knownVariables.keySet() : "."));
+        }
+
         if (newVariableEncounteredListener != null) {
             newVariableEncounteredListener.handleNewVariableEncountered(variableName);
         }
+
+        return resolvedValue;
+    }
+
+    private Object tryResolveVariable(FacesContext fc, String variableName)
+    throws EvaluationException {
 
         if (knownVariables.containsKey(variableName)) {
             return knownVariables.get(variableName);
@@ -66,8 +79,7 @@ public final class PredefinedVariableResolver extends VariableResolver {
             return FakeValueFactory.fakeValueOfType(contextLocalVarType, variableName);
         }
 
-        throw new VariableNotFoundException("No variable '" + variableName + "' among the predefined ones"
-                + (isIncludeKnownVariablesInException()? ": " + knownVariables.keySet() : "."));
+        return null;
     }
 
     public void declareVariable(final String name, final Object value) {
