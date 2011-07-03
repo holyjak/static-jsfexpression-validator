@@ -40,10 +40,15 @@ import com.sun.faces.el.PropertyResolverImpl;
  * The mocked type is determined automatically but may be forced via {@link MockingPropertyResolver#definePropertyTypeOverride(String, Class)},
  * which is useful e.g. for Maps that return just Objects.
  */
-public final class MockingPropertyResolver extends PropertyResolver implements PredefinedVariableResolver.NewVariableEncounteredListener {
+public final class MockingPropertyResolver implements PredefinedVariableResolver.NewVariableEncounteredListener {
+
+    public static interface PropertyTypeResolver {
+
+        Class<?> getType(Object target, Object property);
+    }
 
     private final Logger log = Logger.getLogger(getClass().getName());
-    private PropertyResolver realResolver = new PropertyResolverImpl();
+    private PropertyTypeResolver typeResolver;
     private ParsedElExpression currentExpression = new ParsedElExpression();
     private Map<String, Class<?>> typeOverrides = new Hashtable<String, Class<?>>();
     private final Collection<ElExpressionFilter> filters = new LinkedList<ElExpressionFilter>();
@@ -78,48 +83,29 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
         applyFilters(currentExpression);
     }
 
-    @Override
-    public Class<?> getType(Object target, Object property)
-            throws EvaluationException, PropertyNotFoundException {
-        // Avoid OutOfBoundException for fake 0-length arrays we created
-        if (target.getClass().isArray()) {
-            return target.getClass().getComponentType();
-        }
-        return realResolver.getType(target, property);
-    }
-
-    @Override
-    public Class<?> getType(Object target, int index) throws EvaluationException,
+    Class<?> getTypeInternal(Object target, Object property) throws EvaluationException,
             PropertyNotFoundException {
 
         // Would normally throw an exception for empty arrays/list not having the given index
         if (target.getClass().isArray()) {
             return target.getClass().getComponentType();
         } else if (target instanceof Collection<?>) {
-            return this.determineFinalTypeOfCurrentExpressionAnd(index, null);
+            return this.determineFinalTypeOfCurrentExpressionAnd(property, null);
         }
 
-        return realResolver.getType(target, index);
+        return getTypeResolver().getType(target, property);
     }
 
-    @Override
     public Object getValue(Object target, Object property)
             throws EvaluationException, PropertyNotFoundException {
-        //return realResolver.getValue(arg0, arg1);
-        return getValue(target, property, getType(target, property));
-    }
-
-    @Override
-    public Object getValue(Object target, int property)
-            throws EvaluationException, PropertyNotFoundException {
-        return getValue(target, property, getType(target, property));
+        return this.getValue(target, property, getTypeInternal(target, property));
     }
 
     /**
      * Note: In the case of a Map target the property is the key, ex.: 'my.key'.
      */
     @SuppressWarnings("rawtypes")
-    private Object getValue(final Object target, final Object property, final Class originalType)
+    public Object getValue(final Object target, final Object property, final Class originalType)
             throws EvaluationException, PropertyNotFoundException {
 
         final Class type = determineFinalTypeOfCurrentExpressionAnd(property, originalType);
@@ -129,10 +115,6 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     }
 
     private Object fakePropertValue(final Object target, final Object property, final Class<?> type) {
-        if (type == null) {
-            realResolver.getValue(target, property); // no exception => valid but unset
-        }
-
         try {
             return FakeValueFactory.fakeValueOfType(type, property);
         } catch (UnableToCreateFakeValueException e) {
@@ -188,30 +170,6 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     }
 
     @Override
-    public boolean isReadOnly(Object arg0, Object arg1)
-            throws EvaluationException, PropertyNotFoundException {
-        return realResolver.isReadOnly(arg0, arg1);
-    }
-
-    @Override
-    public boolean isReadOnly(Object arg0, int arg1)
-            throws EvaluationException, PropertyNotFoundException {
-        return realResolver.isReadOnly(arg0, arg1);
-    }
-
-    @Override
-    public void setValue(Object arg0, Object arg1, Object arg2)
-            throws EvaluationException, PropertyNotFoundException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setValue(Object arg0, int arg1, Object arg2)
-            throws EvaluationException, PropertyNotFoundException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void handleNewVariableEncountered(final String variableName) {
         currentExpression.setVariable(variableName);
         applyFilters(currentExpression);
@@ -237,6 +195,17 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
 
     public void clearElExpressionFilters() {
         filters.clear();
+    }
+
+    public void setTypeResolver(PropertyTypeResolver typeResolver) {
+        this.typeResolver = typeResolver;
+    }
+
+    private PropertyTypeResolver getTypeResolver() {
+        if (typeResolver == null) {
+            throw new IllegalStateException("stateResolver: PropertyTypeResolver should have been set at this point");
+        }
+        return typeResolver;
     }
 
 }
