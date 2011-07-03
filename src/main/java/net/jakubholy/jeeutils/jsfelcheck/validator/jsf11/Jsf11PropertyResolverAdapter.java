@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
 import java.util.Collection;
 import java.util.Hashtable;
@@ -27,6 +27,7 @@ import javax.faces.el.EvaluationException;
 import javax.faces.el.PropertyNotFoundException;
 import javax.faces.el.PropertyResolver;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
@@ -75,13 +76,13 @@ public final class Jsf11PropertyResolverAdapter extends PropertyResolver {
     @Override
     public Class<?> getType(Object target, Object property)
             throws EvaluationException, PropertyNotFoundException {
-        return resolver.getTypeInternal(target, property);
+        return resolver.getTypeOfCollectionOrBean(target, property);
     }
 
     @Override
     public Class<?> getType(Object target, int index) throws EvaluationException,
             PropertyNotFoundException {
-        return resolver.getTypeInternal(target, index);
+        return resolver.getTypeOfCollectionOrBean(target, index);
     }
 
     @Override

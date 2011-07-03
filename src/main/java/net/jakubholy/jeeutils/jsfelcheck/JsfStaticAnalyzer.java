@@ -47,7 +47,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
@@ -130,7 +130,7 @@ public class JsfStaticAnalyzer {
     private static final Logger LOG = Logger.getLogger(JsfStaticAnalyzer.class
             .getName());
 
-    private final ValidatingJsfElResolver elValidator = new ValidatingJsfElResolver();
+    private final Jsf11ValidatingElResolver elValidator = new Jsf11ValidatingElResolver();
 
     private boolean printCorrectExpressions = false;
     private String jspsToIncludeCommaSeparated = null;
@@ -255,7 +255,7 @@ public class JsfStaticAnalyzer {
                 + results.failures().size()
         		+ "] #########################################");
         printErr("(Set logging to fine for "
-                + ValidatingJsfElResolver.class
+                + Jsf11ValidatingElResolver.class   // FIXME incorrect class in some cases
                 + " to se failure details and stacktraces)");
 
         // TODO Log separately undefined variables Later: suppress derived

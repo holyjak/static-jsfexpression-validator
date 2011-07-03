@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.faces.application.Application;
 import javax.faces.context.ExternalContext;
@@ -30,13 +27,14 @@ import javax.faces.el.EvaluationException;
 import javax.faces.el.MethodBinding;
 import javax.faces.el.ValueBinding;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
@@ -53,16 +51,14 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
  * @see #definePropertyTypeOverride(String, Class)
  *
  */
-public class ValidatingJsfElResolver implements JsfElValidator {
-
-    private static final Logger LOG = Logger.getLogger(ValidatingJsfElResolver.class.getName());
+public class Jsf11ValidatingElResolver implements JsfElValidator {
 
     private final ElBindingFactory elBindingFactory;
     private final MockingPropertyResolver propertyResolver;
     private final PredefinedVariableResolver variableResolver;
     private final FacesContext mockFacesContext;
 
-    public ValidatingJsfElResolver() {
+    public Jsf11ValidatingElResolver() {
         propertyResolver = new MockingPropertyResolver();
         variableResolver = new PredefinedVariableResolver(propertyResolver);
 
@@ -94,22 +90,9 @@ public class ValidatingJsfElResolver implements JsfElValidator {
             final MethodBinding binding = elBindingFactory.createMethodBinding(elExpression);
             return new SuccessfulValidationResult(binding);
         } catch (EvaluationException e) {
-            return produceFailureResult(elExpression, e);
+            return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {
-            throw wrapIfNeededAndAddContext(elExpression, e);
-        }
-    }
-
-    private ValidationResult produceFailureResult(final String elExpression,
-            EvaluationException e) {
-        LOG.log(Level.FINE, "Resolution failed", e);
-        Throwable unwrappedCause = (e.getCause() == null)? e : e.getCause();
-
-        if (unwrappedCause instanceof ExpressionRejectedByFilterException) {
-            return new ExpressionRejectedByFilterResult((ExpressionRejectedByFilterException) unwrappedCause);
-        } else {
-            return new FailedValidationResult(
-                new InvalidExpressionException(elExpression, null, unwrappedCause));
+            throw ValidationResultHelper.wrapIfNeededAndAddContext(elExpression, e);
         }
     }
 
@@ -124,23 +107,11 @@ public class ValidatingJsfElResolver implements JsfElValidator {
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
             return new SuccessfulValidationResult(resolvedMockedValue);
         } catch (EvaluationException e) {
-            return produceFailureResult(elExpression, e);
+            return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {
-            throw wrapIfNeededAndAddContext(elExpression, e);
+            throw ValidationResultHelper.wrapIfNeededAndAddContext(elExpression, e);
         }
     }
-
-    private InternalValidatorFailureException wrapIfNeededAndAddContext(final String elExpression,
-            RuntimeException e) {
-        if (e instanceof InternalValidatorFailureException) {
-            InternalValidatorFailureException internalFailure = ((InternalValidatorFailureException) e);
-            internalFailure.setExpression(elExpression);
-            return internalFailure;
-        } else {
-            return new InternalValidatorFailureException(e).setExpression(elExpression);
-        }
-    }
-
 
     /* (non-Javadoc)
      * @see net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator#declareVariable(java.lang.String, java.lang.Object)

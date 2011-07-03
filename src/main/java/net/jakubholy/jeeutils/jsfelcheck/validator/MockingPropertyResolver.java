@@ -83,7 +83,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         applyFilters(currentExpression);
     }
 
-    Class<?> getTypeInternal(Object target, Object property) throws EvaluationException,
+    public Class<?> getTypeOfCollectionOrBean(Object target, Object property) throws EvaluationException,
             PropertyNotFoundException {
 
         // Would normally throw an exception for empty arrays/list not having the given index
@@ -98,7 +98,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
 
     public Object getValue(Object target, Object property)
             throws EvaluationException, PropertyNotFoundException {
-        return this.getValue(target, property, getTypeInternal(target, property));
+        return this.getValue(target, property, getTypeOfCollectionOrBean(target, property));
     }
 
     /**

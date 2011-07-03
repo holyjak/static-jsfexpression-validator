@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -31,8 +31,13 @@ import java.util.Iterator;
 
 import javax.faces.el.PropertyNotFoundException;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
+import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ParsedElExpression;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolverTest.ConstantPropertyTypeResolverImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11PropertyResolverAdapter;
 
 import org.junit.Before;
 import org.junit.Test;

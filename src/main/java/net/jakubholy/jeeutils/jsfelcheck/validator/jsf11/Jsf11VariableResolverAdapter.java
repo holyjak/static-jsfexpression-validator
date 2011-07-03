@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
 import javax.faces.context.FacesContext;
 import javax.faces.el.EvaluationException;
 import javax.faces.el.VariableResolver;
+
+import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 
 /**
  * Adapt {@link PredefinedVariableResolver} to behave as JSF 1.1 {@link VariableResolver}.

@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
@@ -46,13 +47,13 @@ public class ValidatingJsfElResolverTest {
         return new ValueHolder<T>(value);
     }
 
-    private ValidatingJsfElResolver elResolver;
+    private Jsf11ValidatingElResolver elResolver;
     @Mock private ElVariableResolver mockUnknownVariableResolver;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        elResolver = new ValidatingJsfElResolver();
+        elResolver = new Jsf11ValidatingElResolver();
         elResolver.setUnknownVariableResolver(mockUnknownVariableResolver);
     }
 
