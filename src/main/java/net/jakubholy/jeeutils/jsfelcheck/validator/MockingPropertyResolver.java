@@ -91,10 +91,14 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     @Override
     public Class<?> getType(Object target, int index) throws EvaluationException,
             PropertyNotFoundException {
-     // Avoid OutOfBoundException for fake 0-length arrays we created
+
+        // Would normally throw an exception for empty arrays/list not having the given index
         if (target.getClass().isArray()) {
             return target.getClass().getComponentType();
+        } else if (target instanceof Collection<?>) {
+            return this.determineFinalTypeOfCurrentExpressionAnd(index, null);
         }
+
         return realResolver.getType(target, index);
     }
 
@@ -118,7 +122,7 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     private Object getValue(final Object target, final Object property, final Class originalType)
             throws EvaluationException, PropertyNotFoundException {
 
-        final Class type = determineFinalType(property, originalType);
+        final Class type = determineFinalTypeOfCurrentExpressionAnd(property, originalType);
         // Append property only after type has been determined !!!!
         appendCurrentPropertyToExpression(property.toString());
         return fakePropertValue(target, property, type);
@@ -141,10 +145,10 @@ public final class MockingPropertyResolver extends PropertyResolver implements P
     /**
      * Determine the type to use using overrides and perhaps a default value.
      * @param property
-     * @param originalType
+     * @param originalType (optional)
      * @return
      */
-    Class<?> determineFinalType(final Object property,
+    Class<?> determineFinalTypeOfCurrentExpressionAnd(final Object property,
             final Class<?> originalType) {
 
         //final boolean undefinedType = Object.class == originalType || originalType == null;
