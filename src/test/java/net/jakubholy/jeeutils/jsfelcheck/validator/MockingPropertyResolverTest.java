@@ -17,13 +17,19 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
+
+import javax.faces.el.PropertyNotFoundException;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 
@@ -54,48 +60,52 @@ public class MockingPropertyResolverTest {
 
     }
 
+    /** Name of the managed bean variable "encountered" during the current resolution process. */
+    private static final String CURRENT_VARIABLE = "bean";
     private MockingPropertyResolver resolver;
+    private MyVariable currentVariable;
 
     @Before
     public void setUp() {
+        currentVariable = new MyVariable();
         resolver = new MockingPropertyResolver();
-        resolver.handleNewVariableEncountered("bean");
+        resolver.handleNewVariableEncountered(CURRENT_VARIABLE);
     }
 
     @Test
     public void should_keep_current_type_if_no_override() throws Exception {
         assertSame(String.class
-                , resolver.determineFinalType("property", String.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("property", String.class));
         assertSame(URL.class
-                , resolver.determineFinalType("property", URL.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("property", URL.class));
     }
 
     @Test
     public void should_respect_component_type_override() throws Exception {
-        resolver.definePropertyTypeOverride("bean.*", Integer.class);
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Integer.class);
 
         assertSame(Integer.class
-                , resolver.determineFinalType("mapKey", String.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("mapKey", String.class));
     }
 
     @Test
     public void should_respect_property_type_override() throws Exception {
-        resolver.definePropertyTypeOverride("bean.property", URL.class);
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".property", URL.class);
 
         assertSame(URL.class
-                , resolver.determineFinalType("property", Math.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("property", Math.class));
     }
 
     @Test
     public void should_prioritize_property_over_component_type_override() throws Exception {
-        resolver.definePropertyTypeOverride("bean.property", URL.class);
-        resolver.definePropertyTypeOverride("bean.*", Integer.class);
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".property", URL.class);
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Integer.class);
 
 
         assertSame(Integer.class
-                , resolver.determineFinalType("nonOverridenProperty", String.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("nonOverridenProperty", String.class));
         assertSame(URL.class
-                , resolver.determineFinalType("property", String.class));
+                , resolver.determineFinalTypeOfCurrentExpressionAnd("property", String.class));
     }
 
 
@@ -142,12 +152,12 @@ public class MockingPropertyResolverTest {
 
         // Try variable.acceptedProperty
         resolver.handleNewVariableEncountered("variable"); // shall pass ok
-        resolver.getValue(new MyVariable(), "acceptedProperty"); // shall pass
+        resolver.getValue(currentVariable, "acceptedProperty"); // shall pass
 
         // Reset, try variable.acceptedProperty
         resolver.handleNewVariableEncountered("variable"); // shall pass ok
         try {
-            resolver.getValue(new MyVariable(), "deniedProperty");
+            resolver.getValue(currentVariable, "deniedProperty");
             fail("Should have been denied by the filter");
         } catch (ExpressionRejectedByFilterException e) {
             assertEquals("variable.deniedProperty", e.getExpression());
@@ -178,10 +188,62 @@ public class MockingPropertyResolverTest {
         resolver.addElExpressionFilter(filter1);
         resolver.addElExpressionFilter(filter2);
 
-        resolver.getValue(new MyVariable(), "acceptedProperty");
+        resolver.getValue(currentVariable, "acceptedProperty");
 
         assertTrue(filter1.isCalled());
         assertTrue(filter2.isCalled());
+    }
+
+    @Test(expected=PropertyNotFoundException.class)
+    public void should_throw_exception_for_unknown_property() throws Exception {
+        resolver.getValue(currentVariable, "unknownProperty");
+    }
+
+    @Test
+    public void should_return_MockObjectOfUnknownType_for_existing_mapped_property_without_declard_component_type() throws Exception {
+        assertThat(resolver.getValue(Collections.EMPTY_MAP, "unknownProperty")
+                , is(instanceOf(MockObjectOfUnknownType.class)));
+    }
+
+    @Test
+    public void should_return_MockObjectOfUnknownType_for_existing_list_property_without_declard_component_type() throws Exception {
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+                , is(instanceOf(MockObjectOfUnknownType.class)));
+    }
+
+    @Test
+    public void should_return_MockObjectOfUnknownType_for_existing_array_property_without_declard_component_type() throws Exception {
+        assertThat(resolver.getValue(new Object[0], 456)
+                , is(instanceOf(MockObjectOfUnknownType.class)));
+    }
+
+    @Test
+    public void should_return_string_for_existing_string_array_property() throws Exception {
+        assertThat(resolver.getValue(new String[0], 33)
+                , is(instanceOf(String.class)));
+    }
+
+    @Test
+    public void should_return_declared_component_type_for_existing_mapped_property() throws Exception {
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Runnable.class);
+        assertThat(resolver.getValue(Collections.EMPTY_MAP, "unknownProperty")
+                , is(instanceOf(Runnable.class)));
+    }
+
+    @Test
+    public void should_return_declared_component_type_for_existing_list_property() throws Exception {
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Cloneable.class);
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+                , is(instanceOf(Cloneable.class)));
+    }
+
+    @Test
+    public void should_return_declared_component_type_for_existing_array_property() throws Exception {
+        resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Float.class);
+        // Note: We return an int for any number as it can be coerced into any other number
+        // i.e. is compatible with it
+        assertThat(resolver.getValue(new Object[0], 456)
+                , is(instanceOf(Number.class)));
     }
 
 }

@@ -10,8 +10,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.List;
 
-import javax.faces.context.FacesContext;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver.NewVariableEncounteredListener;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 
@@ -23,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 public class PredefinedVariableResolverTest {
 
     private PredefinedVariableResolver resolver;
-    @Mock FacesContext fc;
     @Mock NewVariableEncounteredListener listener;
 
     @Before
@@ -34,7 +31,7 @@ public class PredefinedVariableResolverTest {
 
     @Test(expected=VariableNotFoundException.class)
     public void should_throw_exception_for_unknown_variable() throws Exception {
-        resolver.resolveVariable(fc, "unknown");
+        resolver.resolveVariable("unknown");
     }
 
     @Test
@@ -42,8 +39,8 @@ public class PredefinedVariableResolverTest {
         resolver.declareVariable("var1", "Var1_Value");
         resolver.declareVariable("bean2", 222);
 
-        assertEquals("Var1_Value", resolver.resolveVariable(fc, "var1"));
-        assertEquals(222, resolver.resolveVariable(fc, "bean2"));
+        assertEquals("Var1_Value", resolver.resolveVariable("var1"));
+        assertEquals(222, resolver.resolveVariable("bean2"));
     }
 
     @Test
@@ -55,7 +52,7 @@ public class PredefinedVariableResolverTest {
             }
         });
 
-        Object result = resolver.resolveVariable(fc, "unknown");
+        Object result = resolver.resolveVariable("unknown");
 
         assertNotNull("Should be resolved by the UnknownVariableResolver", result);
         assertThat(result, is(instanceOf(List.class)));
@@ -64,7 +61,7 @@ public class PredefinedVariableResolverTest {
     @Test
     public void should_invoke_its_listener_when_variable_known() throws Exception {
         resolver.declareVariable("newVariableName", "value");
-        resolver.resolveVariable(fc, "newVariableName");
+        resolver.resolveVariable("newVariableName");
         verify(listener).handleNewVariableEncountered("newVariableName");
     }
 
@@ -75,14 +72,14 @@ public class PredefinedVariableResolverTest {
                 return List.class;
             }
         });
-        resolver.resolveVariable(fc, "variableDelegatedToUVR");
+        resolver.resolveVariable("variableDelegatedToUVR");
         verify(listener).handleNewVariableEncountered("variableDelegatedToUVR");
     }
 
     @Test
     public void should_not_invoke_its_listener_when_unknown_variable_encountered() throws Exception {
         try {
-            resolver.resolveVariable(fc, "unknownVariable");
+            resolver.resolveVariable("unknownVariable");
         } catch (VariableNotFoundException e) {}
         verifyZeroInteractions(listener);
     }
