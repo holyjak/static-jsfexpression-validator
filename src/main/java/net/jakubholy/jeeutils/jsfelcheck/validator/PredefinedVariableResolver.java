@@ -30,7 +30,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundExc
  * Resolve variables from a pre-defined list initialized via {@link PredefinedVariableResolver#declareVariable(String, Object)}.
  * Throws {@link VariableNotFoundException} if it encounters a variable not present on the list.
  */
-public final class PredefinedVariableResolver extends VariableResolver {
+public final class PredefinedVariableResolver {
 
     private boolean includeKnownVariablesInException = true;
 
@@ -48,11 +48,10 @@ public final class PredefinedVariableResolver extends VariableResolver {
         this.newVariableEncounteredListener = newVariableEncounteredListener;
     }
 
-    @Override
-    public Object resolveVariable(FacesContext fc, String variableName)
+    public Object resolveVariable(String variableName)
             throws EvaluationException {
 
-        final Object resolvedValue = tryResolveVariable(fc, variableName);
+        final Object resolvedValue = tryResolveVariable(variableName);
 
         if (resolvedValue == null) {
             throw new VariableNotFoundException("No variable '" + variableName + "' among the predefined ones"
@@ -66,7 +65,7 @@ public final class PredefinedVariableResolver extends VariableResolver {
         return resolvedValue;
     }
 
-    private Object tryResolveVariable(FacesContext fc, String variableName)
+    private Object tryResolveVariable(String variableName)
     throws EvaluationException {
 
         if (knownVariables.containsKey(variableName)) {

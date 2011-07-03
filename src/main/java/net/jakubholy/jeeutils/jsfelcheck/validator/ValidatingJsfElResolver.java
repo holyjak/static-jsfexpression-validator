@@ -73,7 +73,7 @@ public class ValidatingJsfElResolver implements JsfElValidator {
         when(mockFacesContext.getApplication()).thenReturn(application);
         when(mockFacesContext.getExternalContext()).thenReturn(externalContext);
 
-        when(application.getVariableResolver()).thenReturn(variableResolver);
+        when(application.getVariableResolver()).thenReturn(new Jsf11VariableResolverAdapter(variableResolver));
         when(application.getPropertyResolver()).thenReturn(propertyResolver);
 
         elBindingFactory = ElBindingFactoryProvider.getFactory(application);
