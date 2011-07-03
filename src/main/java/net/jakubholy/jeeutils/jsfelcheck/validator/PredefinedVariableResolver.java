@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,6 +90,10 @@ public final class PredefinedVariableResolver {
                     currentOverride + ", new: " + value);
         }
         knownVariables.put(name, value);
+    }
+
+    public Map<String, Object> getDeclaredVariables() {
+        return Collections.unmodifiableMap(knownVariables);
     }
 
     public void setIncludeKnownVariablesInException(
