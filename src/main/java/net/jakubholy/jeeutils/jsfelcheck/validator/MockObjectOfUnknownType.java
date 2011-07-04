@@ -17,13 +17,11 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
-
 /**
  * Used instead an Object or mock(Object) when resolving a property whose
  * type cannot be safely determined.
  *
- * (Use {@link Jsf11ValidatingElResolver#definePropertyTypeOverride(String, Class)} to force
+ * (Use {@link ValidatingElResolver#definePropertyTypeOverride(String, Class)} to force
  * a particular type.)
  */
 public class MockObjectOfUnknownType {

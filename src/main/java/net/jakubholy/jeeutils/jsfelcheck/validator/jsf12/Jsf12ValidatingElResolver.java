@@ -33,7 +33,10 @@ import javax.el.ValueExpression;
 import javax.faces.context.FacesContext;
 import javax.faces.el.EvaluationException;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidationResultHelper;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -42,7 +45,7 @@ import org.apache.myfaces.el.unified.FacesELContext;
 import org.apache.myfaces.el.unified.resolver.ScopedAttributeResolver;
 import org.apache.myfaces.el.unified.resolver.implicitobject.ImplicitObjectResolver;
 
-public class Jsf12ElValidatorImpl implements JsfElValidator {
+public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     private static final Class<?>[] NO_PARAMS = new Class<?>[0];
     private MyResolver myResolver;
@@ -50,7 +53,7 @@ public class Jsf12ElValidatorImpl implements JsfElValidator {
     private FacesContext context;
      ELContext elContext;
 
-    public Jsf12ElValidatorImpl() {
+    public Jsf12ValidatingElResolver() {
         expressionFactory = new org.apache.el.ExpressionFactoryImpl();
         context = mock(FacesContext.class);
         elContext = new FacesELContext(buildElResolver() , context);
@@ -98,7 +101,6 @@ public class Jsf12ElValidatorImpl implements JsfElValidator {
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(
                     elContext, elExpression, Object.class, NO_PARAMS);
-            // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
             return new SuccessfulValidationResult(methodExpression);
         } catch (EvaluationException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
@@ -118,7 +120,24 @@ public class Jsf12ElValidatorImpl implements JsfElValidator {
     public JsfElValidator definePropertyTypeOverride(String mapJsfExpression,
             Class<?> newType) {
         myResolver.getPropertyResolver().definePropertyTypeOverride(mapJsfExpression, newType);
-        return null;
+        return this;
+    }
+
+    @Override
+    public void setUnknownVariableResolver(
+            ElVariableResolver unknownVariableResolver) {
+        myResolver.getVariableResolver().setUnknownVariableResolver(unknownVariableResolver);
+    }
+
+    @Override
+    public void setIncludeKnownVariablesInException(
+            boolean includeKnownVariablesInException) {
+        myResolver.getVariableResolver().setIncludeKnownVariablesInException(includeKnownVariablesInException);
+    }
+
+    @Override
+    public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
+        myResolver.getPropertyResolver().addElExpressionFilter(elExpressionFilter);
     }
 
 }

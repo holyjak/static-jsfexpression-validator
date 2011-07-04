@@ -16,11 +16,11 @@ public class Jsf12ElValidatorImplTest {
         public int getIntProperty();
     }
 
-    private Jsf12ElValidatorImpl validator;
+    private Jsf12ValidatingElResolver validator;
 
     @Before
     public void setUp() throws Exception {
-        validator = new Jsf12ElValidatorImpl();
+        validator = new Jsf12ValidatingElResolver();
     }
 
     @Test

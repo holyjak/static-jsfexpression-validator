@@ -32,9 +32,9 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
@@ -51,7 +51,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
  * @see #definePropertyTypeOverride(String, Class)
  *
  */
-public class Jsf11ValidatingElResolver implements JsfElValidator {
+public class Jsf11ValidatingElResolver implements ValidatingElResolver {
 
     private final ElBindingFactory elBindingFactory;
     private final MockingPropertyResolver propertyResolver;
@@ -76,6 +76,10 @@ public class Jsf11ValidatingElResolver implements JsfElValidator {
     }
 
 
+    /* (non-Javadoc)
+     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#setUnknownVariableResolver(net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver)
+     */
+    @Override
     public void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver) {
         variableResolver.setUnknownVariableResolver(unknownVariableResolver);
     }
@@ -129,16 +133,19 @@ public class Jsf11ValidatingElResolver implements JsfElValidator {
     }
 
 
-    /** List known variables in VariableNotFoundException? */
+    /* (non-Javadoc)
+     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#setIncludeKnownVariablesInException(boolean)
+     */
+    @Override
     public void setIncludeKnownVariablesInException(
             boolean includeKnownVariablesInException) {
         variableResolver.setIncludeKnownVariablesInException(includeKnownVariablesInException);
     }
 
-    /**
-     * Throw {@link ExpressionRejectedByFilterException} for any expression not accepted by the supplied filter.
-     * @param elExpressionFilter (required)
+    /* (non-Javadoc)
+     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#addElExpressionFilter(net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter)
      */
+    @Override
     public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
         propertyResolver.addElExpressionFilter(elExpressionFilter);
     }
