@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator;
+package net.jakubholy.jeeutils.jsfelcheck;
 
 import java.io.File;
 import java.util.Collection;
@@ -24,12 +24,12 @@ import net.jakubholy.jeeutils.jsfelcheck.AbstractJsfStaticAnalyzer;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12ValidatingElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
 
 /**
  * {@inheritDoc}
  *
- * Implementation based on JSF 1.2.
+ * Implementation based on JSF 1.1.
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
 
@@ -39,13 +39,12 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
 
     @Override
     protected ValidatingElResolver createValidatingElResolver() {
-        return new Jsf12ValidatingElResolver();
+        return new Jsf11ValidatingElResolver();
     }
 
     @Override
     protected ManagedBeanFinder createManagedBeanFinder(
             Collection<File> facesConfigFiles) {
-        // For now we just reuse the jsf11 parser
         return new Jsf11FacesConfigXmlBeanFinder(facesConfigFiles);
     }
 
