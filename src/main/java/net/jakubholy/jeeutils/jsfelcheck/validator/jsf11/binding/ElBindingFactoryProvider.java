@@ -1,10 +1,11 @@
-package net.jakubholy.jeeutils.jsfelcheck.validator.binding;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding;
 
 import java.util.logging.Logger;
 
 import javax.faces.application.Application;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl.Sun11_02ElBindingFactoryImpl;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_02ElBindingFactoryImpl;
+
 
 public class ElBindingFactoryProvider {
 

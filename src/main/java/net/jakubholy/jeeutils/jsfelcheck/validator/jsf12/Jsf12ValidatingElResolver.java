@@ -79,7 +79,6 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
         return elResolver;
     }
-
     @Override
     public ValidationResult validateValueElExpression(String elExpression) {
         final ValueExpression valueExpression = expressionFactory.createValueExpression(

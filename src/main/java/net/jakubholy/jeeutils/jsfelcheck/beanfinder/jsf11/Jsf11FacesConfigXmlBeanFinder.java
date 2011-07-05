@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
+package net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11;
 
 import java.io.File;
 import java.io.InputStream;
@@ -29,6 +29,9 @@ import java.util.logging.Logger;
 
 import javax.faces.FacesException;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
+
 import org.apache.commons.digester.Digester;
 import org.xml.sax.InputSource;
 
@@ -40,15 +43,15 @@ import com.sun.faces.config.rules.FacesConfigRuleSet;
  * Find managed bean defined in (a) faces-config file(s).
  * Uses the available JSF implementation to parse the file(s).
  */
-public class FacesConfigXmlBeanFinder implements ManagedBeanFinder {
+public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
     private static final String[][] DTD_INFO = { { "/com/sun/faces/web-facesconfig_1_0.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN" }, { "/com/sun/faces/web-facesconfig_1_1.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" } };
 
-    private static final  Logger log = Logger.getLogger(FacesConfigXmlBeanFinder.class.getName());
+    private static final  Logger log = Logger.getLogger(Jsf11FacesConfigXmlBeanFinder.class.getName());
 
     private final Collection<File> facesConfigFiles;
 
-    public FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
+    public Jsf11FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
         if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
             throw new IllegalArgumentException("facesConfigFiles: Collection<File> cannot be null/empty, is: " + facesConfigFiles);
         }

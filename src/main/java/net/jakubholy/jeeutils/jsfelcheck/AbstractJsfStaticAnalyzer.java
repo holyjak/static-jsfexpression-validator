@@ -33,9 +33,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
@@ -105,7 +105,7 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * @author jholy
  *
  */
-public class JsfStaticAnalyzer {
+public abstract class AbstractJsfStaticAnalyzer {
 
     public static class ExpressionFailure {
 
@@ -128,17 +128,23 @@ public class JsfStaticAnalyzer {
 
     }
 
-    private static final Logger LOG = Logger.getLogger(JsfStaticAnalyzer.class
+    private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class
             .getName());
 
-    private final ValidatingElResolver elValidator = new Jsf11ValidatingElResolver();
-    //private final ValidatingElResolver elValidator = new Jsf12ValidatingElResolver();
+    private final ValidatingElResolver elValidator;
 
     private boolean printCorrectExpressions = false;
     private String jspsToIncludeCommaSeparated = null;
     private Collection<File> facesConfigFiles = Collections.emptyList();
     private Collection<File> springConfigFiles = Collections.emptyList();
     private boolean suppressOutput = false;
+
+    public AbstractJsfStaticAnalyzer() {
+        elValidator = createValidatingElResolver();
+    }
+
+    /** Create the JSF-implementation specific valiator to use. */
+    protected abstract ValidatingElResolver createValidatingElResolver();
 
 
     /**
@@ -429,12 +435,14 @@ public class JsfStaticAnalyzer {
         LOG.info("Loading faces-config managed beans from "
                 + getFacesConfigFiles());
 
-        ManagedBeanFinder beanFinder = new FacesConfigXmlBeanFinder(
-                getFacesConfigFiles());
+        ManagedBeanFinder beanFinder = createManagedBeanFinder(getFacesConfigFiles());
         Collection<ManagedBeanDescriptor> facesConfigBeans = beanFinder
                 .findDefinedBackingBeans();
         return facesConfigBeans;
     }
+
+    protected abstract ManagedBeanFinder createManagedBeanFinder(
+            Collection<File> facesConfigFiles);
 
     private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
         if (getSpringConfigFiles().isEmpty()) {
@@ -456,7 +464,7 @@ public class JsfStaticAnalyzer {
         elValidator.addElExpressionFilter(elExpressionFilter);
     }
 
-    public static void main(String[] args) throws Exception {
+    protected static void main(AbstractJsfStaticAnalyzer analyzer, String[] args) throws Exception {
 
         String jspRoot = null;
         Map<String, Class<?>> componentTypeOverrides = new Hashtable<String, Class<?>>();
@@ -494,7 +502,7 @@ public class JsfStaticAnalyzer {
             System.exit(-1);
         }
 
-        new JsfStaticAnalyzer().validateElExpressions(jspRoot,
+        analyzer.validateElExpressions(jspRoot,
                 componentTypeOverrides, extraVariables, propertyOverrides);
     }
 

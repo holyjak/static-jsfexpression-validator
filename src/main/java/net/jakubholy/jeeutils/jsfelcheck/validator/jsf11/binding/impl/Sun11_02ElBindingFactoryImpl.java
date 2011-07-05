@@ -1,4 +1,4 @@
-package net.jakubholy.jeeutils.jsfelcheck.validator.binding.impl;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl;
 
 import java.util.logging.Logger;
 
@@ -7,7 +7,7 @@ import javax.faces.el.MethodBinding;
 import javax.faces.el.ReferenceSyntaxException;
 import javax.faces.el.ValueBinding;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactory;
 
 import com.sun.faces.el.MethodBindingImpl;
 import com.sun.faces.el.MixedELValueBinding;

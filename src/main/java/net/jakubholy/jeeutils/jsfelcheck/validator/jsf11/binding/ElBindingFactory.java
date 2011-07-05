@@ -1,4 +1,4 @@
-package net.jakubholy.jeeutils.jsfelcheck.validator.binding;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding;
 
 import javax.faces.el.MethodBinding;
 import javax.faces.el.ReferenceSyntaxException;

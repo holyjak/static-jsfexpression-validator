@@ -33,8 +33,8 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactory;
-import net.jakubholy.jeeutils.jsfelcheck.validator.binding.ElBindingFactoryProvider;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactory;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactoryProvider;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
