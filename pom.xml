@@ -1,16 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.jakubholy.jeeutils</groupId>
-	<artifactId>static-jsfexpression-validator</artifactId>
-        <version>0.9.3-SNAPSHOT</version>
-	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
+	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+	<artifactId>jsfelcheck-parent</artifactId>
+	<version>0.9.3-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<description>Parent POM with common settings.</description>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
+
+	<modules>
+		<module>static-jsfexpression-validator-core</module>
+		<module>static-jsfexpression-validator-jsf11</module>
+		<module>static-jsfexpression-validator-jsf12</module>
+		<module>static-jsfexpression-validator-jsf20</module>
+		<module>static-jsfexpression-validator-core-abstracttests</module>
+	</modules>
 
 	<licenses>
 		<license>
@@ -43,30 +52,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- The publicly available 1.1_02 doesn't have the com.sun.faces.el.ValueBindingFactory
-				we need http://fisheye5.cenqua.com/browse/javaserverfaces-sources/jsf-ri/src/com/sun/faces/el/ValueBindingFactory.java?r=1.19.4.7
-				Maybe it can be fetched from CVS, see http://javaserverfaces.java.net/checkout.html#cvs
-				. -->
-			<groupId>javax.faces</groupId>
-			<artifactId>jsf-impl</artifactId>
-			<version>1.1_02</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>jasper</artifactId>
-			<version>6.0.29</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit-dep</artifactId>
 			<version>4.8.2</version>
@@ -76,13 +61,6 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>1.8.5</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-digester</groupId>
-			<artifactId>commons-digester</artifactId>
-			<version>1.5</version>
-			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -99,64 +77,32 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- only needed for SpringContextBeanFinder, if used -->
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>2.5.6</version>
-			<type>jar</type>
-			<scope>provided</scope> <!-- don't force it on users who don't use Spring -->
-		</dependency>
-
-		<dependency>
-		  <!-- Actually not needed when executing from Ant => exclude in such a case. -->
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.8.2</version>
-            <type>jar</type>
-            <scope>runtime</scope>
-        </dependency>
-
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<version>1.2.9</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-			<version>1.2.9</version>
-		</dependency>
 
 	</dependencies>
 
 	<build>
 		<plugins>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<releaseProfiles>release-sign-artifacts</releaseProfiles>
+				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 
@@ -179,21 +125,13 @@
 		<profile>
 			<id>release-sign-artifacts</id>
 
-			<activation>
-				<property>
-					<!-- will be set by the release plugin upon performing mvn release:perform -->
-					<name>performRelease</name>
-					<value>true</value>
-				</property>
-			</activation>
-
 			<properties>
 				<gpg.keyname>8A7E15EF</gpg.keyname> <!-- GPG Key ID to use for signing -->
 			</properties>
 
 			<build>
 				<plugins>
-					<!-- Build, sign and deploy: mvn -DperformRelease=true  deploy -->
+					<!-- Build, sign and deploy: mvn -DperformRelease=true deploy -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -223,12 +161,25 @@
 						</executions>
 					</plugin>
 
+					<!-- Publish also sources when releasing - required by Sonatype -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
 				</plugins>
 			</build>
 
 		</profile>
 
 	</profiles>
-
 
 </project>

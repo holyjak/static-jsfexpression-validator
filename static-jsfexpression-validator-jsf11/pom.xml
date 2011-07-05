@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>jsfelcheck-parent</artifactId>
+		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+		<version>0.9.3-SNAPSHOT</version>
+	</parent>
+	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+	<artifactId>static-jsfexpression-validator-jsf11</artifactId>
+	<version>0.9.3-SNAPSHOT</version>
+	<name>EL validator for JSF 1.1</name>
+	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.1 implementation. See the readme and main class JsfStaticAnalyzer.</description>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<contributors>
+		<contributor>
+			<name>Jakub Holy</name>
+			<email>malyvelky@users.sf.net</email>
+			<timezone>GMT+1</timezone>
+			<roles></roles>
+		</contributor>
+	</contributors>
+
+	<scm>
+		<connection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
+		<developerConnection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
+		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
+	</scm>
+	<dependencies>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>static-jsfexpression-validator-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <!-- The publicly available 1.1_02 doesn't have the com.sun.faces.el.ValueBindingFactory
+                we need http://fisheye5.cenqua.com/browse/javaserverfaces-sources/jsf-ri/src/com/sun/faces/el/ValueBindingFactory.java?r=1.19.4.7
+                Maybe it can be fetched from CVS, see http://javaserverfaces.java.net/checkout.html#cvs
+                . -->
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-impl</artifactId>
+            <version>1.1_02</version>
+            <scope>compile</scope>
+        </dependency>
+
+		<dependency>
+			<groupId>commons-digester</groupId>
+			<artifactId>commons-digester</artifactId>
+			<version>1.5</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+	</dependencies>
+
+</project>
