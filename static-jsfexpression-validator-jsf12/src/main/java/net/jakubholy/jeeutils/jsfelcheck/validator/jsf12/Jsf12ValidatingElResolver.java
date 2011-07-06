@@ -18,6 +18,10 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Map;
 
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
@@ -31,8 +35,8 @@ import javax.el.MapELResolver;
 import javax.el.MethodExpression;
 import javax.el.ResourceBundleELResolver;
 import javax.el.ValueExpression;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.faces.el.EvaluationException;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
@@ -57,7 +61,16 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     public Jsf12ValidatingElResolver() {
         expressionFactory = new org.apache.el.ExpressionFactoryImpl();
+
+        final Map<String, Object> emptyMap = Collections.emptyMap();
+        ExternalContext externalContextMock = mock(ExternalContext.class);
+        when(externalContextMock.getApplicationMap()).thenReturn(emptyMap);
+        when(externalContextMock.getRequestMap()).thenReturn(emptyMap);
+        when(externalContextMock.getSessionMap()).thenReturn(emptyMap);
+
         context = mock(FacesContext.class);
+        when(context.getExternalContext()).thenReturn(externalContextMock);
+
         elContext = new FacesELContext(buildElResolver() , context);
     }
 

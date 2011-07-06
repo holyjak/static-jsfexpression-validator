@@ -12,15 +12,15 @@ See detailed description of how to use the tool at
 http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/
 
 TODO
-- create JsfStaticAnalyzer extending AbstractJsfStaticAnalyzer for each JSF, supplying proper Resolver and M.B.Finder
-- extract projects for core, jsf11, jsf12, jsf20 (just reuses 12)
-- parent pom (signing, version, common prlugins & settings, publish all)
-- future:
+- verify jsf11, 12, 20 with a real project
+- finishinh touches:
     - each jsf impl. uses its own faces-config parser
     - make true jsf20 impl. using myfaces 2.0
-    - find annotated managed beans
-    - check/finish support for functions in jsf/jsp EL
-
+    - run Findbugs and Sonar, check licenses, Checkstyle
+- full JSF 1.2+ support:
+    - Facelets
+    - detect annotated managed beans
+    - support EL functions (perhaps just reuse Jasper's FunctionMapper ?)
 
 - add example JSF page
 - test with various JSF projects
@@ -34,8 +34,6 @@ TODO
 - better handling of includes:
     1) possibility to exclude pages from processing (the non-standalone ones)
     2) whenever dynamic jsp include encountered, switch to processing of that page, passing local variables in
-
-- far future: migrate to JSF 1.2 (using ElResolver) and then JSF 2.0
 
 DEVELOPEMET INTRO
 
