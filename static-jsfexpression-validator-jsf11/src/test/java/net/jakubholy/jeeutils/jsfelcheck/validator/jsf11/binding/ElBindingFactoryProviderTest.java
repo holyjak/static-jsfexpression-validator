@@ -15,17 +15,23 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
+package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolverAbstractTest;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 
-public class Jsf11ValidatingElResolverTest extends ValidatingJsfElResolverAbstractTest {
+public class ElBindingFactoryProviderTest {
 
-    @Override
-    protected ValidatingElResolver setUpResolver() {
-        return new Jsf11ValidatingElResolver();
+    @Test
+    public void should_instantiate_defaul_implementation() throws Exception {
+        assertNotNull(ElBindingFactoryProvider.getFactory(null));
+    }
+
+    @Test
+    public void should_be_able_to_get_the_legacy_impl_class() throws Exception {
+        assertNotNull(Class.forName(ElBindingFactoryProvider.LEGACY_IMPL_CLASS));
     }
 
 }
