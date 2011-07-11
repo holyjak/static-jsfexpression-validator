@@ -24,12 +24,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javax.servlet.jsp.PageContext;
+
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
@@ -108,21 +112,10 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         assertExpressionValid("#{myBeanWithStringArrayProperty.stringArray[-1]}");
     }
 
-    private void assertExpressionValid(final String elExpression) {
-        assertNotNull("Shall return some Mock"
-                , elResolver.validateValueElExpression(elExpression));
-    }
-
     @Test
     public void should_fail_for_undefined_variable() throws Exception {
         ValidationResult result = elResolver.validateValueElExpression("#{undefinedBean}");
         assertFailureWithMessageContaining(result, "No variable 'undefinedBean' among the predefined ones");
-    }
-
-    private void assertFailureWithMessageContaining(ValidationResult result, String errorSubstring) {
-        assertTrue(result instanceof FailedValidationResult);
-        FailedValidationResult failure = (FailedValidationResult) result;
-        assertThat(failure.getFailure().getMessage(), is(containsString(errorSubstring)));
     }
 
     @Test
@@ -146,12 +139,6 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         elResolver.declareVariable("myMap", Collections.EMPTY_MAP);
         ValidationResult result = elResolver.validateValueElExpression("#{myMap['dummyKey']}");
         assertResultValueType(result, MockObjectOfUnknownType.class);
-    }
-
-    private void assertResultValueType(ValidationResult result, Class<?> type) {
-        assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
-        assertThat( ((SuccessfulValidationResult) result).getExpressionResult()
-                , is(instanceOf(type)));
     }
 
     @Test
@@ -218,6 +205,86 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
         ValidationResult result = elResolver.validateValueElExpression("#{myVariable}");
         assertThat(result, is(instanceOf(ExpressionRejectedByFilterResult.class)));
+    }
+
+    /**
+     * See specification of JSP 2.0, section 2.2.3: Implicit Objects
+     * pageContext: PageContext
+     * pageScope, requestScope, sessionScope, applicationScope: Map<String, Object>
+     * param: Map<String, String>, paramValues: Map<String, String[]>
+     * header: Map<String, String>, headerValues: Map<String, String[]>
+     * cookie: Map<String, Cookie>
+     * initParam: Map<String, String>
+     */
+    @Test
+    public void should_recognize_all_jsp_implicit_objects_as_variables() throws Exception {
+
+        assertResultValueType(elResolver.validateValueElExpression("#{pageContext}"), PageContext.class);
+
+        String[] implicitMapObjects = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
+                , "paramValues", "header", "headerValues", "cookie", "initParam" };
+
+        for (String implicitObject : implicitMapObjects) {
+            assertResultValueType(elResolver.validateValueElExpression("#{" + implicitObject + "}"), Map.class);
+        }
+    }
+
+    /**
+     * We cannot validate values in request/session/.. map for their set is not known in advance.
+     * To avoid false failures we should therefore for any such property return a value, which can
+     * coerce into any primitive type likely to be used on a page (typically boolean, int, string).
+     *
+     * @see #should_recognize_all_jsp_implicit_objects_as_variables()
+     */
+    @Test
+    public void should_be_able_to_coerce_implicit_object_map_property_to_any_primitive_value() throws Exception {
+
+        String[] mapImplicitObjects = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
+                , "paramValues", "header", "headerValues", "initParam" };
+
+        // For each Map implicit object, any implObj['key'] should generate some default value, which
+        // can be coreced to any of the basic primitive types
+        for (String implicitObject : mapImplicitObjects) {
+            assertBoolResult("#{" + implicitObject + ".generatedValue != 'random'}"); // coerce to String
+            assertBoolResult("#{" + implicitObject + ".generatedValue != true}");     // coerce to boolean
+            assertBoolResult("#{" + implicitObject + ".generatedValue != 333}");      // coerce to int
+        }
+
+        // No exception should have been thrown
+
+    }
+
+    private void assertResultValueType(ValidationResult result, Class<?> type) {
+        assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
+        assertThat( ((SuccessfulValidationResult) result).getExpressionResult()
+                , is(instanceOf(type)));
+    }
+
+    private void assertFailureWithMessageContaining(ValidationResult result, String errorSubstring) {
+        assertTrue(result instanceof FailedValidationResult);
+        FailedValidationResult failure = (FailedValidationResult) result;
+        assertThat(failure.getFailure().getMessage(), is(containsString(errorSubstring)));
+    }
+
+    /** Assert that the expression is valid and returns non-null value. */
+    private void assertExpressionValid(final String elExpression) {
+        ValidationResult result = elResolver.validateValueElExpression(elExpression);
+        assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
+
+        assertNotNull("Shall return some Mock"
+                , ((SuccessfulValidationResult) result).getExpressionResult());
+    }
+
+    private void assertBoolResult(String elExpression) {
+        ValidationResult validationResult = elResolver.validateValueElExpression(elExpression);
+        assertThat("The expression '" + elExpression + "' should have succeeded to evaluate (to a boolean) but failed."
+                , validationResult
+                , is(instanceOf(SuccessfulValidationResult.class)));
+
+        SuccessfulValidationResult successfulResult = (SuccessfulValidationResult) validationResult;
+        assertThat("The expression '" + elExpression + "' should have yielded a boolean"
+                , successfulResult.getExpressionResult()
+                , is(instanceOf(boolean.class)));
     }
 
 }
