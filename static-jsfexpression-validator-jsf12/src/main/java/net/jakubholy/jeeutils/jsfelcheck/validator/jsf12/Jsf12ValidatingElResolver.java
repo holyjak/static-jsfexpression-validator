@@ -48,13 +48,11 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationR
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 import org.apache.myfaces.el.unified.FacesELContext;
-import org.apache.myfaces.el.unified.resolver.ScopedAttributeResolver;
-import org.apache.myfaces.el.unified.resolver.implicitobject.ImplicitObjectResolver;
 
 public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     private static final Class<?>[] NO_PARAMS = new Class<?>[0];
-    private MyResolver myResolver;
+    private ValidatingFakeValueResolver validatingResolver;
      ExpressionFactory expressionFactory;
     private FacesContext context;
      ELContext elContext;
@@ -80,17 +78,15 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
     private ELResolver buildElResolver() {
         CompositeELResolver elResolver = new CompositeELResolver();
 
-        elResolver.add(ImplicitObjectResolver.makeResolverForFaces());
+        // replaces ImplicitObjectResolver, ScopedAttributeResolver, ManagedBeanResolver
+        validatingResolver = new ValidatingFakeValueResolver(elResolver);
 
-        myResolver = new MyResolver(elResolver);
-        elResolver.add(myResolver);          // facesContxt.getExternalContext => .getRequest/Session/ApplicationMap()
+        elResolver.add(validatingResolver);
         elResolver.add(new ResourceBundleELResolver());
-        //elResolver.add(new ResourceBundleResolver()); depends on facesContext.getApplication().getResourceBundle(facesContext, property)
         elResolver.add(new MapELResolver());
         elResolver.add(new ListELResolver());
         elResolver.add(new ArrayELResolver());
         elResolver.add(new BeanELResolver());
-        elResolver.add(new ScopedAttributeResolver());     // facesContxt.getExternalContext => .getRequest/Session/ApplicationMap()
 
         return elResolver;
     }
@@ -130,32 +126,32 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     //@Override
     public JsfElValidator declareVariable(String name, Object value) {
-        myResolver.getVariableResolver().declareVariable(name, value);
+        validatingResolver.getVariableResolver().declareVariable(name, value);
         return this;
     }
 
     //@Override
     public JsfElValidator definePropertyTypeOverride(String mapJsfExpression,
             Class<?> newType) {
-        myResolver.getPropertyResolver().definePropertyTypeOverride(mapJsfExpression, newType);
+        validatingResolver.getPropertyResolver().definePropertyTypeOverride(mapJsfExpression, newType);
         return this;
     }
 
     //@Override
     public void setUnknownVariableResolver(
             ElVariableResolver unknownVariableResolver) {
-        myResolver.getVariableResolver().setUnknownVariableResolver(unknownVariableResolver);
+        validatingResolver.getVariableResolver().setUnknownVariableResolver(unknownVariableResolver);
     }
 
     //@Override
     public void setIncludeKnownVariablesInException(
             boolean includeKnownVariablesInException) {
-        myResolver.getVariableResolver().setIncludeKnownVariablesInException(includeKnownVariablesInException);
+        validatingResolver.getVariableResolver().setIncludeKnownVariablesInException(includeKnownVariablesInException);
     }
 
     //@Override
     public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
-        myResolver.getPropertyResolver().addElExpressionFilter(elExpressionFilter);
+        validatingResolver.getPropertyResolver().addElExpressionFilter(elExpressionFilter);
     }
 
 }

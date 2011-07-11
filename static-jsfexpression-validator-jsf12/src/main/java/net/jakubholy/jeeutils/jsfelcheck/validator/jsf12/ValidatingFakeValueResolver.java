@@ -34,14 +34,14 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 
-public class MyResolver extends ELResolver implements PropertyTypeResolver {
+public class ValidatingFakeValueResolver extends ELResolver implements PropertyTypeResolver {
 
     private final CompositeELResolver allResolver;
     private ELContext currentContext;
     MockingPropertyResolver propertyResolver;
     PredefinedVariableResolver variableResolver;
 
-    public MyResolver(CompositeELResolver allResolver) {
+    public ValidatingFakeValueResolver(CompositeELResolver allResolver) {
         this.allResolver = allResolver;
 
         this.propertyResolver = new MockingPropertyResolver();

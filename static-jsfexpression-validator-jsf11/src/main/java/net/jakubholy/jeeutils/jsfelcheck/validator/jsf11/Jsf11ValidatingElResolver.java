@@ -40,17 +40,9 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationR
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 /**
- * A "fake" resolver of JSF EL expression which only checks the validity of the expressions
- * using a custom Variable and Property resolver without requiring real values for the
- * variables being referenced in the expressions.
+ * {@inheritDoc}
  *
- * The variable resolver resolvers against a pre-defined list of known variables, the property resolver doesn't actually
- * invoke any getter but just returns a Mock of the appropriate type (so that evaluation of the expression can
- * proceed, which wouldn't be possible if we used real objects and they returned null).
- *
- * @see #declareVariable(String, Object)
- * @see #definePropertyTypeOverride(String, Class)
- *
+ * JSF 1.1 implementation.
  */
 public class Jsf11ValidatingElResolver implements ValidatingElResolver {
 

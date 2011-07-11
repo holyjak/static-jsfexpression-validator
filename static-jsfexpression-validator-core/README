@@ -26,6 +26,7 @@ TODO
 - test with various JSF projects
 - better error msg for
     '#{bean.listProperty[0].elementProperty}': PropertyNotFoundException - Property 'elementProperty' not found on class net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType]; expression=#{bean.listProperty[0].elementProperty}, file=/mypage.jsp, tagLine=126]
+- better error msg. for PropertyNotFoundException on class Error_YouMustDelcareTypeForThisVariable => include advice how to solve it
  => make it clear the solution is st. like propertyTypeOverrides.put("bean.listProperty.*",  TheElementType.class);
 
 ...
