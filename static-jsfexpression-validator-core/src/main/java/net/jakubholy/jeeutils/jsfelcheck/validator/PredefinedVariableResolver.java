@@ -20,10 +20,10 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import javax.faces.context.FacesContext;
 import javax.faces.el.EvaluationException;
-import javax.faces.el.VariableResolver;
+import javax.servlet.jsp.PageContext;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 
@@ -32,6 +32,11 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundExc
  * Throws {@link VariableNotFoundException} if it encounters a variable not present on the list.
  */
 public final class PredefinedVariableResolver {
+
+    static final String[] IMPLICIT_MAP_OBJECTS = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
+        , "paramValues", "header", "headerValues", "cookie", "initParam" };
+
+    private final Logger log = Logger.getLogger(getClass().getName());
 
     private boolean includeKnownVariablesInException = true;
 
@@ -45,8 +50,19 @@ public final class PredefinedVariableResolver {
 
     public PredefinedVariableResolver(
             final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener) {
-
         this.newVariableEncounteredListener = newVariableEncounteredListener;
+        defineImplicitObjects();
+    }
+
+    /**
+     * Define implicit objects required by the JSP 2.0 specification.
+     */
+    private void defineImplicitObjects() {
+        for (String implicitObjectName : IMPLICIT_MAP_OBJECTS) {
+            declareVariable(implicitObjectName, Collections.EMPTY_MAP);
+        }
+
+        declareVariable("pageContext", FakeValueFactory.fakeValueOfType(PageContext.class, "pageContext"));
     }
 
     public Object resolveVariable(String variableName)
@@ -82,13 +98,24 @@ public final class PredefinedVariableResolver {
         return null;
     }
 
+    /**
+     * @see JsfElValidator#declareVariable(String, Object)
+     */
     public void declareVariable(final String name, final Object value) {
+
+        if (value instanceof Class<?>) {
+            log.warning("declareVariable('" + name + "', value:" + value + "): Are you sure you wanted to declare " +
+            		"a variable containing a Class and not an instance of the class (using the FakeValueFactory)?!");
+        }
+
         Object currentOverride = knownVariables.get(name);
+
         if (currentOverride != null) {
             throw new IllegalArgumentException("The variable '"
                     + name + "' is already defined; current value: " +
                     currentOverride + ", new: " + value);
         }
+
         knownVariables.put(name, value);
     }
 

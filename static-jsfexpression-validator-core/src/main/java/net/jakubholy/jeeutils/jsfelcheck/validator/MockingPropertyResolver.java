@@ -49,6 +49,21 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
     private Map<String, Class<?>> typeOverrides = new Hashtable<String, Class<?>>();
     private final Collection<ElExpressionFilter> filters = new LinkedList<ElExpressionFilter>();
 
+    public MockingPropertyResolver() {
+        defineImplicitMapObjectsElementType();
+    }
+
+    /**
+     * Define the type of elements included in the JSP implicit objects of type Map -
+     * use the most coerceable type to avoid unwanted type cast errors.
+     */
+    private void defineImplicitMapObjectsElementType() {
+        for (String mapImplicitObject : PredefinedVariableResolver.IMPLICIT_MAP_OBJECTS) {
+            definePropertyTypeOverride(mapImplicitObject + ".*", String.class);
+        }
+
+    }
+
     /**
      * Define what type to produce for a JSF EL expression.
      * There are two types of overrides:
@@ -56,8 +71,8 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
      * (2) collection component type overrides: for all sub-properties of a variable/property
      * (unless there is also a property override for it), used for arrays etc. Ex: bean.mapProperty.* =>
      * bean.mapProperty['someKey'] and bean.mapProperty.anotherProperty will be both affected by the override
-     * @param elExpression The expression where to override the guessed type with only names and dots; i.e.
-     *  'var.prop becomes var.prop
+     * @param elExpression The property chain (EL without #{..}) where to override the guessed type - with only name
+     *  s and dots; i.e. 'var.["prop"]' becomes 'var.prop'
      * @param newType (required)
      */
     public void definePropertyTypeOverride(final String elExpression, final Class<?> newType) {
