@@ -218,11 +218,6 @@ public abstract class AbstractJsfStaticAnalyzer {
         }
 
         // DEFAULT EXTRA VARIABLES
-        elValidator.declareVariable("requestScope", Collections.EMPTY_MAP);
-        // return an empty string, advantage: JSF can coalesce it to number/boolean/String as needed,
-        // ex: #{requestScope.myCnt == 5}
-        elValidator.definePropertyTypeOverride("requestScope.*", String.class);
-        elValidator.declareVariable("sessionScope", Collections.EMPTY_MAP);
         elValidator.declareVariable("request", FakeValueFactory
                 .fakeValueOfType(HttpServletRequest.class, "request"));
 
