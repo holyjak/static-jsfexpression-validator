@@ -75,7 +75,7 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
 
     //@Override
     public VariableInfo extractContextVariables(Map<String, String> attributes,
-            AttributesValidationResult resolvedJsfExpressions) throws DeclareTypeOfVariableException {
+            AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException {
 
         String iterationVariableName = attributes.get("var");
         String sourceExpression = normalizeExpression(attributes.get("value"));
@@ -89,7 +89,7 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
         declaredVariableType = tryToExtractTypeFromSourceExpression(sourceModel, declaredVariableType);
 
         if (/*iterationVariableName != null &&*/ declaredVariableType == null) {
-            throw new DeclareTypeOfVariableException(iterationVariableName, sourceExpression);
+            throw new MissingLocalVariableTypeDeclarationException(iterationVariableName, sourceExpression);
         } else {
             LOG.fine("Variable extracted: name=" + iterationVariableName + ", type " + declaredVariableType);
             return new VariableInfo(iterationVariableName, declaredVariableType);

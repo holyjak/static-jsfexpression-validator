@@ -41,7 +41,7 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValid
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -250,11 +250,16 @@ public abstract class AbstractJsfStaticAnalyzer {
         // Handle results
         CollectedValidationResultsImpl results = pageNodeValidator.getValidationResults();
 
-        printErr(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR ["
-                + results.getVariablesNeedingTypeDeclaration().size()
-        		+ "] #########################################");
-        for (DeclareTypeOfVariableException untypedVar : results.getVariablesNeedingTypeDeclaration()) {
-            System.err.println(untypedVar);
+        if (results.getVariablesNeedingTypeDeclaration().size() > 0) {
+            printErr(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR ["
+                    + results.getVariablesNeedingTypeDeclaration().size()
+            		+ "] #########################################\n"
+            		+ "(You must declare type of local variables, usually defined by h:dataTable, by specifying "
+            		+ "the type of elements in the source collection denoted by its EL, or example:\n"
+            	    + "localVariableTypes.put(value h:dataTable's source attribute, element type's class)");
+            for (MissingLocalVariableTypeDeclarationException untypedVar : results.getVariablesNeedingTypeDeclaration()) {
+                printErr(untypedVar.toString());
+            }
         }
 
         printErr("\n>>> FAILED JSF EL EXPRESSIONS ["

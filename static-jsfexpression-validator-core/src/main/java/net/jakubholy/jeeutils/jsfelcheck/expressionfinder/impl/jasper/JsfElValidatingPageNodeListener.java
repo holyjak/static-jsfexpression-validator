@@ -21,7 +21,7 @@ import java.util.Stack;
 import java.util.logging.Logger;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
@@ -63,7 +63,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
                 , resolvedJsfExpressions.getAllResults());
 
             contextVarRegistry.extractContextVariables(jspTag, resolvedJsfExpressions);
-        } catch (DeclareTypeOfVariableException e) {
+        } catch (MissingLocalVariableTypeDeclarationException e) {
             e.setTagLineNumber(jspTag.getLineNumber());
             e.setJspFile(jspFile);
             validationResults.reportContextVariableNeedingTypeDeclaration(e);

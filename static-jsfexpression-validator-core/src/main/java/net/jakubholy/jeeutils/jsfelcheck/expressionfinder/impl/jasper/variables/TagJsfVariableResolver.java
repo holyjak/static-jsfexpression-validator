@@ -28,6 +28,6 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.Attributes
 public interface TagJsfVariableResolver {
 
     VariableInfo extractContextVariables(Map<String, String> attributes,
-            AttributesValidationResult resolvedJsfExpressions) throws DeclareTypeOfVariableException;
+            AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException;
 
 }

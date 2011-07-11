@@ -17,7 +17,12 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
 
-public class DeclareTypeOfVariableException extends RuntimeException {
+/**
+ * Thrown when we detect declaration of a local variable (typically inside an h:dataTable tag)
+ * but its expected type hasn't been defined beforehand. (More exactly the type of elements
+ * contained in the source EL expression, yielding a collection with elements the variable will reference).
+ */
+public class MissingLocalVariableTypeDeclarationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +31,7 @@ public class DeclareTypeOfVariableException extends RuntimeException {
     private int lineNumber;
     private String jspFile;
 
-    public DeclareTypeOfVariableException(String variableName, String sourceExpression) {
+    public MissingLocalVariableTypeDeclarationException(String variableName, String sourceExpression) {
         this.variableName = variableName;
         this.sourceExpression = sourceExpression;
     }
@@ -57,9 +62,9 @@ public class DeclareTypeOfVariableException extends RuntimeException {
 
     @Override
     public String toString() {
-        return "Declare component type of '" + sourceExpression
-        	+ "' assigned to the variable " + variableName
-            + " (file " + jspFile + ", tag line " + lineNumber + ")";
+        return "Declare type of elementes in the collection EL '" + sourceExpression
+        	+ "', assigned to the local variable '" + variableName
+            + "' (file " + jspFile + ", tag line " + lineNumber + ")";
     }
 
 }

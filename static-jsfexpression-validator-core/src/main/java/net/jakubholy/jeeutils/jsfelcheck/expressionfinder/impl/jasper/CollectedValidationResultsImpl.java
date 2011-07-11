@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DeclareTypeOfVariableException;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.MultipleValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -33,8 +33,8 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 public class CollectedValidationResultsImpl extends MultipleValidationResults implements CollectedValidationResults {
 
     private int currentTagLineNumber = -1;
-    private final List<DeclareTypeOfVariableException> variablesNeedingTypeDeclaration =
-        new LinkedList<DeclareTypeOfVariableException>();
+    private final List<MissingLocalVariableTypeDeclarationException> variablesNeedingTypeDeclaration =
+        new LinkedList<MissingLocalVariableTypeDeclarationException>();
     private String currentJspFile;
 
     @Override
@@ -56,7 +56,7 @@ public class CollectedValidationResultsImpl extends MultipleValidationResults im
     }
 
     public void reportContextVariableNeedingTypeDeclaration(
-            DeclareTypeOfVariableException e) {
+            MissingLocalVariableTypeDeclarationException e) {
         getVariablesNeedingTypeDeclaration().add(e);
     }
 
@@ -64,7 +64,7 @@ public class CollectedValidationResultsImpl extends MultipleValidationResults im
      * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResults#getVariablesNeedingTypeDeclaration()
      */
     //@Override
-    public Collection<DeclareTypeOfVariableException> getVariablesNeedingTypeDeclaration() {
+    public Collection<MissingLocalVariableTypeDeclarationException> getVariablesNeedingTypeDeclaration() {
         return variablesNeedingTypeDeclaration;
     }
 

@@ -79,7 +79,7 @@ public class ContextVariableRegistry implements ElVariableResolver {
     }
 
     public void extractContextVariables(PageNode jspTag,
-            AttributesValidationResult resolvedJsfExpressions) throws DeclareTypeOfVariableException {
+            AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException {
 
         TagJsfVariableResolver resolverForTag = resolvers.get(jspTag.getqName());
 
@@ -89,7 +89,7 @@ public class ContextVariableRegistry implements ElVariableResolver {
                         jspTag.getAttributes(), resolvedJsfExpressions);
                 // if not null => create new context & store it
                 storeNewContextVariable(jspTag, variable);
-            } catch (DeclareTypeOfVariableException e) {
+            } catch (MissingLocalVariableTypeDeclarationException e) {
                 // Add a fake context variable to make the error messages clearer
                 // (instead of unknown variable)
                 storeNewContextVariable(jspTag, new VariableInfo(
