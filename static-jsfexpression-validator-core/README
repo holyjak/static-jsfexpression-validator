@@ -12,11 +12,11 @@ See detailed description of how to use the tool at
 http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/
 
 TODO
-- verify jsf11, 12, 20 with a real project
-- finishinh touches:
+- run Findbugs and Sonar, check licenses, Checkstyle
+
+- finishing touches:
     - each jsf impl. uses its own faces-config parser
     - make true jsf20 impl. using myfaces 2.0
-    - run Findbugs and Sonar, check licenses, Checkstyle
 - full JSF 1.2+ support:
     - Facelets
     - detect annotated managed beans
