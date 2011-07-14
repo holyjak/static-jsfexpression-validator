@@ -14,10 +14,16 @@ JH - slightly modified version of Sun Checks that better matches the default cod
   <module name="TreeWalker">
     <property name="tabWidth" value="4"/>
     <module name="JavadocMethod">
+      <property name="scope" value="public"/>
       <property name="suppressLoadErrors" value="true"/>
     </module>
-    <module name="JavadocType"/>
-    <module name="JavadocVariable"/>
+    <module name="JavadocType">
+      <property name="scope" value="public"/>
+    </module>
+    <module name="JavadocVariable">
+      <property name="excludeScope" value="private"/>
+      <property name="scope" value="public"/>
+    </module>
     <module name="JavadocStyle"/>
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
@@ -63,7 +69,10 @@ JH - slightly modified version of Sun Checks that better matches the default cod
     <module name="DoubleCheckedLocking"/>
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
-    <module name="HiddenField"/>
+    <module name="HiddenField">
+      <property name="ignoreConstructorParameter" value="true"/>
+      <property name="ignoreSetter" value="true"/>
+    </module>
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MagicNumber"/>
@@ -92,7 +101,6 @@ JH - slightly modified version of Sun Checks that better matches the default cod
     <module name="NPathComplexity"/>
     <module name="CyclomaticComplexity"/>
   </module>
-  <module name="JavadocPackage"/>
   <module name="NewlineAtEndOfFile">
     <property name="severity" value="ignore"/>
     <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
