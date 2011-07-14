@@ -63,9 +63,8 @@ public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory {
         if (ref == null) {
             String message = Util
                     .getExceptionMessageString("com.sun.faces.NULL_PARAMETERS_ERROR");
-            /*     */
-            message = message + " ref " + ref;
-            throw new NullPointerException(message);
+
+            throw new NullPointerException(message + " ref " + null);
         }
         if (!(Util.isVBExpression(ref))) {
             log.severe(" Expression " + ref

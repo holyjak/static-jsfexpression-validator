@@ -26,7 +26,7 @@ import java.util.Iterator;
  */
 public class JsfElFinder implements Iterable<ExpressionInfo> {
 
-	private class ExpressionInfoIterator implements Iterator<ExpressionInfo> {
+	private static class ExpressionInfoIterator implements Iterator<ExpressionInfo> {
 
 		private final JsfElMatcher expressionMatcher;
 		private ExpressionInfo lastFound;

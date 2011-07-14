@@ -96,7 +96,10 @@ public class JsfElCheckingVisitor extends Visitor {
     }
 
     private Map<String, String> asMap(Attributes attributes) {
-        if (attributes == null || attributes.getLength() == 0) Collections.emptyMap();
+        if (attributes == null || attributes.getLength() == 0) {
+            return Collections.emptyMap();
+        }
+
         Map<String, String> attributeMap = new Hashtable<String, String>();
 
         for (int i = 0; i < attributes.getLength(); i++) {

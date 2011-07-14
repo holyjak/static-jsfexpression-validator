@@ -64,7 +64,9 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
     public DataTableVariableResolver() {
         try {
             jstlResultClass = Class.forName("javax.servlet.jsp.jstl.sql.Result");
-        } catch (ClassNotFoundException e) { }
+        } catch (ClassNotFoundException e) {
+            jstlResultClass = null;
+        }
     }
 
     public DataTableVariableResolver declareTypeFor(String jsfExpression,

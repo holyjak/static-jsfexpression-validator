@@ -35,6 +35,10 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
  */
 public class ContextVariableRegistry implements ElVariableResolver {
 
+    /**
+     * Dummy type used for local variables where the actual type is not known because
+     * it haven't been declared by the user.
+     */
     public static class Error_YouMustDelcareTypeForThisVariable {}
 
     private static class VariableContex {
@@ -60,13 +64,21 @@ public class ContextVariableRegistry implements ElVariableResolver {
 
     private final List<VariableContex> contextStack = new LinkedList<VariableContex>();
 
+    /**
+     * Register a new "resolver," which is able to extract local variables from tags of the
+     * given qualified name.
+     *
+     * @param tagQName (required) ex.: h:dataTable
+     * @param resolver (required)
+     * @return this
+     */
     public ContextVariableRegistry registerResolverForTag(String tagQName,
             TagJsfVariableResolver resolver) {
         resolvers.put(tagQName, resolver);
         return this;
     }
 
-    //@Override
+    @Override
     public Class<?> resolveVariable(String name) {
         for (VariableContex varContext : contextStack) {
             VariableInfo contextVariable = varContext.getVariable();
