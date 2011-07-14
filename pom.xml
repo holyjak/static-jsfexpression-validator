@@ -81,6 +81,22 @@
 	</dependencies>
 
 	<build>
+
+	   <pluginManagement>
+	       <plugins>
+	           <plugin>
+	               <groupId>org.codehause.mojo</groupId>
+	               <artifactId>findbugs-maven-plugin</artifactId>
+	               <version>2.3.2</version>
+	           </plugin>
+	           <plugin>
+	               <groupId>org.apache.maven.plugins</groupId>
+	               <artifactId>maven-checkstyle-plugin</artifactId>
+	               <version>2.6</version>
+	           </plugin>
+	       </plugins>
+	   </pluginManagement>
+
 		<plugins>
 
 			<plugin>
@@ -105,6 +121,24 @@
 
 		</plugins>
 	</build>
+
+	<reporting>
+	   <plugins>
+	       <plugin>
+	           <groupId>org.codehause.mojo</groupId>
+	           <artifactId>findbugs-maven-plugin</artifactId>
+	       </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-checkstyle-plugin</artifactId>
+               <configuration>
+                    <configLocation>static-jsfexpression-validator-core/jh-sun-eclipse-checkstyle.xml</configLocation>
+                    <!--failsOnError>false</failsOnError-->
+                    <!--suppressionsLocation></suppressionsLocation-->
+               </configuration>
+           </plugin>
+	   </plugins>
+	</reporting>
 
 	<distributionManagement>
 		<!-- My project's Sonatype repository to be used by the release plugin -->
