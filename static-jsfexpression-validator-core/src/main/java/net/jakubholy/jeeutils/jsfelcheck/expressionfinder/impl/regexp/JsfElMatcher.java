@@ -24,17 +24,22 @@ import java.util.regex.Pattern;
 /**
  * RegExp matcher for JSF EL expression attributes.
  */
-public class JsfElMatcher {
+public final class JsfElMatcher {
 
-	private static final String methodBindingAttributeRE = "(?:action(?:Listener)?)";
-	private static final String assignmentDeclarationRE = "\\s*=\\s*(?:'|\")\\s*";
-	private static final String expressionRE = "(#\\{.*?\\})";
+	private static final String METHOD_BINDING_ATTRIBUTE_RE = "(?:action(?:Listener)?)";
+	private static final String ASSIGNMENT_DECLARATION_RE = "\\s*=\\s*(?:'|\")\\s*";
+	private static final String EXPRESSION_RE = "(#\\{.*?\\})";
 
-	private static final Pattern elPattern = Pattern.compile(
-			"(" + methodBindingAttributeRE + assignmentDeclarationRE + ")?" + expressionRE);
+	private static final Pattern EL_PATTERN = Pattern.compile(
+			"(" + METHOD_BINDING_ATTRIBUTE_RE + ASSIGNMENT_DECLARATION_RE + ")?" + EXPRESSION_RE);
 
+	/**
+	 * Creates a matcher for the given text.
+	 * @param source (required) the text (usually JSP page source code) to check for EL expressions
+	 * @return matcher containing the EL expressions found
+	 */
 	public static JsfElMatcher forText(final String source) {
-		return new JsfElMatcher(elPattern.matcher(source));
+		return new JsfElMatcher(EL_PATTERN.matcher(source));
 	}
 
 	private final Matcher matcher;
@@ -43,6 +48,10 @@ public class JsfElMatcher {
 		this.matcher = matcher;
 	}
 
+	/**
+	 * Returns the next expression.
+	 * @return the next expression found or null if no more expressions
+	 */
 	public ExpressionInfo findNext() {
 		if (matcher.find()) {
 			String expression = matcher.group(2);

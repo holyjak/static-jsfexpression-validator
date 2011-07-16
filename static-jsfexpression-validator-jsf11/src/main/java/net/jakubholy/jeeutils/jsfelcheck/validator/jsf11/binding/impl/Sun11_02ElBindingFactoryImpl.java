@@ -34,10 +34,10 @@ import com.sun.faces.util.Util;
 /**
  * Implementation using Sun jsf-impl 1.1_02.
  */
-public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory {
+public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory { // CHECKSTYLE:OFF
 
     @SuppressWarnings("rawtypes")
-    private static Class[] NO_PARAMS = new Class[0];
+    private static final Class[] NO_PARAMS = new Class[0];
 
     private final Logger log = Logger.getLogger(Sun11_02ElBindingFactoryImpl.class
             .getName());
@@ -52,10 +52,7 @@ public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory {
         this.application = application;
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.ElBindingFactory#createValueBinding(java.lang.String)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public ValueBinding createValueBinding(String ref)
             throws ReferenceSyntaxException {
 

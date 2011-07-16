@@ -17,25 +17,32 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.regexp;
 
-
+/**
+ * Represents EL expression found in a page source.
+ */
 public class ExpressionInfo {
-	
+
+    /**
+     * What is the EL expected to return - either a method or an object (type).
+     */
 	public static enum ElType {
 		VALUE, METHOD;
 	}
-	
+
 	private final ElType type;
 	private final String expression;
 
-	public ExpressionInfo(final String expression, final ElType type) {
+	ExpressionInfo(final String expression, final ElType type) {
 		this.expression = expression;
 		this.type = type;
 	}
 
+	/** @return Expression's type. */
 	public ElType getType() {
 		return type;
 	}
 
+	/** @return The EL expression itself. */
 	public String getExpression() {
 		return expression;
 	}
@@ -52,6 +59,7 @@ public class ExpressionInfo {
 
 	@Override
 	public boolean equals(Object obj) {
+	    // CHECKSTYLE:OFF
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -67,6 +75,7 @@ public class ExpressionInfo {
 		if (type != other.type)
 			return false;
 		return true;
+        // CHECKSTYLE:ON
 	}
-	
+
 }

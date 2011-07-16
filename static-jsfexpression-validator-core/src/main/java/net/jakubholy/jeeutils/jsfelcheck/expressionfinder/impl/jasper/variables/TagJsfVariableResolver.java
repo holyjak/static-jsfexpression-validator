@@ -27,7 +27,14 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.Attributes
  */
 public interface TagJsfVariableResolver {
 
+    /**
+     * Extract variables from the tag's attributes.
+     * @param attributes (required) the attributes: name to value
+     * @param resolvedJsfExpressions (required)
+     * @return info about local variable extracted from the tag (only 1 supported) or null, if no l.v. defined there
+     * @throws MissingLocalVariableTypeDeclarationException the tag defines a local variable but its type has not
+     * been declared in advance (notice it cannot be derived automatically e.g. if it's an element of a Collection)
+     */
     VariableInfo extractContextVariables(Map<String, String> attributes,
             AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException;
-
 }

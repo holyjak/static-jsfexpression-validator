@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 
 import org.apache.jasper.JasperException;
 
+// CHECKSTYLE:OFF (copied from Jasper's source code)
 /**
  * A simple Compiler subclass that overrides {@link #generateJava()} to invoke
  * the Visitor of our choice.
@@ -53,7 +54,7 @@ public class OnlyReadingJspPseudoCompiler extends Compiler {
                 if (libraryVersion < 2.0) {
                     pageInfo.setIsELIgnored("true", null, errDispatcher, true);
                 }
-                if (libraryVersion < 2.1) {
+                if (libraryVersion < 2.1) { // SUPPRESS CHECKSTYLE
                     pageInfo.setDeferredSyntaxAllowedAsLiteral("true", null,
                             errDispatcher, true);
                 }
@@ -105,3 +106,4 @@ public class OnlyReadingJspPseudoCompiler extends Compiler {
     }
 
 }
+// CHECKSTYLE:ON

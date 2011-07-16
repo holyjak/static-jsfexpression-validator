@@ -55,11 +55,18 @@ public class JsfElFinder implements Iterable<ExpressionInfo> {
 
 	private final String sourceText;
 
+	/**
+	 * Finder for EL expressions in the given (JSP page) source code.
+	 * @param sourceText (required)
+	 */
 	public JsfElFinder(final String sourceText) {
 		this.sourceText = sourceText;
 	}
 
-	//@Override
+	/**
+	 * Search for EL expressions in the source.
+	 * @return Iterator over the expressions found
+	 */
 	public Iterator<ExpressionInfo> iterator() {
 		return new ExpressionInfoIterator(
 				JsfElMatcher.forText(sourceText));

@@ -39,7 +39,7 @@ public class ContextVariableRegistry implements ElVariableResolver {
      * Dummy type used for local variables where the actual type is not known because
      * it haven't been declared by the user.
      */
-    public static class Error_YouMustDelcareTypeForThisVariable {}
+    public static class Error_YouMustDelcareTypeForThisVariable {}  // SUPPRESS CHECKSTYLE
 
     private static class VariableContex {
         private final long tagId;
@@ -90,6 +90,14 @@ public class ContextVariableRegistry implements ElVariableResolver {
         return null;
     }
 
+    /**
+     * Extract local variables defined in the given tag, if any.
+     * @param jspTag (required) the tag
+     * @param resolvedJsfExpressions (required) results of resolving EL expressions used as values in the
+     * tag's attributes
+     * @throws MissingLocalVariableTypeDeclarationException see
+     * {@link TagJsfVariableResolver#extractContextVariables(Map, AttributesValidationResult)}
+     */
     public void extractContextVariables(PageNode jspTag,
             AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException {
 
@@ -117,6 +125,10 @@ public class ContextVariableRegistry implements ElVariableResolver {
         }
     }
 
+    /**
+     * Called when closing tag encountered to discard local variables defined in the scope of that tag.
+     * @param jspTag (required)
+     */
     public void discardContextFor(PageNode jspTag) {
         if (!contextStack.isEmpty() && contextStack.get(0).getTagId() == jspTag.getId()) {
             contextStack.remove(0);

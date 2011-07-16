@@ -28,9 +28,13 @@ public class MissingLocalVariableTypeDeclarationException extends RuntimeExcepti
 
     private final String variableName;
     private final String sourceExpression;
-    private int lineNumber;
+    private int tagLineNumber;
     private String jspFile;
 
+    /**
+     * @param variableName (required)
+     * @param sourceExpression (required) the EL used to feed the local variable
+     */
     public MissingLocalVariableTypeDeclarationException(String variableName, String sourceExpression) {
         this.variableName = variableName;
         this.sourceExpression = sourceExpression;
@@ -52,19 +56,19 @@ public class MissingLocalVariableTypeDeclarationException extends RuntimeExcepti
         return sourceExpression;
     }
 
-    public void setTagLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
+    public void setTagLineNumber(int tagLineNumber) {
+        this.tagLineNumber = tagLineNumber;
     }
 
     public int getTagLineNumber() {
-        return lineNumber;
+        return tagLineNumber;
     }
 
     @Override
     public String toString() {
         return "Declare type of elementes in the collection EL '" + sourceExpression
         	+ "', assigned to the local variable '" + variableName
-            + "' (file " + jspFile + ", tag line " + lineNumber + ")";
+            + "' (file " + jspFile + ", tag line " + tagLineNumber + ")";
     }
 
 }

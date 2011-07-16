@@ -34,19 +34,42 @@ import org.xml.sax.Attributes;
  * Process tree structure of a JSP tags of a page represented by Node objects
  * and delegate any handling to a {@link PageNodeListener}, if set.
  */
-public class JsfElCheckingVisitor extends Visitor {
+public final class JsfElCheckingVisitor extends Visitor {
 
+    /**
+     * Listen to nodes (tags) being found in the [JSP] source file.
+     */
     public static class NullPageNodeListener implements PageNodeListener {
 
-        public void nodeEntered(PageNode currentCustomTag) {}
+        /**
+         * Start tag encountered.
+         * @param currentCustomTag (required) info about the tag
+         */
+        public void nodeEntered(PageNode currentCustomTag) { }
 
-        public void nodeLeft(PageNode currentCustomTag) {}
+        /**
+         * The closing tag (if any) encountered.
+         * @param currentCustomTag (required) info about the tag
+         */
+        public void nodeLeft(PageNode currentCustomTag) { }
 
-        public void fileEntered(String jspFile) {}
+        /**
+         * Processing of a JSP file has started.
+         * @param jspFile (required) the name of the file
+         */
+        public void fileEntered(String jspFile) { }
 
+        /**
+         * Static JSP include encountered, the included file is going to be processed.
+         * @param includedFileName (required) the name of the included file
+         */
         public void includedFileEntered(String includedFileName) {
         }
 
+        /**
+         * Inverse of {@link #includedFileEntered(String)}, called when done with it.
+         * @param includedFileName (required) the name of the file
+         */
         public void includedFileLeft(String includedFileName) {
         }
 
@@ -54,10 +77,19 @@ public class JsfElCheckingVisitor extends Visitor {
 
     private static PageNodeListener nodeListener = new NullPageNodeListener();
 
+    /**
+     * Create a new visitor for the given JSP file.
+     * @param jspFile (required) the name of the file that will be processed by this visitor
+     * @return the visitor
+     */
     public static JsfElCheckingVisitor forFile(final String jspFile) {
         return new JsfElCheckingVisitor(jspFile);
     }
 
+    /**
+     * Set the listeners that should be notified of nodes (tags) as they are found and processed.
+     * @param nodeListener the listener
+     */
     public static void setNodeListener(PageNodeListener nodeListener) {
         JsfElCheckingVisitor.nodeListener = nodeListener;
     }

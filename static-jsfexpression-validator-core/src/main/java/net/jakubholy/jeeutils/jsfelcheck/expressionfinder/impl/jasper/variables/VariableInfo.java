@@ -25,8 +25,11 @@ public class VariableInfo {
     private final String variableName;
     private final Class<?> declaredVariableType;
 
-    public VariableInfo(String variableName,
-            Class<?> declaredVariableType) {
+    /**
+     * @param variableName (required)
+     * @param declaredVariableType  (required)
+     */
+    public VariableInfo(String variableName, Class<?> declaredVariableType) {
         if (variableName == null) {
             throw new IllegalArgumentException("variableName: String may not be null");
         }
@@ -64,6 +67,7 @@ public class VariableInfo {
         return result;
     }
 
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -85,5 +89,6 @@ public class VariableInfo {
             return false;
         return true;
     }
+    // CHECKSTYLE:ON
 
 }
