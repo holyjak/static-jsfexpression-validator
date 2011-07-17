@@ -17,11 +17,20 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+
 /**
  *  Can be added to the validator to include/exclude selected JSF EL expressions.
  */
 public interface ElExpressionFilter {
 
+	/**
+	 * Should this EL expression be accepted for further processing, i.e. for validation?
+	 * @param expression (required) representation of the EL expression found in a source view file
+	 * @return true if the EL expression should be validated, false if it should not be validated
+	 * (it will be added to a list of excluded expressions that can be checked later)
+	 *
+	 * @see net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults#excluded()
+	 */
     boolean accept(ParsedElExpression expression);
 
 }

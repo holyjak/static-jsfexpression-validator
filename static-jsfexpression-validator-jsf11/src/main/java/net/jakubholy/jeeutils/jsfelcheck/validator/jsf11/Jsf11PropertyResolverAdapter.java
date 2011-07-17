@@ -17,22 +17,12 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import javax.faces.el.EvaluationException;
 import javax.faces.el.PropertyNotFoundException;
 import javax.faces.el.PropertyResolver;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
-
 
 import com.sun.faces.el.PropertyResolverImpl;
 

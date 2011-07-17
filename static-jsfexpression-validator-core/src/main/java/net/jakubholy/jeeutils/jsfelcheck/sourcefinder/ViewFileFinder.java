@@ -20,8 +20,15 @@ package net.jakubholy.jeeutils.jsfelcheck.sourcefinder;
 import java.io.File;
 import java.util.Collection;
 
+/**
+ * Find view source files (for example JSPs).
+ */
 public interface ViewFileFinder {
 
+	/**
+	 * Find the files.
+	 * @return the files found, an empty collection if none
+	 */
     Collection<File> findViewFiles();
 
 }

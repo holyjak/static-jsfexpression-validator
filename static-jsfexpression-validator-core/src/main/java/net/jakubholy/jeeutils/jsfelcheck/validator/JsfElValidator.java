@@ -17,7 +17,6 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 /**
@@ -42,6 +41,9 @@ public interface JsfElValidator {
      * it's only important to verify that it is not null or that it is an instance of
      * the expected type.)
      * @param elExpression (required) Ex.: {@code #{aBean}, #{aBean.aProperty}, #{aBean['key'].property}}
+     * @return results of the validation, typically
+     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult} or
+     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult}, but may be other
      */
     ValidationResult validateValueElExpression(final String elExpression);
 
@@ -52,9 +54,11 @@ public interface JsfElValidator {
      * You use this typically to declare managed beans and their value, which is, for the purpose of EL validation,
      * usually produced by {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
      *
-     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression: var.prop1.prop2)
+     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
+     * var.prop1.prop2)
      * @param value (required) the value to be returned for the variable, used in further evaluation. WARNING: It should
      * be an actual instance, not a Class!
+     * @return this
      */
     JsfElValidator declareVariable(final String name, final Object value);
 
@@ -69,17 +73,20 @@ public interface JsfElValidator {
      * (unless there is also a property override for it), used for arrays etc. Ex: bean.mapProperty.* =>
      * bean.mapProperty['someKey'] and bean.mapProperty.anotherProperty will be both affected by the override
      *
-     * @param mapJsfExpression The expression where to override the guessed type with only names and dots, perhaps plus .*; i.e.
-     *  'var.prop['key']' becomes var.prop
-     * @param newType
+     * @param mapJsfExpression The expression where to override the guessed type with only names and dots,
+     * perhaps plus .*; i.e. 'var.prop['key']' becomes var.prop
+     * @param newType the type to use for the property
+     * @return this
      */
     JsfElValidator definePropertyTypeOverride(final String mapJsfExpression, final Class<?> newType);
 
     /**
      * Similar to {@link #validateValueElExpression(String)} but verifies that the result is a method
      * that can be called. (Used for action handlers, action listeners.)
-     * @param expression
-     * @return
+     * @param expression the method EL tp validate
+     * @return results of the validation, typically
+     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult} or
+     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult}, but may be other
      */
     ValidationResult validateMethodElExpression(final String expression);
 

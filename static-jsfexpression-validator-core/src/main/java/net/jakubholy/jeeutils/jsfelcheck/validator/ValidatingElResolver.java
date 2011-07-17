@@ -17,8 +17,6 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
-
 /**
  * A "fake" JSF EL resolver, which doesn't resolve any actual values but validates that the
  * expression is correct. That means that such managed beans and local variables exist and
@@ -26,14 +24,22 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedB
  */
 public interface ValidatingElResolver extends JsfElValidator {
 
+	/**
+	 * Set the fall-back variable resolver to use when this resolver doesn't know the EL variable
+	 * being validated.
+	 * @param unknownVariableResolver (optional)
+	 */
     void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver);
 
-    /** List known variables in VariableNotFoundException? */
-    void setIncludeKnownVariablesInException(
-            boolean includeKnownVariablesInException);
+    /**
+     * List all known variables (managed beans etc) in VariableNotFoundException?
+     * @param includeKnownVariablesInException true to include them
+     */
+    void setIncludeKnownVariablesInException(boolean includeKnownVariablesInException);
 
     /**
-     * Throw {@link ExpressionRejectedByFilterException} for any expression not accepted by the supplied filter.
+     * Throw {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException}
+     * for any expression not accepted by the supplied filter.
      * @param elExpressionFilter (required)
      */
     void addElExpressionFilter(ElExpressionFilter elExpressionFilter);

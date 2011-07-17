@@ -5,9 +5,8 @@
     This configuration file was written by the eclipse-cs plugin configuration editor
 -->
 <!--
-    Checkstyle-Configuration: jh's Sun Checks (Eclipse)
-    Description: 
-JH - slightly modified version of Sun Checks that better matches the default code formatter setting of Eclipse and my preferences.
+    Checkstyle-Configuration: jh - Sun Checks (Eclipse)
+    Description: none
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>
@@ -59,7 +58,7 @@ JH - slightly modified version of Sun Checks that better matches the default cod
     <module name="TypecastParenPad"/>
     <module name="WhitespaceAfter"/>
     <module name="WhitespaceAround">
-      <property name="tokens" value="ASSIGN,BAND,BAND_ASSIGN,BOR,BOR_ASSIGN,BSR,BSR_ASSIGN,BXOR,BXOR_ASSIGN,COLON,DIV,DIV_ASSIGN,EQUAL,GE,GT,LAND,LCURLY,LE,LITERAL_ASSERT,LITERAL_CATCH,LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,LITERAL_RETURN,LITERAL_SYNCHRONIZED,LITERAL_TRY,LITERAL_WHILE,LOR,LT,MINUS,MINUS_ASSIGN,MOD,MOD_ASSIGN,NOT_EQUAL,PLUS,PLUS_ASSIGN,RCURLY,SL,SLIST,SL_ASSIGN,SR,SR_ASSIGN,STAR,STAR_ASSIGN,LITERAL_ASSERT,TYPE_EXTENSION_AND,WILDCARD_TYPE"/>
+      <property name="tokens" value="ASSIGN,BAND,BAND_ASSIGN,BOR,BOR_ASSIGN,BSR,BSR_ASSIGN,BXOR,BXOR_ASSIGN,DIV,DIV_ASSIGN,EQUAL,GE,GT,LAND,LCURLY,LE,LITERAL_ASSERT,LITERAL_CATCH,LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,LITERAL_RETURN,LITERAL_SYNCHRONIZED,LITERAL_TRY,LITERAL_WHILE,LOR,LT,MINUS,MINUS_ASSIGN,MOD,MOD_ASSIGN,NOT_EQUAL,PLUS,PLUS_ASSIGN,RCURLY,SL,SLIST,SL_ASSIGN,SR,SR_ASSIGN,STAR,STAR_ASSIGN,LITERAL_ASSERT,TYPE_EXTENSION_AND,WILDCARD_TYPE"/>
     </module>
     <module name="ModifierOrder"/>
     <module name="RedundantModifier"/>
@@ -112,12 +111,6 @@ JH - slightly modified version of Sun Checks that better matches the default cod
     <module name="NPathComplexity"/>
     <module name="CyclomaticComplexity"/>
   </module>
-  <module name="NewlineAtEndOfFile">
-    <property name="severity" value="ignore"/>
-    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
-  </module>
-  <module name="Translation"/>
-  <module name="FileLength"/>
   <module name="FileTabCharacter">
     <property name="severity" value="ignore"/>
     <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
@@ -128,15 +121,24 @@ JH - slightly modified version of Sun Checks that better matches the default cod
     <property name="message" value="Line has trailing spaces."/>
     <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
   </module>
-  <module name="Header">
-    <property name="headerFile" value="${config_loc}/LICENSE-header.txt"/>
-    <property name="fileExtensions" value="java"/>
+  <module name="NewlineAtEndOfFile">
+    <property name="severity" value="ignore"/>
+    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
   </module>
-  <module name="SuppressWithNearbyCommentFilter">
-    <property name="commentFormat" value="SUPPRESS CHECKSTYLE( \w+)?"/>
-  </module>
+  <module name="Translation"/>
   <module name="SuppressionFilter">
     <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
   </module>
   <module name="SuppressionCommentFilter"/>
+  <module name="Header">
+    <property name="headerFile" value="${config_loc}/LICENSE-header.txt"/>
+    <property name="fileExtensions" value="java"/>
+  </module>
+  <module name="FileLength">
+    <property name="severity" value="ignore"/>
+    <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+  </module>
+  <module name="SuppressWithNearbyCommentFilter">
+    <property name="commentFormat" value="SUPPRESS CHECKSTYLE( \w+)?"/>
+  </module>
 </module>

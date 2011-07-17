@@ -25,19 +25,29 @@ import java.util.List;
 import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 
+/**
+ * Create 'fake' instances of classes (or interfaces). Being fake mean that they can be just
+ * mocks not really supporting the behavior of the class.
+ */
 public class FakeValueFactory {
 
-    public static class UnableToCreateFakeValueException extends RuntimeException {
+	protected FakeValueFactory() { }
+
+	/**
+	 * A fake instance of the given class/interface cannot be produced for some reason.
+	 * (E.g. it is a final class and we tried to mock it, ... .)
+	 */
+    public static final class UnableToCreateFakeValueException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
 
-        public UnableToCreateFakeValueException(String arg0, Throwable arg1) {
+        private UnableToCreateFakeValueException(String arg0, Throwable arg1) {
             super(arg0, arg1);
         }
 
     }
 
-    final static List<Class<?>> numberClasses = Arrays.asList(new Class<?>[] {
+    private static final List<Class<?>> NUMBER_CLASSES = Arrays.asList(new Class<?>[] {
             int.class, long.class, double.class, float.class
             , Integer.class, Long.class, Double.class, Float.class
     });
@@ -56,20 +66,21 @@ public class FakeValueFactory {
 
     private static boolean isNumber(Class<?> type) {
         if (Modifier.isFinal(type.getModifiers())) {
-            return numberClasses.contains(type);
+            return NUMBER_CLASSES.contains(type);
         } else {
             return false;
         }
     }
 
     /**
-     *
+     * Create a (possibly fake) value of the given class/interface.
      * @param type (required) a non-final class or an interface
      * @param propertyToFake (required) for logging and naming
-     * @return
-     * @throws UnableToCreateFakeValueException
+     * @return the (fake) instance
+     * @throws UnableToCreateFakeValueException see the message/cause
      */
-    public static Object fakeValueOfType(final Class<?> type, final Object propertyToFake) throws UnableToCreateFakeValueException {
+    public static Object fakeValueOfType(final Class<?> type, final Object propertyToFake)
+    	throws UnableToCreateFakeValueException {
                 if (type == null) {
                     // We are perhaps in a Map => let's return a default value
                     return new MockObjectOfUnknownType(propertyToFake);

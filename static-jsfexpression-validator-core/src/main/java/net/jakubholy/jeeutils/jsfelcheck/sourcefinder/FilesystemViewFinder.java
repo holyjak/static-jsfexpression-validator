@@ -23,23 +23,31 @@ import java.util.LinkedList;
 
 import org.apache.commons.io.FileUtils;
 
+/**
+ * Simple view finder, which searches the filesystem, starting at the given root folders,
+ *  for files with accepted extensions (.jsp, .jspf).
+ */
 public class FilesystemViewFinder implements ViewFileFinder {
 
     private final String[] allowedExtensions = new String[] {"jsp", "jspf"};
 
     private Collection<File> searchRoots;
 
+    /**
+     * New finder for the given root folders.
+     * @param searchRoots (required)
+     */
     public FilesystemViewFinder(final Collection<File> searchRoots) {
         this.searchRoots = new LinkedList<File>(searchRoots);
         // TODO verify !null & valid directories
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Collection<File> findViewFiles() {
 
         final Collection<File> allFiles = new LinkedList<File>();
 
-        for (File  searchRoot: searchRoots) {
+        for (File searchRoot: searchRoots) {
             @SuppressWarnings("unchecked")
             Collection<File> viewFilesUnderRoot = FileUtils.listFiles(searchRoot, allowedExtensions, true);
             allFiles.addAll(viewFilesUnderRoot);

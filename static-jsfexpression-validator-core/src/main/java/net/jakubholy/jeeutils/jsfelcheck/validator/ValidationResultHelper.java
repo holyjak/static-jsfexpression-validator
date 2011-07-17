@@ -20,8 +20,6 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.faces.el.EvaluationException;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
@@ -29,10 +27,22 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByF
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
-public class ValidationResultHelper {
+/**
+ * Helper for handling validation failures.
+ */
+public final class ValidationResultHelper {
 
     private static final Logger LOG = Logger.getLogger(ValidationResultHelper.class.getName());
 
+    private ValidationResultHelper() { }
+
+    /**
+     * Check what type of exception it is and if necessary then wrap it with an InternalValidatorFailureException
+     * while also adding some context, namely the problematic EL expression.
+     * @param elExpression (required) the EL that failed to validate
+     * @param e (required) the validation failure
+     * @return as shown
+     */
     public static InternalValidatorFailureException wrapIfNeededAndAddContext(final String elExpression,
             RuntimeException e) {
         if (e instanceof InternalValidatorFailureException) {
@@ -44,10 +54,18 @@ public class ValidationResultHelper {
         }
     }
 
+    /**
+     * Produce ValidationResult subclass corresponding to the particular evaluation failure.
+     * Ex.: {@link ExpressionRejectedByFilterException}, {@link FailedValidationResult}.
+     * @param elExpression (required) the EL whose validation failed
+     * @param evaluationException (required) the failure
+     * @return suitable result
+     */
     public static ValidationResult produceFailureResult(final String elExpression,
             Exception evaluationException) {
         LOG.log(Level.FINE, "Resolution failed", evaluationException);
-        Throwable unwrappedCause = (evaluationException.getCause() == null)? evaluationException : evaluationException.getCause();
+        Throwable unwrappedCause = (evaluationException.getCause() == null)? evaluationException
+        		: evaluationException.getCause();
 
         if (unwrappedCause instanceof ExpressionRejectedByFilterException) {
             return new ExpressionRejectedByFilterResult((ExpressionRejectedByFilterException) unwrappedCause);

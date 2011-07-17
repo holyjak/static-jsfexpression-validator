@@ -28,26 +28,41 @@ import javax.servlet.jsp.PageContext;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 
 /**
- * Resolve variables from a pre-defined list initialized via {@link PredefinedVariableResolver#declareVariable(String, Object)}.
+ * Resolve variables from a pre-defined list initialized via
+ * {@link PredefinedVariableResolver#declareVariable(String, Object)}.
  * Throws {@link VariableNotFoundException} if it encounters a variable not present on the list.
  */
 public final class PredefinedVariableResolver {
 
-    static final String[] IMPLICIT_MAP_OBJECTS = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
+	/**
+	 * Be notified when a new variable is encountered, namely when
+	 * processing the first segment of a new EL.
+	 */
+    public static interface NewVariableEncounteredListener {
+
+    	/**
+    	 * Notification of the EL variable being validated.
+    	 * @param variableName (required)
+    	 */
+        void handleNewVariableEncountered(String variableName);
+    }
+
+    static final String[] IMPLICIT_MAP_OBJECTS = new String[] {
+    	"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
         , "paramValues", "header", "headerValues", "cookie", "initParam" };
 
     private final Logger log = Logger.getLogger(getClass().getName());
 
     private boolean includeKnownVariablesInException = true;
 
-    public static interface NewVariableEncounteredListener {
-        public void handleNewVariableEncountered(String variableName);
-    }
-
     private final Map<String, Object> knownVariables = new HashMap<String, Object>();
     private final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener;
     private ElVariableResolver unknownVariableResolver;
 
+    /**
+     * New resolver, notifying the given listener, if any.
+     * @param newVariableEncounteredListener (optional)
+     */
     public PredefinedVariableResolver(
             final PredefinedVariableResolver.NewVariableEncounteredListener newVariableEncounteredListener) {
         this.newVariableEncounteredListener = newVariableEncounteredListener;
@@ -65,6 +80,15 @@ public final class PredefinedVariableResolver {
         declareVariable("pageContext", FakeValueFactory.fakeValueOfType(PageContext.class, "pageContext"));
     }
 
+    /**
+     * Resolve variable: check that it is valid and return its value based on the pre-set
+     * information.
+     * @param variableName (required)
+     * @return an instance of the variable's type
+     * @throws EvaluationException if something fails, e.g. no such variable is known
+     *
+     * @see #declareVariable(String, Object)
+     */
     public Object resolveVariable(String variableName)
             throws EvaluationException {
 
@@ -99,21 +123,24 @@ public final class PredefinedVariableResolver {
     }
 
     /**
+     * Declare a new 'known' variable, supplying its name and value.
+     * @param name (required) the name of the EL variable (likely a managed bean)
+     * @param value (required) its value
      * @see JsfElValidator#declareVariable(String, Object)
      */
     public void declareVariable(final String name, final Object value) {
 
         if (value instanceof Class<?>) {
-            log.warning("declareVariable('" + name + "', value:" + value + "): Are you sure you wanted to declare " +
-            		"a variable containing a Class and not an instance of the class (using the FakeValueFactory)?!");
+            log.warning("declareVariable('" + name + "', value:" + value + "): Are you sure you wanted to declare "
+            		+ "a variable containing a Class and not an instance of the class (using the FakeValueFactory)?!");
         }
 
         Object currentOverride = knownVariables.get(name);
 
         if (currentOverride != null) {
             throw new IllegalArgumentException("The variable '"
-                    + name + "' is already defined; current value: " +
-                    currentOverride + ", new: " + value);
+                    + name + "' is already defined; current value: "
+                    + currentOverride + ", new: " + value);
         }
 
         knownVariables.put(name, value);

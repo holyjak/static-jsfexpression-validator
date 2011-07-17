@@ -32,6 +32,10 @@ public class PageNodeExpressionValidator {
 
     private final JsfElValidator expressionValidator;
 
+    /**
+     * New node helper using the given EL validator.
+     * @param expressionValidator (required)
+     */
     public PageNodeExpressionValidator(JsfElValidator expressionValidator) {
         this.expressionValidator = expressionValidator;
     }
@@ -49,14 +53,13 @@ public class PageNodeExpressionValidator {
     private boolean isMethodBinding(String attribute) {
         return attribute.equals("action")
             || attribute.equals("actionListener")
-            || attribute.equals("valueChangeListener") // e.g. h:selectOneMenu
-            ;
+            || attribute.equals("valueChangeListener"); // e.g. h:selectOneMenu
     }
 
     /**
      * Validate all JSF EL expressions in the tag's attributes and return
      * the resolved values of those expressions, do nothing of no expressions.
-     * @param jspTag (required) attributes of the tag
+     * @param attributes (required) attributes of the tag
      * @return attribute name -> EL expression evaluation result or empty
      */
     public AttributesValidationResult validateJsfExpressions(Map<String, String> attributes) {

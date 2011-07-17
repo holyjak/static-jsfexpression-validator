@@ -27,6 +27,11 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 public class MockObjectOfUnknownType {
     private final Object propertyName;
 
+    /**
+     * Constructor :).
+     * @param propertyName (required) the name of the property that cannot be mocked because its type
+     * couldn't be detected
+     */
     public MockObjectOfUnknownType(Object propertyName) {
         this.propertyName = propertyName;
     }

@@ -17,11 +17,17 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+/**
+ * Return the Class for the given (likely context-local) JSF EL variable or
+ * null if it cannot be resolved (is unknown).
+ */
 public interface ElVariableResolver {
 
     /**
-     * Return the Class for the given (likely context-local) JSF EL variable or
-     * null if it cannot be resolved (is unknown).
+     * Return the Class for the given (likely context-local) JSF EL variable.
+     * @param name (required) the name of the EL variable, i.e. the first segment of an EL such
+     * as 'bean' in 'bean.property1.prop2'
+     * @return the type of the EL variable or null if it cannot be resolved (is unknown).
      */
     Class<?> resolveVariable(String name);
 

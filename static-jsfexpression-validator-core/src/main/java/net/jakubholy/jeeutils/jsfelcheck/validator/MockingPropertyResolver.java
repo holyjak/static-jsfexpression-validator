@@ -31,15 +31,27 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedB
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 
 /**
- * Automatically return a Mockito mock for any property that is valid, otherwise throw a {@link PropertyNotFoundException}.
+ * Automatically return a Mockito mock for any property that is valid, otherwise throw a
+ * {@link PropertyNotFoundException}.
  *
- * The mocked type is determined automatically but may be forced via {@link MockingPropertyResolver#definePropertyTypeOverride(String, Class)},
+ * The mocked type is determined automatically but may be forced via {@link #definePropertyTypeOverride(String, Class)},
  * which is useful e.g. for Maps that return just Objects.
  */
 public final class MockingPropertyResolver implements PredefinedVariableResolver.NewVariableEncounteredListener {
 
+	/**
+	 * JSF-implementation specific resolution of the type of a property.
+	 * Used to delegate type detection to the actual JSF implementation.
+	 */
     public static interface PropertyTypeResolver {
 
+    	/**
+    	 * Try to detect the type of the given property.
+    	 * @param target (optional) the target whose property's type to find out (null if the property
+    	 * actually is a variable)
+    	 * @param property (required) the property name such as 'property' in the EL #{bean.property}
+    	 * @return the class of the property or null if it cannot be resolved
+    	 */
         Class<?> getType(Object target, Object property);
     }
 
@@ -49,6 +61,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
     private Map<String, Class<?>> typeOverrides = new Hashtable<String, Class<?>>();
     private final Collection<ElExpressionFilter> filters = new LinkedList<ElExpressionFilter>();
 
+    /** Constructor. */
     public MockingPropertyResolver() {
         defineImplicitMapObjectsElementType();
     }
@@ -83,8 +96,8 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         Class<?> currentOverride = typeOverrides.get(elExpression);
         if (currentOverride != null) {
             throw new IllegalArgumentException("The property override for '"
-                    + elExpression + "' is already defined; current: " +
-                    currentOverride + ", new: " + newType);
+                    + elExpression + "' is already defined; current: "
+                    + currentOverride + ", new: " + newType);
         }
         typeOverrides.put(elExpression, newType);
     }
@@ -94,7 +107,17 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         applyFilters(currentExpression);
     }
 
-    public Class<?> getTypeOfCollectionOrBean(Object target, Object property) throws EvaluationException,
+    /**
+     * Find out the type of the property with special handling of collections/arrays to detect the type
+     * of their elements.
+     * @param target (optional) the target whose property's type to find out (null if the property
+     * actually is a variable)
+     * @param property (required) the property name such as 'property' in the EL #{bean.property}
+     * @return the type of the property or null if it cannot be detected
+     * @throws EvaluationException
+     * @throws PropertyNotFoundException
+     */
+    private Class<?> getTypeOfCollectionOrBean(Object target, Object property) throws EvaluationException,
             PropertyNotFoundException {
 
         // Would normally throw an exception for empty arrays/list not having the given index
@@ -107,13 +130,32 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         return getTypeResolver().getType(target, property);
     }
 
+    /**
+     * Get value of the property, i.e. produce a fake value for it.
+     * See {@link #getValue(Object, Object, Class)}
+     * @param target (optional) the target whose property's type to find out (null if the property
+     * actually is a variable)
+     * @param property (required) the property name such as 'property' in the EL #{bean.property}
+     * @return an instance of the class of the property
+     * @throws EvaluationException generic evaluation failure
+     * @throws PropertyNotFoundException there is no such property on the target
+     */
     public Object getValue(Object target, Object property)
             throws EvaluationException, PropertyNotFoundException {
         return this.getValue(target, property, getTypeOfCollectionOrBean(target, property));
     }
 
     /**
+     * Get value of the property, i.e. produce a fake value for it.
      * Note: In the case of a Map target the property is the key, ex.: 'my.key'.
+     * @param target (optional) the target whose property's type to find out (null if the property
+     * actually is a variable)
+     * @param property (required) the property name such as 'property' in the EL #{bean.property}
+     * @param originalType (optional) the type of the property
+     *
+     * @return an instance of the class of the property
+     * @throws EvaluationException generic evaluation failure
+     * @throws PropertyNotFoundException there is no such property on the target
      */
     @SuppressWarnings("rawtypes")
     public Object getValue(final Object target, final Object property, final Class originalType)
@@ -137,7 +179,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
 
     /**
      * Determine the type to use using overrides and perhaps a default value.
-     * @param property
+     * @param property (required) the property name such as 'property' in the EL #{bean.property}
      * @param originalType (optional)
      * @return
      */
@@ -163,8 +205,14 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         return type;
     }
 
+    /**
+     * @param property (required) the property name such as 'property' in the EL #{bean.property}
+     * @return
+     */
     private Class<?> getTypeOverride(Object property) {
-        if (currentExpression == null) return null; // should not happen?!
+        if (currentExpression == null) {
+        	return null; // should not happen?!
+        }
 
         // Check property override first, it has higher priority
         Class<?> propertyOverride = typeOverrides.get(currentExpression + "." + property);
@@ -180,17 +228,17 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         return null;
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public void handleNewVariableEncountered(final String variableName) {
         currentExpression.setVariable(variableName);
         applyFilters(currentExpression);
     }
 
-    private void applyFilters(ParsedElExpression currentExpression) throws ExpressionRejectedByFilterException {
+    private void applyFilters(ParsedElExpression elExpressionToValidate) throws ExpressionRejectedByFilterException {
         if (!filters.isEmpty()) {
             for (ElExpressionFilter filter : filters) {
-                if (!filter.accept(currentExpression)) {
-                    throw new ExpressionRejectedByFilterException(currentExpression.toString(), filter);
+                if (!filter.accept(elExpressionToValidate)) {
+                    throw new ExpressionRejectedByFilterException(elExpressionToValidate.toString(), filter);
                 }
             }
         }
@@ -204,6 +252,10 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
         filters.add(elExpressionFilter);
     }
 
+    /**
+     * Remove all filters.
+     * @see #addElExpressionFilter(ElExpressionFilter)
+     */
     public void clearElExpressionFilters() {
         filters.clear();
     }
