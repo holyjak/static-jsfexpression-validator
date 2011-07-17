@@ -20,15 +20,12 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,14 +38,10 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValid
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
-import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.compiler.JsfElCheckingVisitor;
@@ -58,7 +51,7 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * expressions reference only existing managed beans and their properties/action
  * methods.
  * <p>
- * For local variables, such as the <var>var</var> produced by h:dataTable, you
+ * For local variables, such as the <code>var</code> produced by h:dataTable, you
  * must first declare of what type they are as this cannot be determined based
  * on the code, see
  * {@link DataTableVariableResolver#declareTypeFor(String, Class)}.
@@ -105,38 +98,17 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  */
 public abstract class AbstractJsfStaticAnalyzer {
 
-    public static class ExpressionFailure {
-
-        private final String expression;
-        private final String problem;
-        private final File sourceFile;
-
-        public ExpressionFailure(String expression, String problem,
-                File sourceFile) {
-            this.expression = expression;
-            this.problem = problem;
-            this.sourceFile = sourceFile;
-        }
-
-        @Override
-        public String toString() {
-            return "ExpressionFailure [expression=" + expression + ", problem="
-                    + problem + ", sourceFile=" + sourceFile + "]";
-        }
-
-    }
-
     private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class
             .getName());
 
     private final ValidatingElResolver elValidator;
+    private final ResultsReporter resultsReporter = new ResultsReporter();
 
-    private boolean printCorrectExpressions = false;
     private String jspsToIncludeCommaSeparated = null;
     private Collection<File> facesConfigFiles = Collections.emptyList();
     private Collection<File> springConfigFiles = Collections.emptyList();
-    private boolean suppressOutput = false;
 
+    /** New, unconfigured analyzer. */
     public AbstractJsfStaticAnalyzer() {
         elValidator = createValidatingElResolver();
     }
@@ -155,36 +127,30 @@ public abstract class AbstractJsfStaticAnalyzer {
      *
      * @param jspDir
      *            (required) where to search for JSP pages
-     * @param localVariableTypes
+     * @param localVariableTypesParam
      *            (required) type definitions for local EL variables such as
      *            produced by h:dataTable, see
      *            {@link DataTableVariableResolver#declareTypeFor(String, Class)}
-     * @param extraVariables
+     * @param extraVariablesParam
      *            (required) extra variables/managed beans not defined in
      *            faces-context, see
      *            {@link JsfElValidator#declareVariable(String, Object)}
-     * @param propertyTypeOverrides
+     * @param propertyTypeOverridesParam
      *            (required) override the type to use for a property; mostly
      *            useful for properties where the proper type cannot be derived
      *            such as a Collection, see
      *            {@link JsfElValidator#definePropertyTypeOverride(String, Class)}
-     * @return
+     * @return results of the validation (never null)
      * @throws Exception
      */
     public CollectedValidationResults validateElExpressions(String jspDir,
-            Map<String, Class<?>> localVariableTypes,
-            Map<String, Class<?>> extraVariables,
-            Map<String, Class<?>> propertyTypeOverrides) {
+            Map<String, Class<?>> localVariableTypesParam,
+            Map<String, Class<?>> extraVariablesParam,
+            Map<String, Class<?>> propertyTypeOverridesParam) {
 
-        if (localVariableTypes == null) {
-            localVariableTypes = Collections.emptyMap();
-        }
-        if (extraVariables == null) {
-            extraVariables = Collections.emptyMap();
-        }
-        if (propertyTypeOverrides == null) {
-            propertyTypeOverrides = Collections.emptyMap();
-        }
+        final Map<String, Class<?>> localVariableTypes = assignMapOrEmpty(localVariableTypesParam);
+        final Map<String, Class<?>> extraVariables = assignMapOrEmpty(extraVariablesParam);
+        final Map<String, Class<?>> propertyTypeOverrides = assignMapOrEmpty(propertyTypeOverridesParam);
 
         assertJspDirValid(jspDir);
 
@@ -194,44 +160,8 @@ public abstract class AbstractJsfStaticAnalyzer {
 
         final long start = System.currentTimeMillis();
 
-        // 1b. Set exclusions and type overrides
-        // SKIPPED NOW
-
-        // Context-local variables
-        DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
-        for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
-            dataTableResolver.declareTypeFor(variable.getKey(),
-                    variable.getValue());
-        }
-
-        ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
-        contextVarRegistry.registerResolverForTag("h:dataTable",
-                dataTableResolver);
-
-        elValidator.setUnknownVariableResolver(contextVarRegistry);
-        elValidator.setIncludeKnownVariablesInException(false);
-
-        for (Entry<String, Class<?>> override : propertyTypeOverrides
-                .entrySet()) {
-            elValidator.definePropertyTypeOverride(override.getKey(),
-                    override.getValue());
-        }
-
-        // DEFAULT EXTRA VARIABLES
-        elValidator.declareVariable("request", FakeValueFactory
-                .fakeValueOfType(HttpServletRequest.class, "request"));
-
-        for (Entry<String, Class<?>> variable : extraVariables.entrySet()) {
-            Object fakedValue = FakeValueFactory.fakeValueOfType(
-                    variable.getValue(), variable.getKey());
-            elValidator.declareVariable(variable.getKey(), fakedValue);
-        }
-
-        registerKnownManagedBeans(elValidator);
-
-        // Listener
-        JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
-                elValidator, contextVarRegistry);
+        JsfElValidatingPageNodeListener pageNodeValidator = initializeValidationSubsystem(
+                localVariableTypes, extraVariables, propertyTypeOverrides);
 
         // Run it
         JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
@@ -245,80 +175,99 @@ public abstract class AbstractJsfStaticAnalyzer {
         // Handle results
         CollectedValidationResultsImpl results = pageNodeValidator.getValidationResults();
 
-        if (results.getVariablesNeedingTypeDeclaration().size() > 0) {
-            printErr(">>> LOCAL VARIABLES THAT YOU MUST DECLARE TYPE FOR ["
-                    + results.getVariablesNeedingTypeDeclaration().size()
-            		+ "] #########################################\n"
-            		+ "(You must declare type of local variables, usually defined by h:dataTable, by specifying "
-            		+ "the type of elements in the source collection denoted by its EL, or example:\n"
-            	    + "localVariableTypes.put(value h:dataTable's source attribute, element type's class)");
-            for (MissingLocalVariableTypeDeclarationException untypedVar : results.getVariablesNeedingTypeDeclaration()) {
-                printErr(untypedVar.toString());
-            }
-        }
-
-        printErr("\n>>> FAILED JSF EL EXPRESSIONS ["
-                + results.failures().size()
-        		+ "] #########################################");
-        printErr("(Set logging to fine for the correspodning "
-                + ValidatingElResolver.class   // FIXME incorrect class in some cases
-                + "subclass to se failure details and stacktraces)");
-
-        // TODO Log separately undefined variables Later: suppress derived
-        // errors w/ them
-
-        for (ValidationResult result : results.failures()) {
-            System.err.println(result);
-        }
-
-        if (results.failures().size() > 0) {
-            printErr("\n>>> TOTAL FAILED EXPRESIONS: " + results.failures().size());
-        }
-
-        if (results.excluded().size() > 0) {
-            Set<ElExpressionFilter> filters = new HashSet<ElExpressionFilter>();
-            for (ExpressionRejectedByFilterResult exclusionResult : results.excluded()) {
-                filters.add(exclusionResult.getFilter());
-            }
-            String filtersList = filters.isEmpty()? "" : " by filters: " + filters;
-            printErr(">>> TOTAL EXCLUDED EXPRESIONS: " + results.excluded().size() + filtersList);
-        }
-
-        if (printCorrectExpressions) {
-            printOut("\n>>> CORRECT EXPRESSIONS ["
-                    + results.goodResults().size()
-            		+ "] #########################################");
-        }
-
-        for (ValidationResult result : results
-                .goodResults()) {
-            if (printCorrectExpressions) {
-                System.out.println(result);
-            }
-        }
+        resultsReporter.printValidationResults(results);
 
         final long end = System.currentTimeMillis();
+        // CHECKSTYLE:OFF ignore magic numbers warning
         final long durationS = (end - start) / 1000;
-
         final long seconds = durationS % 60;
         final long minutes = durationS / 60;
+        // CHECKSTYLE:ON
 
-        printOut("\n\n>>> TOTAL EXPRESSIONS CHECKED: "
+        resultsReporter.printOut("\n\n>>> TOTAL EXPRESSIONS CHECKED: "
                 + (results.failures().size() + results.goodResults().size())
                 + " (FAILED: " + results.failures().size()
                 + ", IGNORED EXPRESSIONS: " + results.excluded().size()
                 + ") IN " + minutes + "min " + seconds + "s");
 
-        // TODO Verify all JSF ELs found & checked by comparing their number w/
-        // regExp search
-
-        /*
-         * Collection<File> viewFile = findViewFiles(); List<ExpressionFailure>
-         * failures = validateJsfExpressionsInViews(viewFile);
-         * reportInvalidExpressions(failures);
-         */
-
         return results;
+    }
+
+    private JsfElValidatingPageNodeListener initializeValidationSubsystem(
+            final Map<String, Class<?>> localVariableTypes,
+            final Map<String, Class<?>> extraVariables,
+            final Map<String, Class<?>> propertyTypeOverrides) {
+        final ContextVariableRegistry contextVarRegistry = initializeContextVariableRegistry(localVariableTypes);
+
+        elValidator.setUnknownVariableResolver(
+                contextVarRegistry);
+        elValidator.setIncludeKnownVariablesInException(false);
+
+        setPropertyTypeOverrides(propertyTypeOverrides);
+
+        // DEFAULT EXTRA VARIABLES
+        declareImplicitVariables();
+        declareExtraVariables(extraVariables);
+
+        registerKnownManagedBeans(elValidator);
+
+        // Listener
+        JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
+                elValidator, contextVarRegistry);
+        return pageNodeValidator;
+    }
+
+    private void declareExtraVariables(
+            final Map<String, Class<?>> extraVariables) {
+        for (Entry<String, Class<?>> variable : extraVariables.entrySet()) {
+            Object fakedValue = FakeValueFactory.fakeValueOfType(
+                    variable.getValue(), variable.getKey());
+            elValidator.declareVariable(variable.getKey(), fakedValue);
+        }
+    }
+
+    private void declareImplicitVariables() {
+        elValidator.declareVariable("request", FakeValueFactory
+                .fakeValueOfType(HttpServletRequest.class, "request"));
+    }
+
+    private void setPropertyTypeOverrides(
+            final Map<String, Class<?>> propertyTypeOverrides) {
+        for (Entry<String, Class<?>> override : propertyTypeOverrides
+                .entrySet()) {
+            elValidator.definePropertyTypeOverride(override.getKey(),
+                    override.getValue());
+        }
+    }
+
+    private ContextVariableRegistry initializeContextVariableRegistry(
+            final Map<String, Class<?>> localVariableTypes) {
+        // Context-local variables
+        DataTableVariableResolver dataTableResolver = initializeDataResolver(localVariableTypes);
+
+        ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
+        contextVarRegistry.registerResolverForTag("h:dataTable",
+                dataTableResolver);
+        return contextVarRegistry;
+    }
+
+    private DataTableVariableResolver initializeDataResolver(
+            final Map<String, Class<?>> localVariableTypes) {
+        DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
+        for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
+            dataTableResolver.declareTypeFor(variable.getKey(),
+                    variable.getValue());
+        }
+        return dataTableResolver;
+    }
+
+    private Map<String, Class<?>> assignMapOrEmpty(
+            Map<String, Class<?>> parameter) {
+        Map<String, Class<?>> localVariableTypes = parameter;
+        if (localVariableTypes == null) {
+            localVariableTypes = Collections.emptyMap();
+        }
+        return localVariableTypes;
     }
 
     private void assertJspDirValid(String jspDir) throws IllegalArgumentException {
@@ -333,20 +282,6 @@ public abstract class AbstractJsfStaticAnalyzer {
         } else if (!jspDirFile.canRead()) {
             throw new IllegalArgumentException("jspDir (path of the directory with JSP files) is not readable! "
                     + "Path: " + jspDir + " (absolute: " + jspDirFile.getAbsolutePath() + ")");
-        }
-    }
-
-    private void printOut(String message) {
-        print(System.out, message);
-    }
-
-    private void printErr(String message) {
-        print(System.err, message);
-    }
-
-    private void print(PrintStream out, String message) {
-        if (!suppressOutput) {
-            out.println(message);
         }
     }
 
@@ -402,10 +337,9 @@ public abstract class AbstractJsfStaticAnalyzer {
      * Find out what managed beans are defined in faces-context and perhaps
      * elsewhere and declare them to the validator.
      *
-     * @param elValidator
-     *            (required)
+     * @param elValidator (required)
      */
-    private void registerKnownManagedBeans(JsfElValidator elValidator) {
+    private void registerKnownManagedBeans(JsfElValidator elValidator) {    // SUPPRESS CHECKSTYLE (param hides field)
         Collection<ManagedBeanDescriptor> allDefinedBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
 
         allDefinedBeans.addAll(findFacesManagedBeans());
@@ -440,7 +374,7 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     protected abstract ManagedBeanFinder createManagedBeanFinder(
-            Collection<File> facesConfigFiles);
+            Collection<File> facesConfigFilesToRead);
 
     private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
         if (getSpringConfigFiles().isEmpty()) {
@@ -494,9 +428,12 @@ public abstract class AbstractJsfStaticAnalyzer {
             System.err
                     .println("USAGE: java -jar ... <options>; options are:\n"
                             + " --jspRoot <directory> (required)\n"
-                            + " --localVariableTypes <bean1.property=package.SomeType,bean2.p2.p3=...> (optional) - types of components in colections used as value of h:dataTable\n"
-                            + " --extraVariables <bean1=SomeType1,bean2=AnotherType,...> (optional) - define managed beans not in faces-config\n"
-                            + " --propertyOverrides bean1.property=package.SomeType,..> (optional) - types of objects in collections used for iterating etc.\n");
+                            + " --localVariableTypes <bean1.property=package.SomeType,bean2.p2.p3=...> (optional) - "
+                            + "types of components in colections used as value of h:dataTable\n"
+                            + " --extraVariables <bean1=SomeType1,bean2=AnotherType,...> (optional) - define managed "
+                            + "beans not in faces-config\n"
+                            + " --propertyOverrides bean1.property=package.SomeType,..> (optional) - types of objects "
+                            + "in collections used for iterating etc.\n");
             System.exit(-1);
         }
 
@@ -526,16 +463,22 @@ public abstract class AbstractJsfStaticAnalyzer {
 
     }
 
+    /**
+     * See {@link ResultsReporter#setPrintCorrectExpressions(boolean)}.
+     * @param printCorrectExpressions (required)
+     */
     public void setPrintCorrectExpressions(boolean printCorrectExpressions) {
-        this.printCorrectExpressions = printCorrectExpressions;
+        resultsReporter.setPrintCorrectExpressions(printCorrectExpressions);
     }
 
     public boolean isPrintCorrectExpressions() {
-        return printCorrectExpressions;
+        return resultsReporter.isPrintCorrectExpressions();
     }
 
     /**
      * Process only the given files; set to null to process all.
+     * @param jspsToIncludeCommaSeparated (optional) comma-separated list of path to files to process,
+     * relative to the jspDir (they shouldn't start with a '/'). Null to reset, i.e. to process all files under jspDir.
      */
     public void setJspsToIncludeCommaSeparated(
             String jspsToIncludeCommaSeparated) {
@@ -549,6 +492,7 @@ public abstract class AbstractJsfStaticAnalyzer {
     /**
      * The faces-config.xml files to read managed beans from. Default: empty.
      * Set to empty or null not to process any.
+     * @param facesConfigFiles (required) faces-config files to read managed beans from; may be empty
      */
     public void setFacesConfigFiles(Collection<File> facesConfigFiles) {
         if (facesConfigFiles == null) {
@@ -565,6 +509,7 @@ public abstract class AbstractJsfStaticAnalyzer {
     /**
      * The Spring application context XML files to read managed beans from.
      * Default: empty. Set to empty or null not to process any.
+     * @param springConfigFiles (required) Spring applicationContext files to read managed beans from; may be empty
      */
     public void setSpringConfigFiles(Collection<File> springConfigFiles) {
         if (springConfigFiles == null) {
@@ -579,14 +524,15 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     /**
-     * True - do not print results to the standard output / error stream. Defaul: false.
+     * True - do not print results to the standard output / error stream. Default: false.
+     * @param suppressOutput (required)
      */
     public void setSuppressOutput(boolean suppressOutput) {
-        this.suppressOutput = suppressOutput;
+        resultsReporter.setSuppressOutput(suppressOutput);
     }
 
     public boolean isSuppressOutput() {
-        return suppressOutput;
+        return resultsReporter.isSuppressOutput();
     }
 
 }
