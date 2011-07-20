@@ -21,14 +21,14 @@ import java.util.Stack;
 import java.util.logging.Logger;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 
 /**
  * The main processing class for the Jasper-based implementation: retrieves information about
- * JSP tags of interest and JSF EL extraction and validation while maintaining the local variable stack.
+ * JSP tags of interest and triggers JSF EL extraction and validation while maintaining the local variable stack.
  */
 public class JsfElValidatingPageNodeListener implements PageNodeListener {
 
@@ -39,17 +39,23 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
     private final CollectedValidationResultsImpl validationResults = new CollectedValidationResultsImpl();
 
     private Stack<String> jspFileInclusionStack = new Stack<String>();
-    private String jspFile;
+    private String currentJspFile;
 
-    public JsfElValidatingPageNodeListener(JsfElValidator expressionValidator, ContextVariableRegistry contextVarRegistry) {
+    /**
+     * New listener using the given validator and resolving local variables via the given registry.
+     * @param expressionValidator (required)
+     * @param contextVarRegistry (required)
+     */
+    public JsfElValidatingPageNodeListener(
+            JsfElValidator expressionValidator, ContextVariableRegistry contextVarRegistry) {
         this.contextVarRegistry = contextVarRegistry;
         this.nodeValidator = new PageNodeExpressionValidator(expressionValidator);
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public void nodeEntered(PageNode jspTag) {
-        LOG.fine("PROCESSING " + jspTag.getqName() + " at " +
-                jspTag.getLineNumber() + " id " + jspTag.getId()
+        LOG.fine("PROCESSING " + jspTag.getQName() + " at "
+                + jspTag.getLineNumber() + " id " + jspTag.getId()
                 + ", class: " + jspTag.getTagHandlerClass().getName()
                 + ", attrs: " + jspTag.getAttributes());
 
@@ -65,44 +71,44 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
             contextVarRegistry.extractContextVariables(jspTag, resolvedJsfExpressions);
         } catch (MissingLocalVariableTypeDeclarationException e) {
             e.setTagLineNumber(jspTag.getLineNumber());
-            e.setJspFile(jspFile);
+            e.setJspFile(currentJspFile);
             validationResults.reportContextVariableNeedingTypeDeclaration(e);
         } catch (InternalValidatorFailureException e) {
-            e.setExpressionDescriptor(new JsfExpressionDescriptor(jspTag.getLineNumber(), jspFile));
+            e.setExpressionDescriptor(new JsfExpressionDescriptor(jspTag.getLineNumber(), currentJspFile));
             throw e;
         }
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public void nodeLeft(PageNode jspTag) {
         LOG.fine("DONE WITH " + jspTag.getId());
         contextVarRegistry.discardContextFor(jspTag);
     }
 
-    //@Override
-    public void fileEntered(String jspFile) {
-        setCurrentJspFile(jspFile);
-        LOG.info(">>> STARTED FOR '" + jspFile + " #############################################");
+    /** {@inheritDoc} */
+    public void fileEntered(String newJspFile) {
+        setCurrentJspFile(newJspFile);
+        LOG.info(">>> STARTED FOR '" + newJspFile + " #############################################");
     }
 
     public CollectedValidationResultsImpl getValidationResults() {
         return validationResults;
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public void includedFileEntered(String includedFileName) {
-        jspFileInclusionStack.push(jspFile);
+        jspFileInclusionStack.push(currentJspFile);
         setCurrentJspFile(includedFileName);
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public void includedFileLeft(String includedFileName) {
         setCurrentJspFile(jspFileInclusionStack.pop());
     }
 
-    private void setCurrentJspFile(String jspFile) {
-        this.jspFile = jspFile;
-        this.validationResults.setCurrentJspFile(jspFile);
+    private void setCurrentJspFile(String currentJspFile) {
+        this.currentJspFile = currentJspFile;
+        this.validationResults.setCurrentJspFile(currentJspFile);
     }
 
 }

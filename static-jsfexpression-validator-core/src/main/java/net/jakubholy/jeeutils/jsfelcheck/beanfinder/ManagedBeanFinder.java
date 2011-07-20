@@ -24,11 +24,19 @@ import java.util.Collection;
  */
 public interface ManagedBeanFinder {
 
+    /**
+     * Definition of a managed bean.
+     */
     public static class ManagedBeanDescriptor {
 
         private final String name;
         private final Class<?> type;
 
+        /**
+         * New descriptor.
+         * @param name (required) the managed bean's name
+         * @param type (required) the managed bean's class
+         */
         public ManagedBeanDescriptor(final String name, final Class<?> type) {
             if (name == null) {
                 throw new IllegalArgumentException("name: String must be set");
@@ -59,6 +67,7 @@ public interface ManagedBeanFinder {
 
         @Override
         public boolean equals(Object obj) {
+            // CHECKSTYLE:OFF
             if (this == obj)
                 return true;
             if (obj == null)
@@ -77,6 +86,7 @@ public interface ManagedBeanFinder {
             } else if (!type.equals(other.type))
                 return false;
             return true;
+            // CHECKSTYLE:ON
         }
 
         @Override
@@ -85,6 +95,11 @@ public interface ManagedBeanFinder {
         }
     }
 
-    public Collection<ManagedBeanDescriptor> findDefinedBackingBeans();
+    /**
+     * Find all managed beans defined in the application
+     * (those this particular finder can discover).
+     * @return possibly empty collection
+     */
+    Collection<ManagedBeanDescriptor> findDefinedBackingBeans();
 
 }

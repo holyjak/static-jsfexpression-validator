@@ -8,4 +8,6 @@
 
     <!-- Tone down the checking for test code -->
     <suppress checks="MethodName" files=".*[\\/]test[\\/].*Test\.java"/>
+    <suppress checks="JavadocType" files=".*[\\/]test[\\/].*Test\.java"/>
+    <suppress checks="JavadocMethod" files=".*[\\/]test[\\/].*Test\.java"/>
 </suppressions>

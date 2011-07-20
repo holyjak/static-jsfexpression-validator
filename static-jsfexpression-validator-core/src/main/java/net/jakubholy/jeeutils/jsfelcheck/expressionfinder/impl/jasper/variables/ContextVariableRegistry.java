@@ -101,7 +101,7 @@ public class ContextVariableRegistry implements ElVariableResolver {
     public void extractContextVariables(PageNode jspTag,
             AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException {
 
-        TagJsfVariableResolver resolverForTag = resolvers.get(jspTag.getqName());
+        TagJsfVariableResolver resolverForTag = resolvers.get(jspTag.getQName());
 
         if (resolverForTag != null) {
             try {

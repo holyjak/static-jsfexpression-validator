@@ -114,11 +114,11 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
      * actually is a variable)
      * @param property (required) the property name such as 'property' in the EL #{bean.property}
      * @return the type of the property or null if it cannot be detected
-     * @throws EvaluationException
-     * @throws PropertyNotFoundException
+     * @throws PropertyNotFoundException there is no such property on the target object
+     * @throws EvaluationException other problem
      */
-    private Class<?> getTypeOfCollectionOrBean(Object target, Object property) throws EvaluationException,
-            PropertyNotFoundException {
+    public Class<?> getTypeOfCollectionOrBean(Object target, Object property)
+        throws PropertyNotFoundException, EvaluationException {
 
         // Would normally throw an exception for empty arrays/list not having the given index
         if (target.getClass().isArray()) {

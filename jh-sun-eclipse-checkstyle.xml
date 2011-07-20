@@ -5,8 +5,9 @@
     This configuration file was written by the eclipse-cs plugin configuration editor
 -->
 <!--
-    Checkstyle-Configuration: jh - Sun Checks (Eclipse)
-    Description: none
+    Checkstyle-Configuration: jh's Sun Checks (Eclipse)
+    Description: 
+JH - slightly modified version of Sun Checks that better matches the default code formatter setting of Eclipse and my preferences.
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>
@@ -35,7 +36,9 @@
     <module name="ParameterName"/>
     <module name="StaticVariableName"/>
     <module name="TypeName"/>
-    <module name="AvoidStarImport"/>
+    <module name="AvoidStarImport">
+      <property name="allowStaticMemberImports" value="true"/>
+    </module>
     <module name="IllegalImport"/>
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>

@@ -37,22 +37,27 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
 
     private final Collection<File> springContextFiles;
 
+    /**
+     * New finder reading Spring beans from the given applicationContext XML files.
+     * @param springContextFiles (optional) nothing done if empty/null
+     */
     public SpringContextBeanFinder(final Collection<File> springContextFiles) {
         if (springContextFiles == null || springContextFiles.isEmpty()) {
-            throw new IllegalArgumentException("springContextFiles: Collection<File> cannot be null/empty, is: " + springContextFiles);
+            throw new IllegalArgumentException(
+                    "springContextFiles: Collection<File> cannot be null/empty, is: " + springContextFiles);
         }
 
         for (File file : springContextFiles) {
             if (!file.canRead()) {
-                throw new IllegalArgumentException("The supplied Spring application context XML file " +
-                		"cannot be opened for reading: " + file);
+                throw new IllegalArgumentException("The supplied Spring application context XML file "
+                		+ "cannot be opened for reading: " + file);
             }
         }
 
         this.springContextFiles = new LinkedList<File>(springContextFiles);
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Collection<ManagedBeanDescriptor> findDefinedBackingBeans() {
         Collection<ManagedBeanDescriptor> allBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
 
@@ -80,11 +85,11 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
         }
     }
 
-    private Resource[] toResources(Collection<File> springContextFiles) {
-        Resource[] locations = new Resource[springContextFiles.size()];
+    private Resource[] toResources(Collection<File> resourceFiles) {
+        Resource[] locations = new Resource[resourceFiles.size()];
 
         int index = 0;
-        for (File configFile : springContextFiles) {
+        for (File configFile : resourceFiles) {
             locations[index++] = new FileSystemResource(configFile);
         }
 

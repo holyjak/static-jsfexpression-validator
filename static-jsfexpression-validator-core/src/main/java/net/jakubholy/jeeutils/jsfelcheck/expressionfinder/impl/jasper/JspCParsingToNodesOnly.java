@@ -25,7 +25,10 @@ import org.apache.jasper.compiler.OnlyReadingJspPseudoCompiler;
  */
 public class JspCParsingToNodesOnly extends JspC {
 
-    /** Overriden to return the class of ours (default = null => JdtCompiler)*/
+    /**
+     * {@inheritDoc}
+     * Overriden to return the class of ours (default = null => JdtCompiler.
+     */
     @Override
     public String getCompilerClassName() {
         return OnlyReadingJspPseudoCompiler.class.getName();

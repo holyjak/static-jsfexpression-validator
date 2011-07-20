@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.MultipleValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -48,20 +48,30 @@ public class CollectedValidationResultsImpl extends MultipleValidationResults im
         descriptor.setTagLineNumber(currentTagLineNumber);
     }
 
-    public void addAllFromTagLineNr(int currentTagLineNumber,
+    /**
+     * Add results of validating ELs in attributes of a tag that appeared at a particular line.
+     * @param currentTagLine number of the line in the source file where the tag starts
+     * @param allResults (required) the results to add
+     */
+    public void addAllFromTagLineNr(int currentTagLine,
             Collection<ValidationResult> allResults) {
-        this.currentTagLineNumber = currentTagLineNumber;
+        this.currentTagLineNumber = currentTagLine;
         super.addAll(allResults);
 
     }
 
+    /**
+     * Report a local variable for which there was no type declaration.
+     * @param e (required)
+     */
     public void reportContextVariableNeedingTypeDeclaration(
             MissingLocalVariableTypeDeclarationException e) {
         getVariablesNeedingTypeDeclaration().add(e);
     }
 
     /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResults#getVariablesNeedingTypeDeclaration()
+     * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResults
+     * #getVariablesNeedingTypeDeclaration()
      */
     //@Override
     public Collection<MissingLocalVariableTypeDeclarationException> getVariablesNeedingTypeDeclaration() {

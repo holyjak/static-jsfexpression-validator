@@ -31,12 +31,24 @@ public class AttributesValidationResult extends ValidationResult {
     private Map<String, ValidationResult> results = new Hashtable<String, ValidationResult>();
     private boolean error = false;
 
+    /**
+     * Add results of validation of the given attribute.
+     * @param attribute (required) the name of the tag's attribute
+     * @param result (required)
+     */
     public void add(String attribute, ValidationResult result) {
-        if (result == null) throw new IllegalArgumentException("result: ValidationResult may not be null");
+        if (result == null) {
+            throw new IllegalArgumentException("result: ValidationResult may not be null");
+        }
         results.put(attribute, result);
         error |= result.hasErrors();
     }
 
+    /**
+     * Get results of validating EL in the given attribute.
+     * @param attribute (required)
+     * @return null if the attribute had no EL
+     */
     public ValidationResult get(String attribute) {
         return results.get(attribute);
     }
@@ -46,6 +58,10 @@ public class AttributesValidationResult extends ValidationResult {
         return error;
     }
 
+    /**
+     * True if any attribute's value contained an EL.
+     * @return see above
+     */
     public boolean jsfExpressionsFound() {
         return !results.isEmpty();
     }

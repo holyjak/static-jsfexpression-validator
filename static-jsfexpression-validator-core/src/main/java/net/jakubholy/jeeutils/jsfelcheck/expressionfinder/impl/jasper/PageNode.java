@@ -19,6 +19,7 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
 import java.util.Map;
 
+/** Represents a tag in a JSP/JSF page, in other words a node of the page. */
 public class PageNode {
 
     private static long counter = 0;
@@ -29,6 +30,17 @@ public class PageNode {
     private final Class<?> tagHandlerClass;
     private final int lineNumber;
 
+    /**
+     * Create new page node describing a custom JSP tag.
+     * @param qName (required)
+     *  qualified name of the tag, ex.: h:dataTable
+     * @param tagHandlerClass (required)
+     *  the handler used for the tag, ex.: org.apache.myfaces.taglib.html.HtmlDataTableTag
+     * @param lineNumber (required)
+     *  the line where the tag starts in the page source code
+     * @param attributeMap (required)
+     *  map with attributes of the tag: name -> value
+     */
     public PageNode(String qName, Class<?> tagHandlerClass, int lineNumber,
             Map<String, String> attributeMap) {
                 this.qName = qName;
@@ -41,7 +53,7 @@ public class PageNode {
         return attributes;
     }
 
-    public String getqName() {
+    public String getQName() {
         return qName;
     }
 
