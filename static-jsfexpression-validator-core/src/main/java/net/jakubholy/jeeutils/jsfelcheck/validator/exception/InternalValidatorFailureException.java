@@ -19,22 +19,39 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 
+/**
+ * Unexpected failure of validation, most likely a bug in the code.
+ */
 public class InternalValidatorFailureException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
     private String elExpression;
     private JsfExpressionDescriptor jsfExpressionDescriptor;
 
+    /**
+     * See {@link Throwable#Throwable(String, Throwable)}.
+     * @param message (required)
+     * @param cause (required)
+     */
     public InternalValidatorFailureException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * See {@link Throwable#Throwable(Throwable)}.
+     * @param cause (required)
+     */
     public InternalValidatorFailureException(final Throwable cause) {
         super(cause);
     }
 
-    public InternalValidatorFailureException setExpression(final String elExpression) {
-        this.elExpression = elExpression;
+    /**
+     * Set the EL expression whose validation lead to the failure.
+     * @param failedElExpression (required)
+     * @return this
+     */
+    public InternalValidatorFailureException setExpression(final String failedElExpression) {
+        this.elExpression = failedElExpression;
         return this;
     }
 
@@ -60,8 +77,8 @@ public class InternalValidatorFailureException extends RuntimeException {
     }
 
     public void setExpressionDescriptor(
-            JsfExpressionDescriptor jsfExpressionDescriptor) {
-                this.jsfExpressionDescriptor = jsfExpressionDescriptor;
+            JsfExpressionDescriptor newExpressionDescriptor) {
+                this.jsfExpressionDescriptor = newExpressionDescriptor;
     }
 
 }

@@ -19,12 +19,23 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 
+/**
+ * Used to indicate an EL expression that hasn't been checked because a filter
+ * has rejected it.
+ *
+ * @see ElExpressionFilter
+ */
 @SuppressWarnings("serial")
 public class ExpressionRejectedByFilterException extends BaseEvaluationException {
 
     private final String expression;
     private final ElExpressionFilter filter;
 
+    /**
+     * New.
+     * @param expression (required) the EL expression
+     * @param filter (required) the filter that rejected it
+     */
     public ExpressionRejectedByFilterException(String expression, ElExpressionFilter filter) {
         super(expression + " rejected by " + filter);
         this.expression = expression;

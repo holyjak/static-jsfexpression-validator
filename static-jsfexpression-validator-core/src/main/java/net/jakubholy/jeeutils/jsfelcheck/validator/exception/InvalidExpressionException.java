@@ -17,16 +17,30 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
+/**
+ * Used to pass on EL validation failures in a JSF implementation independent way.
+ */
 public class InvalidExpressionException extends Exception {
 
     private static final long serialVersionUID = 1L;
     private final String expression;
 
+    /**
+     * Full constructor.
+     * @param expression (required) the EL expression
+     * @param message (optional) description of the problem
+     * @param cause (required) cause
+     */
     public InvalidExpressionException(final String expression, final String message, final Throwable cause) {
         super(message, cause);
         this.expression = expression;
     }
 
+    /**
+     * See {@link #InvalidExpressionException(String, String, Throwable)}.
+     * @param expression (required)
+     * @param message (required)
+     */
     public InvalidExpressionException(final String expression, final String message) {
         this(expression, message, null);
     }
@@ -34,8 +48,10 @@ public class InvalidExpressionException extends Exception {
     @Override
     public String getMessage() {
         String defaultMessage = (super.getMessage() == null)? "" : super.getMessage();
-        String causeInfo = (getCause() == null)? "" : getCause().getClass().getSimpleName() + " - " + getCause().getMessage();
-        String message = (defaultMessage.contains(expression)) || causeInfo.contains(expression)? defaultMessage : "Invalid EL expression '"
+        String causeInfo = (getCause() == null)? "" : getCause().getClass().getSimpleName()
+                + " - " + getCause().getMessage();
+        String message = (defaultMessage.contains(expression))
+            || causeInfo.contains(expression)? defaultMessage : "Invalid EL expression '"
             + expression + "': " + defaultMessage;
         return message + causeInfo;
     }

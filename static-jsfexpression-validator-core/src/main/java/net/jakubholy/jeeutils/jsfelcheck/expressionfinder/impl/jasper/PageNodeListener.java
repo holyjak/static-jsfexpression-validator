@@ -17,22 +17,40 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
-import org.apache.jasper.compiler.JsfElCheckingVisitor;
-
 /**
  * Get informed about nodes in a JSP pages being processed by the
- * {@link JsfElCheckingVisitor}.
+ * {@link org.apache.jasper.compiler.JsfElCheckingVisitor}.
  */
 public interface PageNodeListener {
 
+    /**
+     * Processing of a new node (tag) has started.
+     * @param currentCustomTag (required) the new tag
+     */
     void nodeEntered(PageNode currentCustomTag);
 
+    /**
+     * Processing of a node (tag) has finished.
+     * @param currentCustomTag (required) the tag being done
+     */
     void nodeLeft(PageNode currentCustomTag);
 
+    /**
+     * Processing of a new page source file has started.
+     * @param jspFile (required) the jspRoot-relative path of the file
+     */
     void fileEntered(String jspFile);
 
+    /**
+     * Processing of a new static include of another page source file has started.
+     * @param includedFileName (required) the jspRoot-relative path of the included file
+     */
     void includedFileEntered(String includedFileName);
 
+    /**
+     * Processing of an include has finished (i.e. we are back in the original file)
+     * @param includedFileName (required) the file being left
+     */
     void includedFileLeft(String includedFileName);
 
 }

@@ -46,7 +46,7 @@ public class PageNodeExpressionValidator {
     private Map<String, String> extractJsfExpressions(Map<String, String> attributes) {
         Map<String, String> jsfExpressions = new Hashtable<String, String>();
         for (Entry<String, String> atribute : attributes.entrySet()) {
-            if(containsElExpression(atribute.getValue())) {
+            if (containsElExpression(atribute.getValue())) {
                 jsfExpressions.put(atribute.getKey(), atribute.getValue());
             }
         }

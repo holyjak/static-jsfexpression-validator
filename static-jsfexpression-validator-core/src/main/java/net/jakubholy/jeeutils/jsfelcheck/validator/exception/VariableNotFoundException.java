@@ -17,9 +17,17 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
+/**
+ * The EL variable used in an EL expression is unknown - neither a managed bean nor a local variable of
+ * that name is known.
+ */
 @SuppressWarnings("serial")
 public class VariableNotFoundException extends BaseEvaluationException {
 
+    /**
+     * See {@link BaseEvaluationException#BaseEvaluationException(String)}.
+     * @param message (required) Should contain the name of the variable and perhaps some context info
+     */
     public VariableNotFoundException(String message) {
         super(message);
     }

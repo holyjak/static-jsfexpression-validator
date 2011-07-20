@@ -19,9 +19,16 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 import javax.faces.el.EvaluationException;
 
+/**
+ * Exception during JSF EL evaluation.
+ */
 @SuppressWarnings("serial")
 public class BaseEvaluationException extends EvaluationException {
 
+    /**
+     * Constructor.
+     * @param message (required) the problem
+     */
     public BaseEvaluationException(String message) {
         super(message);
     }
