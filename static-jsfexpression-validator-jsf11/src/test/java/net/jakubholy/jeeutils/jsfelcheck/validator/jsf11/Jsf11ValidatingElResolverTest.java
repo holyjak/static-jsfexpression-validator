@@ -17,6 +17,10 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
+import javax.faces.el.ReferenceSyntaxException;
+
+import org.junit.Test;
+
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolverAbstractTest;
 
@@ -26,6 +30,11 @@ public class Jsf11ValidatingElResolverTest extends ValidatingJsfElResolverAbstra
     @Override
     protected ValidatingElResolver setUpResolver() {
         return new Jsf11ValidatingElResolver();
+    }
+
+    @Test(expected = ReferenceSyntaxException.class)
+    public void should_reject_non_el_literal() throws Exception {
+        elResolver.validateValueElExpression("this is a literal string, not an EL expression");
     }
 
 }

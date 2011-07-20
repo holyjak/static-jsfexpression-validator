@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
@@ -50,7 +51,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         return new ValueHolder<T>(value);
     }
 
-    private ValidatingElResolver elResolver;
+    protected ValidatingElResolver elResolver;
     @Mock private ElVariableResolver mockUnknownVariableResolver;
 
     @Before
@@ -62,6 +63,12 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     /** Provide the resolver to be tested */
     protected abstract ValidatingElResolver setUpResolver();
+
+    @Test
+    public void should_accept_hash_marked_jsf_el() throws Exception {
+        elResolver.declareVariable("myStringBean", "Hello!");
+        assertResultValue("#{myStringBean}", "Hello!");
+    }
 
     @Test
     public void should_return_simple_session_bean() throws Exception {
@@ -256,7 +263,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     private void assertResultValueType(ValidationResult result, Class<?> type) {
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
-        assertThat( ((SuccessfulValidationResult) result).getExpressionResult()
+        assertThat(((SuccessfulValidationResult) result).getExpressionResult()
                 , is(instanceOf(type)));
     }
 
@@ -267,7 +274,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     }
 
     /** Assert that the expression is valid and returns non-null value. */
-    private void assertExpressionValid(final String elExpression) {
+    private final void assertExpressionValid(final String elExpression) {
         ValidationResult result = elResolver.validateValueElExpression(elExpression);
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
 
@@ -285,6 +292,19 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         assertThat("The expression '" + elExpression + "' should have yielded a boolean"
                 , successfulResult.getExpressionResult()
                 , is(instanceOf(boolean.class)));
+    }
+
+    protected final <T> void assertResultValue(String elExpression, T expectedValue) {
+        ValidationResult validationResult = elResolver.validateValueElExpression(elExpression);
+        assertThat("The expression '" + elExpression + "' should have succeeded to evaluate (to " + expectedValue
+                + ") but failed."
+                , validationResult
+                , is(instanceOf(SuccessfulValidationResult.class)));
+
+        SuccessfulValidationResult successfulResult = (SuccessfulValidationResult) validationResult;
+        assertEquals("The expression '" + elExpression + "' should have yielded the expecte value"
+                , successfulResult.getExpressionResult()
+                , expectedValue);
     }
 
 }

@@ -26,9 +26,12 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescript
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 /**
- * Helper for extracting JSF EL from a tag and validating the EL via a validator.
+ * Helper for extracting JSF EL expressions from a tag's attributes and validating them via a validator.
  */
 public class PageNodeExpressionValidator {
+
+    private static final String JSF11_EL_START_MARKER = "#{";
+    private static final String JSF12_EL_START_MARKER = "${";
 
     private final JsfElValidator expressionValidator;
 
@@ -43,11 +46,15 @@ public class PageNodeExpressionValidator {
     private Map<String, String> extractJsfExpressions(Map<String, String> attributes) {
         Map<String, String> jsfExpressions = new Hashtable<String, String>();
         for (Entry<String, String> atribute : attributes.entrySet()) {
-            if( atribute.getValue().contains("#{")) {
+            if(containsElExpression(atribute.getValue())) {
                 jsfExpressions.put(atribute.getKey(), atribute.getValue());
             }
         }
         return jsfExpressions;
+    }
+
+    boolean containsElExpression(String attributeValue) {
+        return attributeValue.contains(JSF11_EL_START_MARKER) || attributeValue.contains(JSF12_EL_START_MARKER);
     }
 
     private boolean isMethodBinding(String attribute) {

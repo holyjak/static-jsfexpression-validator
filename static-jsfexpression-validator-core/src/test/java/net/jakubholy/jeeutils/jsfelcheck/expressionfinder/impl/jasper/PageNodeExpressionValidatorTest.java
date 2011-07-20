@@ -16,6 +16,7 @@
  */
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -132,6 +133,18 @@ public class PageNodeExpressionValidatorTest {
 
         verify(expressionValidator).validateValueElExpression(anyString());
         verify(expressionValidator, never()).validateMethodElExpression(anyString());
+    }
+
+    /**
+     * JSF EL up to 1.1 were marked with #{..}, since the introduction of UEL in 1.2 they use
+     * ${..} (used for JSP EL only before that).
+     */
+    @Test
+    public void should_recognize_both_jsf11_and_uel_expressions() throws Exception {
+        assertTrue("Should recognize jsf <= 1.1 expression, i.e. #{}"
+                , nodeValidator.containsElExpression("garbage before... #{jsf11_expression} ...and after"));
+        assertTrue("Should recognize jsf 1.2+ UEL expression, i.e. ${}"
+                , nodeValidator.containsElExpression("garbage before... ${jsf12+_expression} ...and after"));
     }
 
 
