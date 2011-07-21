@@ -17,16 +17,30 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 
+/**
+ * Context information about an EL expression, attached to validation results etc.
+ */
 public class JsfExpressionDescriptor {
 
     private final String expression;
     private String jspFile;
     private int tagLineNumber = -1;
 
+    /**
+     * Descriptor whose context data is just the expression itself.
+     * Further context info may be provided via {@link #setJspFile(String)} and {@link #setTagLineNumber(int)}.
+     * @param elExpression (required)
+     */
     public JsfExpressionDescriptor(String elExpression) {
         this.expression = elExpression;
     }
 
+    /**
+     * Descriptor with tag location information and no EL expression (it's assumed that it isn't needed because it's
+     * already communicated in another way).
+     * @param lineNumber (required) the line where the tag containing the EL expression in question starts
+     * @param jspFile (required) the page source file where the tag is
+     */
     public JsfExpressionDescriptor(int lineNumber, String jspFile) {
         this.tagLineNumber = lineNumber;
         this.jspFile = jspFile;

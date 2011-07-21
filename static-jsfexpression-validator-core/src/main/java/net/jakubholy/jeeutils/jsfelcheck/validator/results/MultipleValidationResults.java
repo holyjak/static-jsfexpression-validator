@@ -21,6 +21,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+ * Collection of validation results whose {@link #hasErrors()} is true if any of the contained results has it true.
+ */
 public class MultipleValidationResults extends ValidationResult implements Iterable<ValidationResult> {
 
     private final Collection<ValidationResult> results = new LinkedList<ValidationResult>();
@@ -38,10 +41,18 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         return errors;
     }
 
+    /**
+     * Add all results from the given collection to this one.
+     * @param multipleResults (required)
+     */
     public void add(MultipleValidationResults multipleResults) {
         addAll(multipleResults.results);
     }
 
+    /**
+     * Add a single result to this collection.
+     * @param singleResult (required)
+     */
     public void add(ValidationResult singleResult) {
         addSingleResult(singleResult);
     }
@@ -59,27 +70,38 @@ public class MultipleValidationResults extends ValidationResult implements Itera
         postAddSingleResult(singleResult);
     }
 
-    protected void postAddSingleResult(ValidationResult singleResult) {}
+    /**
+     * Subclass hook - called after a single result has been added to this.
+     * @param singleResult (required)
+     */
+    protected void postAddSingleResult(ValidationResult singleResult) { }
 
+    /**
+     * Add all the results in the collection to this one.
+     * @param allResults (required)
+     */
     public void addAll(Collection<ValidationResult> allResults) {
         for (ValidationResult singleResult : allResults) {
             this.add(singleResult);
         }
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Iterator<ValidationResult> iterator() {
         return results.iterator();
     }
 
+    /** {@inheritDoc} */
     public ResultsIterable<SuccessfulValidationResult> goodResults() {
         return new ResultsIterable<SuccessfulValidationResult>(goodResults);
     }
 
+    /** {@inheritDoc} */
     public ResultsIterable<FailedValidationResult> failures() {
         return new ResultsIterable<FailedValidationResult>(failures);
     }
 
+    /** {@inheritDoc} */
     public ResultsIterable<ExpressionRejectedByFilterResult> excluded() {
         return new ResultsIterable<ExpressionRejectedByFilterResult>(exclusions);
     }

@@ -19,10 +19,17 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
 
+/**
+ * Result for an invalid EL expression.
+ */
 public class FailedValidationResult extends ValidationResult {
 
     private final InvalidExpressionException failure;
 
+    /**
+     * Result for the given failure.
+     * @param failure (required) details of what was wrong
+     */
     public FailedValidationResult(InvalidExpressionException failure) {
         this.failure = failure;
     }

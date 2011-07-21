@@ -17,11 +17,18 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 
-abstract public class ValidationResult {
+/**
+ * Result of EL expression validation.
+ */
+public abstract class ValidationResult {
 
     private JsfExpressionDescriptor expressionDescriptor;
 
-    abstract public boolean hasErrors();
+    /**
+     * Were there errors or other problems when validating the expression?
+     * @return true if the validation wasn't successful
+     */
+    public abstract boolean hasErrors();
 
     public void setExpressionDescriptor(JsfExpressionDescriptor expressionDescriptor) {
         this.expressionDescriptor = expressionDescriptor;
@@ -33,7 +40,8 @@ abstract public class ValidationResult {
 
     @Override
     public String toString() {
-        return (expressionDescriptor == null)? super.toString() : getClass().getSimpleName() + "[" + expressionDescriptor + "]";
+        return (expressionDescriptor == null)? super.toString()
+                : getClass().getSimpleName() + "[" + expressionDescriptor + "]";
     }
 
 

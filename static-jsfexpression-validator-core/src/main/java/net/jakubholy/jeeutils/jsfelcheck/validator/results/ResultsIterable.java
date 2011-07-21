@@ -20,6 +20,11 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * A collection or EL validation results.
+ *
+ * @param <T> The type of the results
+ */
 public class ResultsIterable<T> implements Iterable<T> {
 
     private final Collection<T> results;
@@ -28,11 +33,15 @@ public class ResultsIterable<T> implements Iterable<T> {
         this.results = results;
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Iterator<T> iterator() {
         return results.iterator();
     }
 
+    /**
+     * Number of results in this iterable.
+     * @return >= 0
+     */
     public int size() {
         return results.size();
     }

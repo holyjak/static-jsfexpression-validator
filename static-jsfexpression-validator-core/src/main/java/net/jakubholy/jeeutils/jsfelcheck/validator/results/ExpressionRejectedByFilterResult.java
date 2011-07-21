@@ -20,15 +20,25 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 
+/**
+ * Information about an expression that hasn't been validated because one of the filters rejected it.
+ *
+ * @see ElExpressionFilter
+ */
 public class ExpressionRejectedByFilterResult extends ValidationResult {
 
     private final ExpressionRejectedByFilterException details;
     private final ElExpressionFilter filter;
 
+    /** New result without any details. */
     public ExpressionRejectedByFilterResult() {
         this(null);
     }
 
+    /**
+     * Result with the given details.
+     * @param details (optional) Details of where and why
+     */
     public ExpressionRejectedByFilterResult(ExpressionRejectedByFilterException details) {
         this.details = details;
         if (details == null) {
@@ -43,6 +53,7 @@ public class ExpressionRejectedByFilterResult extends ValidationResult {
         return true;
     }
 
+    @Override
     public String toString() {
         return "ExpressionRejectedByFilterResult [details=" + details + "; "
             + super.getExpressionDescriptor() + "]";

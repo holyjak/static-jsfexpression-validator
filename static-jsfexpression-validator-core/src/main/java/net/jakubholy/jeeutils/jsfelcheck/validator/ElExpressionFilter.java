@@ -17,9 +17,10 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-
 /**
  *  Can be added to the validator to include/exclude selected JSF EL expressions.
+ *
+ *  @see net.jakubholy.jeeutils.jsfelcheck.AbstractJsfStaticAnalyzer#addElExpressionFilter(ElExpressionFilter)
  */
 public interface ElExpressionFilter {
 

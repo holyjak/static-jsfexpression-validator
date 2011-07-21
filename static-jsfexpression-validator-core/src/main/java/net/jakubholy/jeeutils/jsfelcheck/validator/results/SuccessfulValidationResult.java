@@ -17,10 +17,20 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 
+/**
+ * Result for a JSF EL expression that was successfully validated.
+ */
 public class SuccessfulValidationResult extends ValidationResult {
 
     private final Object expressionResult;
 
+    /**
+     * Result for EL expression whose evaluation produced the given value.
+     * In the context of the "fake" validating resolver this is usually a "fake value" of the expression's output type.
+     * @param expressionResult (optional) result of evaluating the EL
+     *
+     * @see net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory
+     */
     public SuccessfulValidationResult(Object expressionResult) {
         this.expressionResult = expressionResult;
     }
@@ -31,7 +41,7 @@ public class SuccessfulValidationResult extends ValidationResult {
     }
 
     /**
-     * The value produced by the resolved expression.
+     * @return the value produced by the resolved expression.
      */
     public Object getExpressionResult() {
         return expressionResult;
@@ -49,6 +59,7 @@ public class SuccessfulValidationResult extends ValidationResult {
 
     @Override
     public boolean equals(Object obj) {
+        // CHECKSTYLE:OFF
         if (this == obj)
             return true;
         if (obj == null)
@@ -62,12 +73,13 @@ public class SuccessfulValidationResult extends ValidationResult {
         } else if (!expressionResult.equals(other.expressionResult))
             return false;
         return true;
+        // CHECKSTYLE:ON
     }
 
     @Override
     public String toString() {
-    	    return "Correct: " + super.toString() +
-        		" (fake EL result=" + expressionResult + ")";
+    	    return "Correct: " + super.toString()
+        		+ " (fake EL result=" + expressionResult + ")";
     }
 
 }
