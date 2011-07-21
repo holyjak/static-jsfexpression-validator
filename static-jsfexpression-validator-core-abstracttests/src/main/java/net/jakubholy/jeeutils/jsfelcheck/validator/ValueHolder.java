@@ -17,9 +17,16 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+/** Dummy class for creating Java Beans to be used in EL expressions.
+ * @param <T> The type of the value hold
+ */
 public class ValueHolder<T> {
     private T value;
 
+    /**
+     * Holder for the given value.
+     * @param beanValue (required)
+     */
     public ValueHolder(final T beanValue) {
         this.value = beanValue;
     }

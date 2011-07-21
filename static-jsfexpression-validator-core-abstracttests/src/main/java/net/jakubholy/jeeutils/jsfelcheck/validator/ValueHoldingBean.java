@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+/** Dummy class for creating Java Beans to be used in EL expressions. */
 public class ValueHoldingBean {
     private Boolean value;
     private String[] stringArray;
@@ -24,8 +25,12 @@ public class ValueHoldingBean {
     private ValueHoldingBean[] beanArray;
     private ValueHoldingBean beanProperty;
 
-    public ValueHoldingBean() {}
+    /** Empty holder. */
+    public ValueHoldingBean() { }
 
+    /** Holder for the given boolean.
+     * @param beanValue (required)
+     */
     public ValueHoldingBean(final Boolean beanValue) {
         this.value = beanValue;
     }

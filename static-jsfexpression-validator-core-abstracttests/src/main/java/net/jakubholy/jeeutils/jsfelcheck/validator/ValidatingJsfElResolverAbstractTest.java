@@ -24,8 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
@@ -34,7 +32,6 @@ import java.util.Map;
 
 import javax.servlet.jsp.PageContext;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
@@ -45,14 +42,24 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Test validation of EL expressions, to be extended by every (JSF version-specific) validator implementation.
+ *
+ * The actual implementation is plugged in by implementing {@link #setUpResolver()}.
+ */
 public abstract class ValidatingJsfElResolverAbstractTest {
 
     private static <T> ValueHolder<T> valueHolder(final T value) {
         return new ValueHolder<T>(value);
     }
 
-    protected ValidatingElResolver elResolver;
+    protected ValidatingElResolver elResolver; // SUPPRESS CHECKSTYLE
     @Mock private ElVariableResolver mockUnknownVariableResolver;
+
+    /** Provide the resolver to be tested. */
+    protected abstract ValidatingElResolver setUpResolver();
+
+    // CHECKSTYLE:OFF (don't want to add JavaDoc to each test method)
 
     @Before
     public void setUp() throws Exception {
@@ -60,9 +67,6 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         elResolver = setUpResolver();
         elResolver.setUnknownVariableResolver(mockUnknownVariableResolver);
     }
-
-    /** Provide the resolver to be tested */
-    protected abstract ValidatingElResolver setUpResolver();
 
     @Test
     public void should_accept_hash_marked_jsf_el() throws Exception {
@@ -246,7 +250,8 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     @Test
     public void should_be_able_to_coerce_implicit_object_map_property_to_any_primitive_value() throws Exception {
 
-        String[] mapImplicitObjects = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
+        String[] mapImplicitObjects = new String[] {
+                "pageScope", "requestScope", "sessionScope", "applicationScope", "param"
                 , "paramValues", "header", "headerValues", "initParam" };
 
         // For each Map implicit object, any implObj['key'] should generate some default value, which
@@ -261,6 +266,8 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     }
 
+    // CHECKSTYLE:ON
+
     private void assertResultValueType(ValidationResult result, Class<?> type) {
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
         assertThat(((SuccessfulValidationResult) result).getExpressionResult()
@@ -274,7 +281,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     }
 
     /** Assert that the expression is valid and returns non-null value. */
-    private final void assertExpressionValid(final String elExpression) {
+    private void assertExpressionValid(final String elExpression) {
         ValidationResult result = elResolver.validateValueElExpression(elExpression);
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
 
