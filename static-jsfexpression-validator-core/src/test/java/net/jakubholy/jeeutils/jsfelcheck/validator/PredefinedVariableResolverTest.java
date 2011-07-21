@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -21,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 public class PredefinedVariableResolverTest {
 
     private PredefinedVariableResolver resolver;
-    @Mock NewVariableEncounteredListener listener;
+    @Mock private NewVariableEncounteredListener listener;
 
     @Before
     public void setUp() throws Exception {
@@ -29,7 +46,7 @@ public class PredefinedVariableResolverTest {
         resolver = new PredefinedVariableResolver(listener);
     }
 
-    @Test(expected=VariableNotFoundException.class)
+    @Test(expected = VariableNotFoundException.class)
     public void should_throw_exception_for_unknown_variable() throws Exception {
         resolver.resolveVariable("unknown");
     }
@@ -37,10 +54,10 @@ public class PredefinedVariableResolverTest {
     @Test
     public void should_return_predefined_variable() throws Exception {
         resolver.declareVariable("var1", "Var1_Value");
-        resolver.declareVariable("bean2", 222);
+        resolver.declareVariable("bean2", 222); // SUPPRESS CHECKSTYLE
 
         assertEquals("Var1_Value", resolver.resolveVariable("var1"));
-        assertEquals(222, resolver.resolveVariable("bean2"));
+        assertEquals(222, resolver.resolveVariable("bean2"));// SUPPRESS CHECKSTYLE
     }
 
     @Test
@@ -80,7 +97,7 @@ public class PredefinedVariableResolverTest {
     public void should_not_invoke_its_listener_when_unknown_variable_encountered() throws Exception {
         try {
             resolver.resolveVariable("unknownVariable");
-        } catch (VariableNotFoundException e) {}
+        } catch (VariableNotFoundException e) { /* expected*/ } // SUPPRESS CHECKSTYLE
         verifyZeroInteractions(listener);
     }
 

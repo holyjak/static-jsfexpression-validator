@@ -41,6 +41,7 @@ import org.junit.Test;
 
 public class MockingPropertyResolverTest {
 
+    @SuppressWarnings("unused")
     private static class MyVariable {
         public String getAcceptedProperty() { return ""; };
         public String getDeniedProperty() { return ""; };
@@ -125,7 +126,7 @@ public class MockingPropertyResolverTest {
 
     @Test
     public void should_apply_filter_on_variable() throws Exception {
-        resolver.addElExpressionFilter(new ElExpressionFilter(){
+        resolver.addElExpressionFilter(new ElExpressionFilter() {
 
             public boolean accept(ParsedElExpression expr) {
                 if (expr.size() == 1 && expr.iterator().next().equals("deniedVariable")) {
@@ -149,7 +150,7 @@ public class MockingPropertyResolverTest {
     @Test
     public void should_apply_filter_on_property() throws Exception {
         resolver.setTypeResolver(new ConstantPropertyTypeResolverImpl(String.class));
-        resolver.addElExpressionFilter(new ElExpressionFilter(){
+        resolver.addElExpressionFilter(new ElExpressionFilter() {
 
             public boolean accept(ParsedElExpression expr) {
                 Iterator<String> exprIter = expr.iterator();
@@ -209,34 +210,37 @@ public class MockingPropertyResolverTest {
     }
 
     @Ignore("Only testable with a real property type resolver")
-    @Test(expected=PropertyNotFoundException.class)
+    @Test(expected = PropertyNotFoundException.class)
     public void should_throw_exception_for_unknown_property() throws Exception {
         resolver.setTypeResolver(new ConstantPropertyTypeResolverImpl(null));
         resolver.getValue(currentVariable, "unknownProperty");
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_mapped_property_without_declard_component_type() throws Exception {
+    public void should_return_MockObjectOfUnknownType_for_existing_mapped_property_without_declard_component_type()
+        throws Exception {
         resolver.setTypeResolver(new ConstantPropertyTypeResolverImpl(Object.class));
         assertThat(resolver.getValue(Collections.EMPTY_MAP, "some.key")
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_list_property_without_declard_component_type() throws Exception {
-        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+    public void should_return_MockObjectOfUnknownType_for_existing_list_property_without_declard_component_type()
+        throws Exception {
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123) // SUPPRESS CHECKSTYLE
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_array_property_without_declard_component_type() throws Exception {
-        assertThat(resolver.getValue(new Object[0], 456)
+    public void should_return_MockObjectOfUnknownType_for_existing_array_property_without_declard_component_type()
+        throws Exception {
+        assertThat(resolver.getValue(new Object[0], 456) // SUPPRESS CHECKSTYLE
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
     public void should_return_string_for_existing_string_array_property() throws Exception {
-        assertThat(resolver.getValue(new String[0], 33)
+        assertThat(resolver.getValue(new String[0], 33) // SUPPRESS CHECKSTYLE
                 , is(instanceOf(String.class)));
     }
 
@@ -251,7 +255,7 @@ public class MockingPropertyResolverTest {
     @Test
     public void should_return_declared_component_type_for_existing_list_property() throws Exception {
         resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Cloneable.class);
-        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123) // SUPPRESS CHECKSTYLE
                 , is(instanceOf(Cloneable.class)));
     }
 
@@ -260,7 +264,7 @@ public class MockingPropertyResolverTest {
         resolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Float.class);
         // Note: We return an int for any number as it can be coerced into any other number
         // i.e. is compatible with it
-        assertThat(resolver.getValue(new Object[0], 456)
+        assertThat(resolver.getValue(new Object[0], 456) // SUPPRESS CHECKSTYLE
                 , is(instanceOf(Number.class)));
     }
 
@@ -271,7 +275,7 @@ public class MockingPropertyResolverTest {
                 , resolver.getValue(new Object[0], Integer.MAX_VALUE));
         // Object property
         assertNotNull("Should return a fake value even though no such index in the target"
-                , resolver.getValue(new Object[0], new Integer(12345)));
+                , resolver.getValue(new Object[0], new Integer(12345))); // SUPPRESS CHECKSTYLE
     }
 
     @Test
@@ -281,7 +285,7 @@ public class MockingPropertyResolverTest {
                 , resolver.getValue(Collections.EMPTY_LIST, Integer.MAX_VALUE));
         // Object property
         assertNotNull("Should return a fake value even though no such index in the target"
-                , resolver.getValue(Collections.EMPTY_LIST, new Integer(12345)));
+                , resolver.getValue(Collections.EMPTY_LIST, new Integer(12345))); // SUPPRESS CHECKSTYLE
     }
 
 }
