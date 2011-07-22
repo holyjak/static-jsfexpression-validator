@@ -1,0 +1,112 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+	<artifactId>static-jsfexpression-validator-core</artifactId>
+    <version>0.9.3-SNAPSHOT</version>
+    <name>EL validator common core</name>
+	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
+
+	<parent>
+		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+		<artifactId>jsfelcheck-parent</artifactId>
+		<version>0.9.3-SNAPSHOT</version>
+	</parent>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<contributors>
+		<contributor>
+			<name>Jakub Holy</name>
+			<email>malyvelky@users.sf.net</email>
+			<timezone>GMT+1</timezone>
+			<roles></roles>
+		</contributor>
+	</contributors>
+
+	<scm>
+		<connection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
+		<developerConnection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
+		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
+	</scm>
+	<dependencies>
+
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<!--version>1.1_02</version -->
+			<version>1.1_02</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>jasper</artifactId>
+			<version>6.0.29</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit-dep</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.8.5</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-digester</groupId>
+			<artifactId>commons-digester</artifactId>
+			<version>1.5</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<version>1.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>1.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- only needed for SpringContextBeanFinder, if used -->
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>2.5.6</version>
+			<type>jar</type>
+			<scope>provided</scope> <!-- don't force it on users who don't use Spring -->
+		</dependency>
+
+		<dependency>
+		  <!-- Actually not needed when executing from Ant => exclude in such a case. -->
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.2</version>
+            <type>jar</type>
+            <scope>runtime</scope>
+        </dependency>
+
+	</dependencies>
+
+</project>
