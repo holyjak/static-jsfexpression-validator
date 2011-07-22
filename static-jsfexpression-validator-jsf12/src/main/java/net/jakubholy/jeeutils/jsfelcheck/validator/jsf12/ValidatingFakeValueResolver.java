@@ -34,14 +34,22 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 
+/**
+ * Adapt {@link MockingPropertyResolver} and {@link PredefinedVariableResolver} to behave as a single JSF 1.2
+ * {@link ELResolver}.
+ */
 public class ValidatingFakeValueResolver extends ELResolver implements PropertyTypeResolver {
 
     private final CompositeELResolver allResolver;
     private ELContext currentContext;
-    MockingPropertyResolver propertyResolver;
-    PredefinedVariableResolver variableResolver;
+    private MockingPropertyResolver propertyResolver;
+    private PredefinedVariableResolver variableResolver;
 
-    public ValidatingFakeValueResolver(CompositeELResolver allResolver) {
+    /**
+     * New resolver delegating property type resolution to the given implementation's resolver.
+     * @param allResolver (required)
+     */
+    ValidatingFakeValueResolver(CompositeELResolver allResolver) {
         this.allResolver = allResolver;
 
         this.propertyResolver = new MockingPropertyResolver();
@@ -50,15 +58,18 @@ public class ValidatingFakeValueResolver extends ELResolver implements PropertyT
         this.variableResolver = new PredefinedVariableResolver(propertyResolver);
     }
 
+    /** {@inheritDoc} */
     public void setValue(final ELContext context, final Object base, final Object property, final Object value)
         throws NullPointerException, PropertyNotFoundException, PropertyNotWritableException, ELException {
     }
 
+    /** {@inheritDoc} */
     public boolean isReadOnly(final ELContext context, final Object base, final Object property)
         throws NullPointerException, PropertyNotFoundException, ELException {
         return false;
     }
 
+    /** {@inheritDoc} */
     public Object getValue(final ELContext context, final Object base, final Object property)
         throws NullPointerException, PropertyNotFoundException, ELException {
 
@@ -96,14 +107,18 @@ public class ValidatingFakeValueResolver extends ELResolver implements PropertyT
         return variableResolver.resolveVariable(variable);
     }
 
+    /** {@inheritDoc} */
     public Class<?> getType(final ELContext context, final Object base, final Object property)
         throws NullPointerException, PropertyNotFoundException, ELException {
         return null;
     }
 
-    public Iterator getFeatureDescriptors(final ELContext context, final Object base) {
+    /** {@inheritDoc} */
+    public Iterator<FeatureDescriptor> getFeatureDescriptors(final ELContext context, final Object base) {
 
-        if (base != null) return null;
+        if (base != null) {
+            return null;
+        }
 
         final ArrayList<FeatureDescriptor> descriptors = new ArrayList<FeatureDescriptor>();
 
@@ -128,12 +143,15 @@ public class ValidatingFakeValueResolver extends ELResolver implements PropertyT
         return fd;
     }
 
+    /** {@inheritDoc} */
     public Class<?> getCommonPropertyType(final ELContext context, final Object base) {
-        if (base != null) return null;
+        if (base != null) {
+            return null;
+        }
         return Object.class;
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Class<?> getType(Object target, Object property) {
         return allResolver.getType(currentContext, target, property);
     }

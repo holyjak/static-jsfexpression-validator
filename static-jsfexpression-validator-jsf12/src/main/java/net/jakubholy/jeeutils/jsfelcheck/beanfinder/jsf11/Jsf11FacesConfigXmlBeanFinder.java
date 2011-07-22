@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 import javax.faces.FacesException;
 
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 
 import org.apache.commons.digester.Digester;
 import org.xml.sax.InputSource;
@@ -45,28 +44,34 @@ import com.sun.faces.config.rules.FacesConfigRuleSet;
  */
 public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
-    private static final String[][] DTD_INFO = { { "/com/sun/faces/web-facesconfig_1_0.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN" }, { "/com/sun/faces/web-facesconfig_1_1.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" } };
+    private static final String[][] DTD_INFO = { { "/com/sun/faces/web-facesconfig_1_0.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN" } // SUPPRESS CHECKSTYLE
+    , { "/com/sun/faces/web-facesconfig_1_1.dtd", "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN" } };
 
-    private static final  Logger log = Logger.getLogger(Jsf11FacesConfigXmlBeanFinder.class.getName());
+    private static final Logger LOG = Logger.getLogger(Jsf11FacesConfigXmlBeanFinder.class.getName());
 
     private final Collection<File> facesConfigFiles;
 
+    /**
+     * Finder reading from the given files.
+     * @param facesConfigFiles (required) may be empty
+     */
     public Jsf11FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
         if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
-            throw new IllegalArgumentException("facesConfigFiles: Collection<File> cannot be null/empty, is: " + facesConfigFiles);
+            throw new IllegalArgumentException("facesConfigFiles: Collection<File> cannot be null/empty, is: "
+                    + facesConfigFiles);
         }
 
         for (File file : facesConfigFiles) {
             if (!file.canRead()) {
-                throw new IllegalArgumentException("The supplied faces-config XML file " +
-                        "cannot be opened for reading: " + file);
+                throw new IllegalArgumentException("The supplied faces-config XML file "
+                        + "cannot be opened for reading: " + file);
             }
         }
 
         this.facesConfigFiles = new LinkedList<File>(facesConfigFiles);
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public Collection<ManagedBeanDescriptor> findDefinedBackingBeans() {
         Collection<ManagedBeanDescriptor> allBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
 
@@ -120,8 +125,7 @@ public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
         }
     }
 
-    protected Digester digester(boolean validateXml)
-    {
+    protected Digester digester(boolean validateXml) {
       Digester digester = new Digester();
 
       digester.setNamespaceAware(false);
@@ -132,10 +136,10 @@ public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
       for (int i = 0; i < DTD_INFO.length; i++) {
         URL url = getClass().getResource(DTD_INFO[i][0]);
-        if (url != null)
+        if (url != null) {
           digester.register(DTD_INFO[i][1], url.toString());
-        else {
-          throw new RuntimeException("NO_DTD_FOUND_ERROR: " + DTD_INFO[i][1] + "," + DTD_INFO[i][0] );
+        } else {
+          throw new RuntimeException("NO_DTD_FOUND_ERROR: " + DTD_INFO[i][1] + "," + DTD_INFO[i][0]);
         }
 
       }
@@ -164,17 +168,15 @@ public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
         stream = null;
       } catch (Exception e) {
         String message = "Can't parse configuration file:" + url.toExternalForm();
-        log.log(Level.SEVERE, message, e);
+        LOG.log(Level.SEVERE, message, e);
         throw new FacesException(message, e);
       } finally {
-        if (stream != null)
+        if (stream != null) {
           try {
             stream.close();
-          }
-          catch (Exception e)
-          {
-          }
+          } catch (Exception e) { } // SUPPRESS CHECKSTYLE
         stream = null;
+        }
       }
     }
 
