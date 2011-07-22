@@ -20,7 +20,6 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import java.io.File;
 import java.util.Collection;
 
-import net.jakubholy.jeeutils.jsfelcheck.AbstractJsfStaticAnalyzer;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
@@ -33,7 +32,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolv
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no JavaDoc)
         AbstractJsfStaticAnalyzer.main(new JsfStaticAnalyzer(), args);
     }
 

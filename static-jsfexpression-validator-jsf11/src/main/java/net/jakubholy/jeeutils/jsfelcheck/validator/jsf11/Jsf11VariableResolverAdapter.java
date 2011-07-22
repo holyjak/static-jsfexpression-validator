@@ -30,6 +30,10 @@ public final class Jsf11VariableResolverAdapter extends VariableResolver {
 
     private final PredefinedVariableResolver resolver;
 
+    /**
+     * Adapter delegating to the given resolver.
+     * @param resolver (required)
+     */
     public Jsf11VariableResolverAdapter(PredefinedVariableResolver resolver) {
         if (resolver == null) {
             throw new IllegalArgumentException("The resolver: PredefinedVariableResolver may not be null");

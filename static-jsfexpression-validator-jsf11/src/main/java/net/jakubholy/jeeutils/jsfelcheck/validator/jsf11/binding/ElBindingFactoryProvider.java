@@ -23,28 +23,39 @@ import javax.faces.application.Application;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_02ElBindingFactoryImpl;
 
+/**
+ * Provides the {@link ElBindingFactory} to use based on the available implementation.
+ */
+public final class ElBindingFactoryProvider {
 
-public class ElBindingFactoryProvider {
-
-    static final String LEGACY_IMPL_CLASS = "net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_legacyElBindingFactoryImpl";
+    static final String LEGACY_IMPL_CLASS = "net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_legacyElBindingFactoryImpl"; // SUPPRESS CHECKSTYLE
     private static final Logger LOG = Logger.getLogger(ElBindingFactoryProvider.class.getName());
 
+    private ElBindingFactoryProvider() { }
+
+    /**
+     * Return a suitable factory.
+     * @param application (required) some implementations need it (e.g. to get Variable and Property Resolver)
+     * @return the factory, never null
+     */
     public static ElBindingFactory getFactory(Application application) {
 
         try {
             Class.forName("com.sun.faces.el.ValueBindingFactory");
             LOG.info("Instantiating JSF EL Binding factory for the legacy jsf-impl 1.1 ...");
-            // Note: This class is pre-compiled in src/main/resources/net/jakubholy/jeeutils/jsfelcheck/validator/binding/impl/Sun11_legacyElBindingFactoryImpl.class
+            // Note: This class is pre-compiled in src/main/resources/net/jakubholy/jeeutils/jsfelcheck/validator/
+            //      binding/impl/Sun11_legacyElBindingFactoryImpl.class
             // for we wouldn't be able to compile it w/o the jsf impl. it uses but it isn't anywhere in Maven
             return instantiate(LEGACY_IMPL_CLASS, "legacy Sun-based v1.1");
-        } catch (ClassNotFoundException e) {}
+        } catch (ClassNotFoundException e) {} // SUPPRESS CHECKSTYLE (ignored exception)
 
         try {
             Class.forName("com.sun.faces.el.MixedELValueBinding");
             LOG.info("Instantiating JSF EL Binding factory for the published jsf-impl 1.1_02 ...");
             return new Sun11_02ElBindingFactoryImpl(application);
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("No supported implementation of JSF found (jsf-impl 1.1 (legacy) and 1.1_02");
+            throw new IllegalStateException(
+                    "No supported implementation of JSF found (jsf-impl 1.1 (legacy) and 1.1_02");
         }
     }
 

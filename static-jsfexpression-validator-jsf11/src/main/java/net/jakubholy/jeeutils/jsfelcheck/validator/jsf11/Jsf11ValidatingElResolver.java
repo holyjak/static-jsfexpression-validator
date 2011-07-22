@@ -51,7 +51,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
     private final PredefinedVariableResolver variableResolver;
     private final FacesContext mockFacesContext;
 
-    public Jsf11ValidatingElResolver() {
+    public Jsf11ValidatingElResolver() { // SUPPRESS CHECKSTYLE (javadoc)
         propertyResolver = new MockingPropertyResolver();
         variableResolver = new PredefinedVariableResolver(propertyResolver);
 
@@ -69,18 +69,12 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
     }
 
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#setUnknownVariableResolver(net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver) {
         variableResolver.setUnknownVariableResolver(unknownVariableResolver);
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator#validateMethodElExpression(java.lang.String)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public ValidationResult validateMethodElExpression(final String elExpression) {
         try {
             // Create binding - throws an exception if no matching method found
@@ -93,10 +87,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         }
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator#validateValueElExpression(java.lang.String)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public ValidationResult validateValueElExpression(final String elExpression) {
         final ValueBinding binding = elBindingFactory.createValueBinding(elExpression);
         try {
@@ -110,35 +101,25 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         }
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator#declareVariable(java.lang.String, java.lang.Object)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public JsfElValidator declareVariable(final String name, final Object value) {
         variableResolver.declareVariable(name, value);
         return this;
     }
 
-    //@Override
+    /** {@inheritDoc} */
     public JsfElValidator definePropertyTypeOverride(final String elExpression, final Class<?> newType) {
         propertyResolver.definePropertyTypeOverride(elExpression, newType);
         return this;
     }
 
-
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#setIncludeKnownVariablesInException(boolean)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public void setIncludeKnownVariablesInException(
             boolean includeKnownVariablesInException) {
         variableResolver.setIncludeKnownVariablesInException(includeKnownVariablesInException);
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.ValidatingElResolver#addElExpressionFilter(net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
         propertyResolver.addElExpressionFilter(elExpressionFilter);
     }

@@ -34,7 +34,7 @@ import com.sun.faces.util.Util;
 /**
  * Implementation using Sun jsf-impl 1.1_02.
  */
-public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory { // CHECKSTYLE:OFF
+public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory { // SUPPRESS CHECKSTYLE (name with _)
 
     @SuppressWarnings("rawtypes")
     private static final Class[] NO_PARAMS = new Class[0];
@@ -69,22 +69,21 @@ public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory { // CHECK
             throw new ReferenceSyntaxException(ref);
         }
 
+        String normalizedRef;
         if (Util.isMixedVBExpression(ref)) {
+            normalizedRef = ref;
             valueBinding = new MixedELValueBinding(application);
         } else {
-            ref = Util.stripBracketsIfNecessary(ref);
+            normalizedRef = Util.stripBracketsIfNecessary(ref);
             // checkSyntax(ref);
             valueBinding = new ValueBindingImpl(application);
         }
-        ((ValueBindingImpl) valueBinding).setRef(ref);
+        ((ValueBindingImpl) valueBinding).setRef(normalizedRef);
 
         return valueBinding;
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.validator.ElBindingFactory#createMethodBinding(java.lang.String)
-     */
-    //@Override
+    /** {@inheritDoc} */
     public MethodBinding createMethodBinding(String ref) {
         if (ref == null) {
             throw new NullPointerException("The argument ref: String may not be null");

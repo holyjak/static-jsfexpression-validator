@@ -26,8 +26,19 @@ import javax.faces.el.ValueBinding;
  */
 public interface ElBindingFactory {
 
+    /**
+     * Create a value binding.
+     * @param ref (required) ex.: #{bean.property}
+     * @return the binding, never null
+     * @throws ReferenceSyntaxException if the expression syntax is incorrect (not {..})
+     */
     ValueBinding createValueBinding(String ref) throws ReferenceSyntaxException;
 
+    /**
+     * Create a method binding.
+     * @param ref (required) ex.: #{bean.actionMethod}
+     * @return the binding, never null
+     */
     MethodBinding createMethodBinding(String ref);
 
 }

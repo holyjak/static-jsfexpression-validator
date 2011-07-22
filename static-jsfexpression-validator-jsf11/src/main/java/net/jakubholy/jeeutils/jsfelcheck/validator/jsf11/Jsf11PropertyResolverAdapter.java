@@ -27,18 +27,18 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.Prope
 import com.sun.faces.el.PropertyResolverImpl;
 
 /**
- * Automatically return a Mockito mock for any property that is valid, otherwise throw a {@link PropertyNotFoundException}.
- *
- * The mocked type is determined automatically but may be forced via {@link Jsf11PropertyResolverAdapter#definePropertyTypeOverride(String, Class)},
- * which is useful e.g. for Maps that return just Objects.
+ * Adapt {@link MockingPropertyResolver} to behave as JSF 1.1 {@link PropertyResolver}.
  */
 public final class Jsf11PropertyResolverAdapter extends PropertyResolver {
 
+    /**
+     * Type resolver implementation delegating to the JSF 1.1 implementation.
+     */
     public static class Jsf11PropertyTypeResolverImpl implements PropertyTypeResolver {
 
         private PropertyResolver realResolver = new PropertyResolverImpl();
 
-        //@Override
+        /** {@inheritDoc} */
         public Class<?> getType(Object target, Object property) {
 
             if (property instanceof Integer) {
@@ -55,6 +55,10 @@ public final class Jsf11PropertyResolverAdapter extends PropertyResolver {
     private final MockingPropertyResolver resolver;
     private final PropertyResolver realResolver = new PropertyResolverImpl();
 
+    /**
+     * Adapter delegating to the given resolver.
+     * @param resolver (required)
+     */
     public Jsf11PropertyResolverAdapter(MockingPropertyResolver resolver) {
         if (resolver == null) {
             throw new IllegalArgumentException("The resolver is required");
