@@ -70,32 +70,35 @@ public class Jsf11PropertyResolverAdapterTest {
         trueResolver.handleNewVariableEncountered(CURRENT_VARIABLE);
     }
 
-    @Test(expected=PropertyNotFoundException.class)
+    @Test(expected = PropertyNotFoundException.class)
     public void should_throw_exception_for_unknown_property() throws Exception {
         resolver.getValue(currentVariable, "unknownProperty");
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_mapped_property_without_declard_component_type() throws Exception {
+    public void should_return_MockObjectOfUnknownType_for_existing_mapped_property_without_declard_component_type()
+        throws Exception {
         assertThat(resolver.getValue(Collections.EMPTY_MAP, "unknownProperty")
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_list_property_without_declard_component_type() throws Exception {
-        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+    public void should_return_MockObjectOfUnknownType_for_existing_list_property_without_declard_component_type()
+        throws Exception {
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, randomIndex())
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
-    public void should_return_MockObjectOfUnknownType_for_existing_array_property_without_declard_component_type() throws Exception {
-        assertThat(resolver.getValue(new Object[0], 456)
+    public void should_return_MockObjectOfUnknownType_for_existing_array_property_without_declard_component_type()
+        throws Exception {
+        assertThat(resolver.getValue(new Object[0], randomIndex())
                 , is(instanceOf(MockObjectOfUnknownType.class)));
     }
 
     @Test
     public void should_return_string_for_existing_string_array_property() throws Exception {
-        assertThat(resolver.getValue(new String[0], 33)
+        assertThat(resolver.getValue(new String[0], randomIndex())
                 , is(instanceOf(String.class)));
     }
 
@@ -109,7 +112,7 @@ public class Jsf11PropertyResolverAdapterTest {
     @Test
     public void should_return_declared_component_type_for_existing_list_property() throws Exception {
         trueResolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Cloneable.class);
-        assertThat(resolver.getValue(Collections.EMPTY_LIST, 123)
+        assertThat(resolver.getValue(Collections.EMPTY_LIST, randomIndex())
                 , is(instanceOf(Cloneable.class)));
     }
 
@@ -118,8 +121,13 @@ public class Jsf11PropertyResolverAdapterTest {
         trueResolver.definePropertyTypeOverride(CURRENT_VARIABLE + ".*", Float.class);
         // Note: We return an int for any number as it can be coerced into any other number
         // i.e. is compatible with it
-        assertThat(resolver.getValue(new Object[0], 456)
+        assertThat(resolver.getValue(new Object[0], randomIndex())
                 , is(instanceOf(Number.class)));
+    }
+
+    private int randomIndex() {
+        final int maxIndex = 1000;
+        return (int) Math.random() * maxIndex;
     }
 
 }
