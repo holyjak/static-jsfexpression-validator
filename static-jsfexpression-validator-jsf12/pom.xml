@@ -1,14 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-		<version>0.9.3-SNAPSHOT</version>
+		<version>0.9.3</version>
 	</parent>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 	<artifactId>static-jsfexpression-validator-jsf12</artifactId>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.3</version>
 	<name>EL validator for JSF 1.2</name>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.1 implementation. See the readme and main class JsfStaticAnalyzer.</description>
 
@@ -24,7 +23,7 @@
 			<name>Jakub Holy</name>
 			<email>malyvelky@users.sf.net</email>
 			<timezone>GMT+1</timezone>
-			<roles></roles>
+			<roles />
 		</contributor>
 	</contributors>
 
