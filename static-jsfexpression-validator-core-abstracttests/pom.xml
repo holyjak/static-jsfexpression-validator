@@ -27,9 +27,9 @@
 	</contributors>
 
 	<scm>
-		<connection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
-		<developerConnection>scm:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
-		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
+		<connection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
+        <developerConnection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
+        <url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
 	</scm>
 	<dependencies>
 
