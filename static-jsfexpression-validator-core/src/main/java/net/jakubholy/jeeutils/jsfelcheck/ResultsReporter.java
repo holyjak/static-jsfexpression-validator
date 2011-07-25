@@ -115,8 +115,9 @@ public class ResultsReporter {
                     + results.getVariablesNeedingTypeDeclaration().size()
             		+ "] #########################################\n"
             		+ "(You must declare type of local variables, usually defined by h:dataTable, by specifying "
-            		+ "the type of elements in the source collection denoted by its EL, or example:\n"
-            	    + "localVariableTypes.put(value h:dataTable's source attribute, element type's class)");
+            		+ "the type of elements in the source collection denoted by its EL. Example: "
+            		+ "<h:dataTable value='#{cart.books}' var='book'> ->"
+            	    + "localVariableTypes.put(\"cart.books\", MyBook.class)");
             for (MissingLocalVariableTypeDeclarationException untypedVar : results.getVariablesNeedingTypeDeclaration()) {  // SUPPRESS CHECKSTYLE
                 printErr(untypedVar.toString());
             }
