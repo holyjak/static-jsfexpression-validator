@@ -20,6 +20,7 @@
 		<module>static-jsfexpression-validator-jsf12</module>
 		<module>static-jsfexpression-validator-jsf20</module>
         <module>test-webapp-jsf12</module>
+        <module>test-webapp-jsf12-facelets</module>
   </modules>
 
 	<licenses>
