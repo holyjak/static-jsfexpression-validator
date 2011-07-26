@@ -18,7 +18,8 @@
 --%>
 
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
-<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <html>
     <head>
         <title>Hello World</title>
@@ -31,6 +32,11 @@
                     <h:outputText value="Home"/>
                 </h:commandLink>
             </h:form>
+
+            <p>
+                <h:outputText value="FYI: Your name has #{fn:length(helloWorld.name)} characters." />
+            </p>
+
         </f:view>
     </body>
 </html>
