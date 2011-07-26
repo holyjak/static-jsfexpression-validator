@@ -15,11 +15,12 @@
 
 	<modules>
 		<module>static-jsfexpression-validator-core</module>
+        <module>static-jsfexpression-validator-core-abstracttests</module>
 		<module>static-jsfexpression-validator-jsf11</module>
 		<module>static-jsfexpression-validator-jsf12</module>
 		<module>static-jsfexpression-validator-jsf20</module>
-		<module>static-jsfexpression-validator-core-abstracttests</module>
-	</modules>
+        <module>test-webapp-jsf12</module>
+  </modules>
 
 	<licenses>
 		<license>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+    <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+    <artifactId>test-webapp-jsf12</artifactId>
+    <packaging>war</packaging>
+    <version>0.9.4-SNAPSHOT</version>
+    <name>Test JSF 1.2 webapp</name>
+    <description>Exemplifies JSF 1.2 which should be supported by the JSF EL validator for JSF 1.2 (using JSP)</description>
+
+	<parent>
+		<artifactId>jsfelcheck-parent</artifactId>
+		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+		<version>0.9.4-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+	   <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>static-jsfexpression-validator-jsf12</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.core</groupId>
+            <artifactId>myfaces-api</artifactId>
+            <version>${myfaces.jsf12.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.core</groupId>
+            <artifactId>myfaces-impl</artifactId>
+            <version>${myfaces.jsf12.version}</version>
+        </dependency>
+
+        <!-- dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency-->
+
+        <dependency>
+            <groupId>org.apache.myfaces.tomahawk</groupId>
+            <artifactId>tomahawk12</artifactId>
+            <version>1.1.9</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+            <scope>runtime</scope>
+        </dependency>
+
+	</dependencies>
+
+	<properties>
+		<maven.jetty.plugin.version>6.1.22</maven.jetty.plugin.version>
+		<log4j.version>1.2.13</log4j.version>
+	</properties>
+
+	<build>
+		<finalName>test-webapp-jsf12</finalName>
+		<plugins>
+			<plugin>
+				<!--This plugin allows to run the example using
+				        mvn -Djetty.port=9999 jetty:run
+				        or: mvn -PjettyConfig -Djetty.port=9999 jetty:run
+				    Then go to
+				        http://localhost:9999/test-webapp-jsf12
+				-->
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<version>${maven.jetty.plugin.version}</version>
+				<configuration>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+    <profiles>
+
+
+
+		<profile>
+			<!-- Debug profile for myfaces and jetty. It allows to see debug messages
+				using -PjettyConfig -->
+			<id>jettyConfig</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+					</resource>
+					<resource>
+						<directory>src/main/log4j</directory>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<!--This plugin allows to run the example using mvn jetty:run -->
+						<groupId>org.mortbay.jetty</groupId>
+						<artifactId>maven-jetty-plugin</artifactId>
+						<version>${maven.jetty.plugin.version}</version>
+						<configuration>
+							<scanIntervalSeconds>10</scanIntervalSeconds>
+							<systemProperties>
+								<systemProperty>
+									<name>org.apache.commons.logging.Log</name>
+									<value>org.apache.commons.logging.impl.Log4JLogger</value>
+								</systemProperty>
+							</systemProperties>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+					<version>${log4j.version}</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
+</project>
