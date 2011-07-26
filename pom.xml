@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
@@ -32,7 +33,7 @@
 			<name>Jakub Holy</name>
 			<email>malyvelky@users.sf.net</email>
 			<timezone>GMT+1</timezone>
-			<roles />
+			<roles/>
 		</contributor>
 	</contributors>
 
@@ -42,13 +43,6 @@
 		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
 	</scm>
 	<dependencies>
-
-		<dependency>
-			<groupId>javax.faces</groupId>
-			<artifactId>jsf-api</artifactId>
-			<!--version>1.1_02</version -->
-			<version>1.1_02</version>
-		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -214,5 +208,10 @@
 		</profile>
 
 	</profiles>
+
+	<properties>
+	   <myfaces.jsf12.version>1.2.10</myfaces.jsf12.version>
+	   <myfaces.jsf20.version>2.1.1</myfaces.jsf20.version>
+	</properties>
 
 </project>

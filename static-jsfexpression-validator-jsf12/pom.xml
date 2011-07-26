@@ -9,7 +9,9 @@
 	<artifactId>static-jsfexpression-validator-jsf12</artifactId>
 	<version>0.9.4-SNAPSHOT</version>
 	<name>EL validator for JSF 1.2</name>
-	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.1 implementation. See the readme and main class JsfStaticAnalyzer.</description>
+	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.2 implementation. See the readme and main class JsfStaticAnalyzer.
+
+Note:  JSF 1.2 &lt;=&gt; JavaEE 5 =&gt; Servlet 2.5 and JSP 2.1 =&gt;Tomcat 6.0.x</description>
 
 	<licenses>
 		<license>
@@ -43,13 +45,13 @@
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-api</artifactId>
-            <version>1.2.9</version>
+            <version>${myfaces.jsf12.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-impl</artifactId>
-            <version>1.2.9</version>
+            <version>${myfaces.jsf12.version}</version>
         </dependency>
 
         <dependency>
@@ -66,7 +68,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
 
 	</dependencies>
 

@@ -9,7 +9,9 @@
 	<artifactId>static-jsfexpression-validator-jsf20</artifactId>
 	<version>0.9.4-SNAPSHOT</version>
 	<name>EL validator for JSF 2.0</name>
-	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.2 (shall switch to 2.0 soon) implementation. See the readme and main class JsfStaticAnalyzer.</description>
+	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.2 (shall switch to 2.0 soon) implementation. See the readme and main class JsfStaticAnalyzer.
+
+Note: JSF 2.0 &lt;=&gt; JavaEE 6 =&gt; Servlet 3.0 and JSP/EL 2.2 =&gt; Tomcat 7.0.x.</description>
 
 	<licenses>
 		<license>
@@ -46,6 +48,27 @@
             <artifactId>static-jsfexpression-validator-jsf12</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!--
+        <dependency>
+            <groupId>org.apache.myfaces.core</groupId>
+            <artifactId>myfaces-api</artifactId>
+            <version>${myfaces.jsf20.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.core</groupId>
+            <artifactId>myfaces-impl</artifactId>
+            <version>${myfaces.jsf20.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        -->
 
 	</dependencies>
 

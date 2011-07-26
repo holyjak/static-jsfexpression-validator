@@ -40,6 +40,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>1.1_02</version>
+            <scope>compile</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>javax.faces</groupId>
 			<artifactId>jsf-impl</artifactId>
