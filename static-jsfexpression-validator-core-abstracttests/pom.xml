@@ -3,11 +3,11 @@
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-		<version>0.9.4-SNAPSHOT</version>
+		<version>0.9.4</version>
 	</parent>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 	<artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>
-	<version>0.9.4-SNAPSHOT</version>
+	<version>0.9.4</version>
 
 	<licenses>
 		<license>
