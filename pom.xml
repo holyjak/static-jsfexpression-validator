@@ -105,6 +105,11 @@
 			</plugin>
 
 			<plugin>
+			     <!--
+			     Releasing:
+			         mvn release:prepare -DautoVersionSubmodules=true
+			         mvn release:perform
+			      -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.2</version>
