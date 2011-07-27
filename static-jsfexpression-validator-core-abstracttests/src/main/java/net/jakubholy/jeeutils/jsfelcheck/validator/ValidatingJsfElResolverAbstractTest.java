@@ -268,6 +268,8 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     // CHECKSTYLE:ON
 
+    // #################################################################################### HELPER FUNCTIONS ###########
+
     private void assertResultValueType(ValidationResult result, Class<?> type) {
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
         assertThat(((SuccessfulValidationResult) result).getExpressionResult()
@@ -281,7 +283,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     }
 
     /** Assert that the expression is valid and returns non-null value. */
-    private void assertExpressionValid(final String elExpression) {
+    protected final void assertExpressionValid(final String elExpression) {
         ValidationResult result = elResolver.validateValueElExpression(elExpression);
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
 

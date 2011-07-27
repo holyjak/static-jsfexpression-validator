@@ -36,6 +36,14 @@
             <version>${myfaces.jsf12.version}</version>
         </dependency>
 
+		<dependency>
+		      <!-- needed to compile getElContext() -->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>el-api</artifactId>
+			<version>6.0.29</version>
+			<scope>provided</scope>
+		</dependency>
+
         <!-- dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>

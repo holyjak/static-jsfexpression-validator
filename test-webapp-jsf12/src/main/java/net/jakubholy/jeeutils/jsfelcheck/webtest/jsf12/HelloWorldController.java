@@ -24,10 +24,8 @@ package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12;
  */
 public class HelloWorldController {
 
-    
-    //properties
-    private String name;
-    
+    private String name = "your_name";
+
     /**
      * default empty constructor
      */

@@ -57,6 +57,7 @@ import org.apache.myfaces.el.unified.FacesELContext;
 public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     private static final Class<?>[] NO_PARAMS = new Class<?>[0];
+    private final MethodFakingFunctionMapper functionMapper = new MethodFakingFunctionMapper();
     private ValidatingFakeValueResolver validatingResolver;
     private ExpressionFactory expressionFactory;
     private FacesContext context;
@@ -75,7 +76,10 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         context = mock(FacesContext.class);
         when(context.getExternalContext()).thenReturn(externalContextMock);
 
-        elContext = new FacesELContext(buildElResolver() , context);
+        FacesELContext facesELContext = new FacesELContext(buildElResolver() , context);
+        facesELContext.setFunctionMapper(functionMapper);
+        elContext = facesELContext;
+        //when(context.getELContext()).thenReturn(elContext); // possible but actually not required by the implem.
     }
 
     /**
@@ -99,6 +103,7 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     /** {@inheritDoc} */
     public ValidationResult validateValueElExpression(String elExpression) {
+        functionMapper.setCurrentExpression(elExpression);
         final ValueExpression valueExpression = expressionFactory.createValueExpression(
                 elContext, elExpression, Object.class);
         try {
@@ -117,6 +122,7 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     /** {@inheritDoc} */
     public ValidationResult validateMethodElExpression(String elExpression) {
+        functionMapper.setCurrentExpression(elExpression);      // most likely absolutely unnecessary
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(
                     elContext, elExpression, Object.class, NO_PARAMS);

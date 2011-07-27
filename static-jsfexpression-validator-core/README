@@ -12,7 +12,7 @@ See detailed description of how to use the tool at
 http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/
 
 TODO
-- run Findbugs and Sonar, check licenses, Checkstyle
+- run Sonar
 
 - finishing touches:
     - each jsf impl. uses its own faces-config parser
@@ -20,8 +20,9 @@ TODO
 - full JSF 1.2+ support:
     - Facelets
     - detect annotated managed beans
-    - support EL functions (perhaps just reuse Jasper's FunctionMapper ?)
+    - support EL functions (not just 'function tolerance' as implemented now)
 
+- report all functions found (and of course not validated)
 - add example JSF page
 - test with various JSF projects
 - better error msg for

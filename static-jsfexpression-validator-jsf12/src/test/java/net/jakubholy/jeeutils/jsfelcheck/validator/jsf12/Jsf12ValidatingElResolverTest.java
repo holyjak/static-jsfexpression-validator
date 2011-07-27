@@ -46,4 +46,17 @@ public class Jsf12ValidatingElResolverTest extends ValidatingJsfElResolverAbstra
                 , "this is a literal string, not an EL expression");
     }
 
+    @Test
+    public void should_fake_method_of_any_arguments_and_arity() throws Exception {
+        assertExpressionValid("#{fake:fakeFunction0()}");
+        assertExpressionValid("#{fake:fakeFunction1(123) == true}");           // coerce to boolean
+        assertExpressionValid("#{fake:fakeFunction2('string', 456) == 987}");   // coerce to int
+        elResolver.declareVariable("myArray", new String[0]);
+        assertExpressionValid("#{fake:fakeFunction3(myArray, 'myString')}");
+        // more complex, composed expression:
+        assertExpressionValid("#{f:parentFunc(fake:oneParamFunc(), another:anotherParamFunc(456))}");
+        //assertExpressionValid("#{(fake:fakeFunction0() + another:anotherFunc(456)) > 0}");
+        // `- now fails, can't coerce "" -> int (NumberFormatException)
+    }
+
 }
