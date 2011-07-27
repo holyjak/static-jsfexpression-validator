@@ -3,11 +3,11 @@
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-		<version>0.9.4</version>
+		<version>0.9.5-SNAPSHOT</version>
 	</parent>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 	<artifactId>static-jsfexpression-validator-jsf20</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5-SNAPSHOT</version>
 	<name>EL validator for JSF 2.0</name>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages using a JSF 1.2 (shall switch to 2.0 soon) implementation. See the readme and main class JsfStaticAnalyzer.
 
