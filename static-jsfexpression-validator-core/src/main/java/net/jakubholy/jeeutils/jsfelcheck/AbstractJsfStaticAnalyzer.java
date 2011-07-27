@@ -76,8 +76,8 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * <h3>Limitations</h3>
  *
  * <pre>
- * - JSF 1.1 (switching to another one requires replacing the Sun's ValueBindingFactory and
- * MethodBindingFactory used by the {@link JsfElValidator} by appropriate alternatives).
+ * - Function in expressions do not cause failures but are not checked for validity (e.g. fn:contains(s1,s2)).
+ * - JSF 2.0 doesn't have a native support yet, reuses JSF 1.2 implementation.
  * - Currently it's assumed that a tag can declare only 1 local variable (var in dataTable).
  * - Included files (statically or dynamically) are processed without taking their inclusion
  * into account, i.e. variables defined in the including page aren't available when checking them.
@@ -163,6 +163,8 @@ public abstract class AbstractJsfStaticAnalyzer {
         JsfElValidatingPageNodeListener pageNodeValidator = initializeValidationSubsystem(
                 localVariableTypes, extraVariables, propertyTypeOverrides);
 
+        applySystemProperties();
+
         // Run it
         JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
                 pageNodeValidator);
@@ -191,6 +193,13 @@ public abstract class AbstractJsfStaticAnalyzer {
                 + ") IN " + minutes + "min " + seconds + "s");
 
         return results;
+    }
+
+    private void applySystemProperties() {
+        setPrintCorrectExpressions(
+                Boolean.getBoolean("jsfelcheck.printCorrectExpressions") || isPrintCorrectExpressions());
+        setSuppressOutput(
+                Boolean.getBoolean("jsfelcheck.suppressOutput") || isSuppressOutput());
     }
 
     private JsfElValidatingPageNodeListener initializeValidationSubsystem(
@@ -464,7 +473,12 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     /**
-     * See {@link ResultsReporter#setPrintCorrectExpressions(boolean)}.
+     * Normally successfully validated expressions are not printed but by setting this to true
+     * you can force them to be printed.
+     * <p>
+     * It can be also set by setting the system property
+     * {@code jsfelcheck.printCorrectExpressions} to true.
+     *
      * @param printCorrectExpressions (required)
      */
     public void setPrintCorrectExpressions(boolean printCorrectExpressions) {
@@ -525,6 +539,10 @@ public abstract class AbstractJsfStaticAnalyzer {
 
     /**
      * True - do not print results to the standard output / error stream. Default: false.
+     * <p>
+     * It can be also set by setting the system property
+     * {@code jsfelcheck.suppressOutput} to true.
+     *
      * @param suppressOutput (required)
      */
     public void setSuppressOutput(boolean suppressOutput) {
