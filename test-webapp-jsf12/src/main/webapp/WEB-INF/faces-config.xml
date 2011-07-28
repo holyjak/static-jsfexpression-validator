@@ -17,19 +17,25 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<faces-config version="1.2" 
+<faces-config version="1.2"
     xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd">
-	
+
 	<!-- managed beans of the simple hello world app -->
 	<managed-bean>
 		<managed-bean-name>helloWorld</managed-bean-name>
 		<managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.HelloWorldController</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
-	
+
+    <managed-bean>
+        <managed-bean-name>shop</managed-bean-name>
+        <managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.BookController</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
 	<!-- navigation rules for helloWorld.jsp -->
 	<navigation-rule>
 		<from-view-id>/helloWorld.jsp</from-view-id>
@@ -38,7 +44,7 @@
 			<to-view-id>/page2.jsp</to-view-id>
 		</navigation-case>
 	</navigation-rule>
-	
+
 	<!-- navigation rules for page2.jsp -->
 	<navigation-rule>
 		<from-view-id>/page2.jsp</from-view-id>

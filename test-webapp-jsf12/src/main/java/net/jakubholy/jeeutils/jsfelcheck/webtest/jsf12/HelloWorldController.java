@@ -20,18 +20,12 @@ package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12;
 
 /**
  * A typical simple backing bean, that is backed to <code>helloworld.jsp</code>
- * 
+ *
  */
 public class HelloWorldController {
 
     private String name = "your_name";
 
-    /**
-     * default empty constructor
-     */
-    public HelloWorldController(){
-    }
-    
     //-------------------getter & setter
     public String getName() {
         return name;
@@ -39,7 +33,7 @@ public class HelloWorldController {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * Method that is backed to a submit button of a form.
      */

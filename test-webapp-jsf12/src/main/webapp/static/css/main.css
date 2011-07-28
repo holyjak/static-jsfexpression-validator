@@ -1,0 +1,150 @@
+/* ----------------------------------------------------------------------------------------------------------
+
+    This website template was downloaded from http://www.nuviotemplates.com - visit us for more templates
+
+    Structure:
+    display; position; float; z-index; overflow; width; height; margin; padding; border; background; align; font;
+
+    Content:
+    
+        1) HTML tags, reset
+        2) Universal styles (display, float, margin, text-align...)
+        3) Generally HTML styles (table, ul, dl...)
+        4) Layout
+        5) Page: Home
+        
+---------------------------------------------------------------------------------------------------------- */
+
+/* ----------------------------------------------------------------------------------------------------------
+1) HTML tags, reset
+---------------------------------------------------------------------------------------------------------- */
+
+* {margin:0; padding:0;}
+body, div, span, p, a, img, ul, ol, li, caption, table, thead, tbody, tfoot, tr, th, td, form, fieldset, legend, label, dl, dt, dd, blockquote, applet, object, h1, h2, h3, h4, h5 {border:0;}
+body {padding-bottom:20px; background:url("../design/bg.gif") 0 0 repeat-x; font:0.8em/1.5 "arial",sans-serif; text-align:center;}
+
+h1, h2, h3, h4, h5, h6 {margin:15px 0 10px 0;}
+h1 {font-size:180%;}
+h2 {font-size:160%;}
+h3 {font-size:140%;}
+h4 {font-size:120%;}
+h5 {font-size:100%;}
+
+p, table, ul, ol, dl, fieldset {margin:15px 0;}
+
+table {border-collapse:collapse; border-spacing:0; font-size:100%;}
+th {text-align:center; font-weight:bold;}
+th, td {padding:3px 7px;}
+
+ul, ol {margin-left:30px;}
+ul ul, ol ol {margin:0; margin-left:20px;}
+ol {list-style-type:decimal;}
+li {display:list-item;}
+
+dt {font-weight:bold;}
+dd {margin-left:30px;}
+
+fieldset {position:relative; padding:10px;}
+legend {position:absolute; top:-1em; margin:0; padding:5px 10px; font-size:100%; font-weight:bold;}
+
+/* ----------------------------------------------------------------------------------------------------------
+2) Universal styles (display, float, margin, text-align...)
+---------------------------------------------------------------------------------------------------------- */
+
+.box {min-height:1px;}
+.box:after {display:block; visibility:hidden; clear:both; line-height:0; font-size:0; content:".";}
+
+.relative {position:relative;}
+
+.clear {clear:both;}
+
+.f-left {float:left !important;} img.f-left {float:left; margin-right:10px;}
+.f-right {float:right !important;} img.f-right {float:right; margin-left:10px;}
+
+.t-left {text-align:left !important;}
+.t-center {text-align:center !important;}
+.t-right {text-align:right !important;}
+.t-justify {text-align:justify !important;}
+
+.va-top {vertical-align:top;}
+.va-middle {vertical-align:middle;}
+.va-bottom {vertical-align:bottom;}
+
+.nom {margin:0 !important;}
+.nomt {margin-top:0 !important;}
+.nomb {margin-bottom:0 !important;}
+
+.noscreen {display:none;}
+
+/* ----------------------------------------------------------------------------------------------------------
+3) Generally HTML styles (table, ul, dl...)
+---------------------------------------------------------------------------------------------------------- */            
+
+table.table-style01 {width:100%;}
+table.table-style01 th {text-align:center;}
+
+ul.ul-style01 {margin:15px 0 15px 20px; padding:0; list-style:none;}
+ul.ul-style01 li {margin:0; padding:0; padding-left:15px; background:url("../design/ul-style01.gif") 0 5px no-repeat;} 
+ul.ul-style01 ul {margin:0; padding:0; list-style:none;}
+ul.ul-style01 ul li {background:url("../design/ul-style01-sub.gif") 0 5px no-repeat;}
+
+/* ----------------------------------------------------------------------------------------------------------
+4) Layout
+---------------------------------------------------------------------------------------------------------- */
+
+#main {width:910px; margin:0 auto; text-align:left;}
+
+    #header {position:relative; height:100px; background:url("../design/header.jpg") 0 0 no-repeat; overflow:hidden;}
+    
+        #logo {position:absolute; top:30px; left:80px; margin:0; font-size:200%; letter-spacing:-1px; font-weight:normal;}
+        #logo span {font-weight:bold;}
+        #logo a {text-decoration:none;}
+        
+        #slogan {position:absolute; top:40px; right:15px; width:230px; font-size:120%; font-weight:normal; font-style:italic; text-align:center;}
+
+    #nav {padding:0 15px 5px 6px; background:url("../design/nav.gif") 0 100% no-repeat;}
+    
+        #nav ul {margin:0; padding:0; list-style:none;}
+        #nav ul li {display:inline; margin:0; padding:0;}
+        #nav ul li a {display:block; float:left; padding:12px 15px 12px 14px; background:url("../design/nav-link.gif") 100% 0 repeat-y; text-decoration:underline;}
+        #nav ul li#nav-active a {font-weight:bold; text-decoration:none;}
+
+    #cols {background:url("../design/cols.gif") 0 0 repeat-y;}
+
+        #content {float:left; width:655px; overflow:hidden;}
+        
+            #content #content-title {margin:0; padding:15px 15px 10px 20px; background:url("../design/content-title.gif") 0 0 no-repeat; font-size:140%; font-weight:normal;}
+            #content #content-in {padding:15px 15px 10px 20px;}
+        
+        #aside {float:right; width:255px; overflow:hidden;}
+        
+            #aside #aside-title {margin:0; padding:15px 15px 10px 15px; background:url("../design/aside-title.gif") 0 0 no-repeat; font-size:140%; font-weight:normal;}
+            #aside .aside-in {padding:10px 10px 15px 10px;}
+            #aside .aside-box {padding:10px; background:url("../design/aside-box.jpg") 0 0 no-repeat;}
+            #aside .title {margin:0 5px 0 0; padding:10px 15px; background:url("../design/aside-title-02.gif") 0 0 repeat-x; font-size:100%;}    
+
+    #cols-bottom {width:910px; height:12px; background:url("../design/cols-bottom.gif") 0 0 no-repeat; font-size:0;}
+    
+    #footer {width:870px; height:40px; padding:20px 20px 0 20px; background:url("../design/footer.gif") 0 0 no-repeat;}
+    #footer p {margin:0;}
+ 
+/* ----------------------------------------------------------------------------------------------------------
+5) Page: Home
+---------------------------------------------------------------------------------------------------------- */
+
+#perex {margin-left:5px; padding:15px; background:url("../design/perex.gif") 0 100% no-repeat;}
+#perex p {margin:0;}
+
+#sections {background:url("../design/sections.gif") 0 0 repeat-y;}
+#sections-bottom {width:620px; height:7px; background:url("../design/sections-bottom.gif") 0 0 no-repeat; font-size:0;}
+
+    .section {float:left; width:200px;}
+    .section p {margin:0;}
+    .section.margin {margin:0 10px;}
+    .section h3 {margin:0; padding:10px; background:url("../design/section-title.gif") 0 0 no-repeat; font-size:100%;}
+    .section-in {margin-bottom:10px; padding:0 10px 10px 10px;}
+
+dl#news, dl#news dd {margin:0;}
+dl#news dt {clear:both; padding-left:18px; background:url("../design/ico-list.gif") 0 2px no-repeat;}
+dl#news dd {margin:7px 0 10px 0; padding-bottom:10px;}
+dl#news dd span.date {padding-right:10px; background:url("../design/date.gif") 100% 50% no-repeat; font-size:85%; font-weight:bold;}
