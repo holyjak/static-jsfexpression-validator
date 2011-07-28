@@ -18,8 +18,8 @@
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
 
 import java.sql.ResultSet;
+import java.util.Collection;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,7 +98,8 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
         // TODO verify sourceModel <> null and one of the allowed types
 
         Class<?> declaredVariableType = declaredTypes.get(sourceExpression);
-        declaredVariableType = tryToExtractTypeFromSourceExpression(sourceModel, declaredVariableType);
+        declaredVariableType = tryToExtractTypeFromSourceExpression(
+                sourceModel, declaredVariableType, iterationVariableName);
 
         if (/*iterationVariableName != null &&*/ declaredVariableType == null) {
             throw new MissingLocalVariableTypeDeclarationException(iterationVariableName, sourceExpression);
@@ -115,10 +116,11 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
      * array or a simple value (don't ask me why somebody uses dataTable for that but they do).
      * @param sourceModel (optional)
      * @param declaredVariableType (optional)
+     * @param variableName (required) for logging
      * @return the variables type if it can be determined (or the declared type, if set), null otherwise
      */
     private Class<?> tryToExtractTypeFromSourceExpression(
-            ValidationResult sourceModel, final Class<?> declaredVariableType) {
+            ValidationResult sourceModel, final Class<?> declaredVariableType, String variableName) {
 
         Class<?> result = declaredVariableType;
 
@@ -132,7 +134,7 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
                 // See sublcasses of DataModel: http://download.oracle.com/docs/cd/E17802_01/j2ee/javaee/
                 //      javaserverfaces/2.0/docs/api/javax/faces/model/DataModel.html
                 Class<?> sourceValueType = sourceValue.getClass();
-                boolean isNonArrayCollection = List.class.isAssignableFrom(sourceValueType)
+                boolean isNonArrayCollection = Collection.class.isAssignableFrom(sourceValueType)
                     || ResultSet.class.isAssignableFrom(sourceValueType)
                     || DataModel.class.isAssignableFrom(sourceValueType)
                     || (jstlResultClass != null && jstlResultClass.isAssignableFrom(sourceValueType));
@@ -142,6 +144,8 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
                 } else if (!isNonArrayCollection) {
                     result = stripMockitoSubclass(sourceValueType); // the source is likely a single value thing
                     // Perhaps make configurable whether / for which types to allow this???
+                    LOG.info("Local variable '" + variableName
+                    		+ "' found but seems to be just a single, non-collection value, using it directly");
                 }
             }
         }
@@ -158,7 +162,7 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
         if (matcher.find()) {
             String mockedClass = matcher.group(1);
             try {
-                LOG.info("Found mockito-generated class '"
+                LOG.fine("Found mockito-generated class '"
                         + sourceValueType.getName() + "', replacing with the original class '"
                         + mockedClass + "'");
                 return Class.forName(mockedClass);

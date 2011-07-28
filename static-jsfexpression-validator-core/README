@@ -13,6 +13,10 @@ http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf
 
 TODO
 - run Sonar
+- test-webapp-jsf12 doesn't report missing local variable for book
+
+- make it possible/easy to register other local variable extractors, min. re-register h:dataTable for other
+    similar tags (enhanced dataTables from JSF fwrks; value and var attributes perhaps configurable?)
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> FakingMethodMapper
@@ -20,7 +24,7 @@ TODO
     - make true jsf20 impl. using myfaces 2.0
 - full JSF 1.2+ support:
     - Facelets
-    - detect annotated managed beans
+    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...])
     - support EL functions (not just 'function tolerance' as implemented now)
 
 - report all functions found (and of course not validated)
