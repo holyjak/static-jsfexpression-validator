@@ -15,6 +15,7 @@ TODO
 - run Sonar
 
 - finishing touches:
+    - add addFunctionReturnTypeOverride -> FakingMethodMapper
     - each jsf impl. uses its own faces-config parser
     - make true jsf20 impl. using myfaces 2.0
 - full JSF 1.2+ support:
