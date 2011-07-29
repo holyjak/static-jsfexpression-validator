@@ -3,7 +3,9 @@ package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.dao;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
@@ -75,8 +77,10 @@ public class SpringBookDaoImpl implements BookDao {
 
     @Override
     public SortedSet<AuthorStats> findAuthors() {
-        // TODO Auto-generated method stub
-        return null;
+        List<AuthorStats> authorStats = createJdbcTemplate().query(
+                "SELECT author as name, count(*) as frequency FROM book GROUP BY author"
+                    , new BeanPropertyRowMapper<AuthorStats>());
+        return new TreeSet<AuthorStats>(authorStats);
     }
 
 }

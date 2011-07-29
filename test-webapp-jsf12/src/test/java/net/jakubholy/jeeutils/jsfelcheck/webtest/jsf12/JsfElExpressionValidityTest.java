@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
@@ -17,8 +18,10 @@ public class JsfElExpressionValidityTest {
     public void verify_all_el_expressions_valid() throws Exception {
 
         Map<String, Class<?>> extraVariables = Collections.emptyMap();
-        Map<String, Class<?>> localVariableTypes = Collections.emptyMap();
+        Map<String, Class<?>> localVariableTypes = new HashMap<String, Class<?>>();
         Map<String, Class<?>> propertyTypeOverrides = Collections.emptyMap();
+
+        localVariableTypes.put("shop.books", Book.class);
 
         JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
 
