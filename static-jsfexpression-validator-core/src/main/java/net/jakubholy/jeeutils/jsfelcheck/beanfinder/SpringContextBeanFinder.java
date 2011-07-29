@@ -20,7 +20,9 @@ package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
@@ -34,6 +36,8 @@ import org.springframework.core.io.Resource;
  * Uses Spring itself to get the beans.
  */
 public class SpringContextBeanFinder implements ManagedBeanFinder {
+
+    private static final Logger LOG = Logger.getLogger(SpringContextBeanFinder.class.getName());
 
     private final Collection<File> springContextFiles;
 
@@ -66,14 +70,32 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
 
         beanParser.loadBeanDefinitions(toResources(springContextFiles));
 
+        LOG.info("found " + knownBeans.getBeanDefinitionCount() + " definitions in the given Spring config files");
+
         String[] beanNames = knownBeans.getBeanDefinitionNames();
         for (String beanName : beanNames) {
-            String beanClassName = knownBeans.getBeanDefinition(beanName).getBeanClassName();
+            BeanDefinition beanDefinition = knownBeans.getBeanDefinition(beanName);
+            String beanClassName = extractBeanType(beanName, beanDefinition);
             Class<?> beanClass = loadBeanClass(beanName, beanClassName);
             allBeans.add(new ManagedBeanDescriptor(beanName, beanClass));
         }
 
         return allBeans;
+    }
+
+    private String extractBeanType(String beanName, BeanDefinition beanDefinition) {
+        final String definedType = beanDefinition.getBeanClassName();
+        String actualType = definedType;
+
+        // Bypass proxies etc. (perhaps there can be more levels of decorators?)
+        // TODO test more
+        BeanDefinition decoratedBeanDef;
+        while ((decoratedBeanDef = beanDefinition.getOriginatingBeanDefinition()) != null) {
+            actualType = decoratedBeanDef.getBeanClassName();
+            LOG.info("Found bean " + beanName + " wrapped with a decorator; using the original type "
+                    + actualType + "; decorator: " + definedType);
+        }
+        return actualType;
     }
 
     private Class<?> loadBeanClass(String beanName, String beanClassName) {
