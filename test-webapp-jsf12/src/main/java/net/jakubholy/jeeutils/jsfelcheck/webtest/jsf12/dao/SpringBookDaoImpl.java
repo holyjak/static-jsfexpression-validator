@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedS
 public class SpringBookDaoImpl implements BookDao {
 
     private DataSource dataSource;
-    private RowMapper<Book> bookMapper = new BeanPropertyRowMapper<Book>();
+    private RowMapper<Book> bookMapper = new BeanPropertyRowMapper<Book>(Book.class);
 
     /* (non-Javadoc)
      * @see net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.dao.BookDao#getAllBooks()
@@ -72,15 +72,23 @@ public class SpringBookDaoImpl implements BookDao {
     }
 
     private JdbcTemplate createJdbcTemplate() {
-        return new JdbcTemplate(dataSource);
+        return new JdbcTemplate(getDataSource());
     }
 
     @Override
     public SortedSet<AuthorStats> findAuthors() {
         List<AuthorStats> authorStats = createJdbcTemplate().query(
                 "SELECT author as name, count(*) as frequency FROM book GROUP BY author"
-                    , new BeanPropertyRowMapper<AuthorStats>());
+                    , new BeanPropertyRowMapper<AuthorStats>(AuthorStats.class));
         return new TreeSet<AuthorStats>(authorStats);
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
     }
 
 }

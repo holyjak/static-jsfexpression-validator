@@ -5,6 +5,8 @@ public class AuthorStats implements Comparable<AuthorStats> {
     private String name;
     private int frequency;
 
+    public AuthorStats() { /* for Spring */ }
+
     public AuthorStats(String name, int frequency) {
         this.name = name;
         this.frequency = frequency;
@@ -49,6 +51,14 @@ public class AuthorStats implements Comparable<AuthorStats> {
     @Override
     public int compareTo(AuthorStats o) {
         return name.compareTo(o.name);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setFrequency(int frequency) {
+        this.frequency = frequency;
     }
 
 }
