@@ -3,3 +3,7 @@
 .classpath
 target/
 static-jsfexpression-validator-core/.checkstyle
+dbunit-lecture-bkp/
+test-webapp-jsf12/derby.log
+test-webapp-jsf12/derby.log
+test-webapp-jsf12/testData/testDB/
