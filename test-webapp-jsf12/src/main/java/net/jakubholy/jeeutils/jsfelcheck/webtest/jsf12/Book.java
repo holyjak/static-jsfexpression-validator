@@ -8,6 +8,8 @@ public class Book {
     private String name;
     private boolean available;
 
+    public Book() {}
+
     public Book(String isbn, String name, String author, int ranking,
             boolean available) {
         this.isbn = isbn;
