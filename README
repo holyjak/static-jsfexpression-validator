@@ -13,14 +13,8 @@ http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf
 
 TODO
 - run Sonar
-- test-webapp-jsf12 doesn't report missing local variable for book
 - Spring, Faces Config - replace File with URL -> read from .jar
-- DONE: Spring - find original class for decorated bens such as @Controller with  scoped-proxy="targetClass"
-- faces-config - handle defined variables such as:
-        <resource-bundle>
-            <base-name>/som/package/ui_textresources</base-name>
-            <var>regionalblocking_msg</var>
-        </resource-bundle>
+- faces-config - handle resource-bundle variables, see failing test in test-webapp-jsf12
 
 - remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
 

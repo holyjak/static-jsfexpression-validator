@@ -33,6 +33,9 @@
                 <h:messages showDetail="true" showSummary="false"/>
               </h:panelGrid>
             </h:form>
+
+            <p><h:outputText value="#{resourceBundleFromFacesXml.greeting}"/></p>
+
         </f:view>
     </body>
 </html>

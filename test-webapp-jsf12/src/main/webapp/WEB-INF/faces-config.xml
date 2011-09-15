@@ -53,4 +53,11 @@
 			<to-view-id>/helloWorld.jsp</to-view-id>
 		</navigation-case>
 	</navigation-rule>
+
+	<application>
+		<resource-bundle>
+			<base-name>MyResourceBundle</base-name>
+			<var>resourceBundleFromFacesXml</var>
+		</resource-bundle>
+    </application>
 </faces-config>

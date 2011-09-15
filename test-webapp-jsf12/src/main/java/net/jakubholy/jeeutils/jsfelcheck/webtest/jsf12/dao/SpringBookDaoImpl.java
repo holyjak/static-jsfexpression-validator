@@ -24,9 +24,6 @@ public class SpringBookDaoImpl implements BookDao {
     private DataSource dataSource;
     private RowMapper<Book> bookMapper = new BeanPropertyRowMapper<Book>(Book.class);
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.dao.BookDao#getAllBooks()
-     */
     @Override
     public Collection<Book> getAllBooks() {
         return createJdbcTemplate().query("SELECT * FROM book", bookMapper);
@@ -38,22 +35,16 @@ public class SpringBookDaoImpl implements BookDao {
     @Override
     public Collection<Book> findTopBestRatedBooks() {
         JdbcTemplate jdbcTemplate = createJdbcTemplate();
-        jdbcTemplate.setMaxRows(10);
+        jdbcTemplate.setMaxRows(5);
         return jdbcTemplate.query("SELECT * FROM book ORDER BY ranking", bookMapper);
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.dao.BookDao#findBooksByAuthor(java.lang.String)
-     */
     @Override
     public Collection<Book> findBooksByAuthor(String author) {
         return createJdbcTemplate().query("SELECT * FROM book WHERE author=?"
                 , new Object[] {author}, bookMapper);
     }
 
-    /* (non-Javadoc)
-     * @see net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.dao.BookDao#markSoldOut(java.util.Collection)
-     */
     @Override
     public void markSoldOut(Collection<Book> books) {
         final Book[] booksArray = books.toArray(new Book[0]);
