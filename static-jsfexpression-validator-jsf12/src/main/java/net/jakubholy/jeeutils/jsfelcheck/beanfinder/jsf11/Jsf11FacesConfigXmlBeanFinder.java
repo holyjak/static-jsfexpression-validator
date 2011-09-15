@@ -41,6 +41,7 @@ import com.sun.faces.config.rules.FacesConfigRuleSet;
 /**
  * Find managed bean defined in (a) faces-config file(s).
  * Uses the available JSF implementation to parse the file(s).
+ * @deprecated Use the 1.2 version
  */
 public class Jsf11FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
