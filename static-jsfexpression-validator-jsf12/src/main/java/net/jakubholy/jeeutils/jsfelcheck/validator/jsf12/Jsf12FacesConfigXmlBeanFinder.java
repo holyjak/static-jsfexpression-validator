@@ -114,9 +114,9 @@ public class Jsf12FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
             return toManagedBeanDescriptors(facesConfig.getManagedBeans());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to access the faces-config.xml", e);
+            throw new RuntimeException("Failed to access the faces-config xml at " + configFileUrl, e);
         } catch (SAXException e) {
-            throw new RuntimeException("Failed to parse the faces-config.xml", e);
+            throw new RuntimeException("Failed to parse the faces-config xml at " + configFileUrl, e);
         }
     }
 

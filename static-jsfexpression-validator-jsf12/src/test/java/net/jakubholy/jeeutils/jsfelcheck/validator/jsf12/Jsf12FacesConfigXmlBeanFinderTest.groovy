@@ -35,8 +35,9 @@ public class Jsf12FacesConfigXmlBeanFinderTest {
 
      @Test
      public void should_fail_if_nonexistent_file_supplied() throws Exception {
+         thrown.expect(IllegalArgumentException)
+         thrown.expectMessage(containsString("/no/such/file"))
          finderForFile("/no/such/file").findDefinedBackingBeans()
-         fail("Should have failed!");
      }
 
      @Test
@@ -49,32 +50,31 @@ public class Jsf12FacesConfigXmlBeanFinderTest {
          thrown.expect(RuntimeException.class);
          thrown.expectMessage(allOf(
                  containsString("faces-config-invalid_xml.xml")
-                 , containsString("XML parsing failed")));
+                 , containsString("Failed to parse")));
          finderForFile("faces-config-invalid_xml.xml").findDefinedBackingBeans()
      }
 
      @Test
-     public void should_be_able_to_parse_config_file_in_jar() throws Exception {
-         fail("TBD")
-     }
-
-     @Test
-     public void should_fail_for_invalid_url() throws Exception {
+     public void should_fail_for_closed_stream() throws Exception {
          fail("TBD")
      }
 
      @Test
      public void should_return_all_beans_in_the_file() throws Exception {
-         fail("TBD")
+         assert finderForFile("faces-config-some_beans.xml").findDefinedBackingBeans()
+             .collect {it.name}.containsAll(["bean1","bean2"])
      }
 
      @Test
      public void should_return_also_resource_bundle_variables() throws Exception {
-         fail("TBD")
+         def beanNames = finderForFile("faces-config-resource_bundle_var.xml").findDefinedBackingBeans()
+         .collect {it.name}
+         assert beanNames.size() == 1
+         assert beanNames.containsAll(["resourceBundleFromFacesXml"])
      }
 
      def finderForFile(fileName) {
-         beanFinder.setFacesConfigFiles([new File(fileName)])
+         beanFinder.setFacesConfigFiles([new File("src/test/resources/" + fileName)])
          return beanFinder
      }
 
