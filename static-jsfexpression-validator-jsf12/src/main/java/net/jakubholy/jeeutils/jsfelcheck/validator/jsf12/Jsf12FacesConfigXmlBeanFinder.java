@@ -40,22 +40,25 @@ import org.xml.sax.SAXException;
 /**
  * Find managed bean defined in (a) faces-config file(s).
  * Uses the available JSF implementation to parse the file(s).
- * <p>
- * Sources:
- *
- * </p>
  */
 public class Jsf12FacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
     private final ExternalContext externalContext = Mockito.mock(ExternalContext.class);
 
-    private final Collection<File> facesConfigFiles;
+    private Collection<File> facesConfigFiles;
 
     /**
      * Finder reading from the given files.
      * @param facesConfigFiles (required) may be empty
      */
     public Jsf12FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
+        setFacesConfigFiles(facesConfigFiles);
+    }
+
+
+    Jsf12FacesConfigXmlBeanFinder() { /* for testing only */ }
+
+    private void setFacesConfigFiles(final Collection<File> facesConfigFiles) {
         // TODO remove this duplication with Jsf11FacesConfigXmlBeanFinder
         if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
             throw new IllegalArgumentException("facesConfigFiles: Collection<File> cannot be null/empty, is: "
@@ -73,7 +76,6 @@ public class Jsf12FacesConfigXmlBeanFinder implements ManagedBeanFinder {
     }
 
     /* TODO Test with:
-     * - non-exist. file(non-Javadoc)
      * - file w/ no beans
      * - file w/ invalid xml
      * - URL to non-exist. file, URL into a JAR, ...
