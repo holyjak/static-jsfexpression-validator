@@ -20,12 +20,13 @@ import org.junit.Test
 import org.junit.Beforeimport org.junit.Ruleimport org.junit.rules.ExpectedException
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 public class Jsf12FacesConfigXmlBeanFinderTest {
 
     private Jsf12FacesConfigXmlBeanFinder beanFinder;
 
-    @Rule ExpectedException thrown = ExpectedException.none();
+    @Rule public ExpectedException thrown = ExpectedException.none();
 
     @Before
     void setUp() {
