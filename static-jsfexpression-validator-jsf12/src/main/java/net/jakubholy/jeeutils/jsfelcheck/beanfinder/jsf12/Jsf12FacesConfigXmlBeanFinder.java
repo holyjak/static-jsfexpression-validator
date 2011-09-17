@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
+package net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12;
 
 import java.io.*;
 import java.util.Collection;
@@ -23,6 +23,7 @@ import java.util.LinkedList;
 
 import javax.faces.context.ExternalContext;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.AbstractFacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 
 import org.apache.myfaces.config.FacesConfigUnmarshaller;
@@ -38,75 +39,28 @@ import org.xml.sax.SAXException;
  * Find managed bean defined in (a) faces-config file(s).
  * Uses the available JSF implementation to parse the file(s).
  */
-public class Jsf12FacesConfigXmlBeanFinder implements ManagedBeanFinder {
+public class Jsf12FacesConfigXmlBeanFinder extends AbstractFacesConfigXmlBeanFinder {
 
     private final ExternalContext externalContext = Mockito.mock(ExternalContext.class);
 
-    private Collection<InputStream> facesConfigStreams = new LinkedList<InputStream>();
-
     /**
-     * Finder reading from the given files.
-     * @param facesConfigFiles (required) may be empty
+     * Finder reading from the supplied faces-config files.
      */
-    public Jsf12FacesConfigXmlBeanFinder(final Collection<File> facesConfigFiles) {
-        setFacesConfigFiles(facesConfigFiles);
-    }
-
-
-    Jsf12FacesConfigXmlBeanFinder() { /* for testing only */ }
-
-    public Jsf12FacesConfigXmlBeanFinder setFacesConfigFiles(final Collection<File> facesConfigFiles) {
-        // TODO remove this duplication with Jsf11FacesConfigXmlBeanFinder
-        if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
-            throw new IllegalArgumentException("facesConfigStreams: Collection<File> cannot be null/empty, is: "
-                    + facesConfigFiles);
-        }
-
-        for (File facesConfigXml : facesConfigFiles) {
-            if (!facesConfigXml.canRead()) {
-                throw new IllegalArgumentException("The supplied faces-config XML file "
-                        + "cannot be opened for reading: " + facesConfigXml);
-            }
-
-            try {
-                this.facesConfigStreams.add(new NamedInputStream(facesConfigXml));
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException("Failed to create an input stream for the file "
-                		+ facesConfigXml, e);
-            }
-
-        }
-
-        return this;
+    public static ManagedBeanFinder forFiles(final Collection<File> facesConfigFiles) {
+        return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigFiles(facesConfigFiles);
     }
 
     /**
-     * Set input streams to the faces-config XML files to read managed beans from.
-     * @param facesConfigStreams (required)
+     * Finder reading from the supplied faces-config files.
      */
-    public Jsf12FacesConfigXmlBeanFinder setFacesConfigStreams(final Collection<InputStream> facesConfigStreams) {
-        if (facesConfigStreams == null) {
-            throw new IllegalArgumentException("The facesConfigStreams: Collection<InputStream> can't be null");
-        }
-        this.facesConfigStreams.addAll(facesConfigStreams);
-        return this;
+    public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
+        return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigStreams(facesConfigStreams);
     }
+
+    Jsf12FacesConfigXmlBeanFinder() {}
 
     @Override
-    public Collection<ManagedBeanDescriptor> findDefinedBackingBeans() {
-        // TODO remove this duplication with Jsf11FacesConfigXmlBeanFinder
-        final Collection<ManagedBeanDescriptor> allBeans =
-            new LinkedList<ManagedBeanDescriptor>();
-
-        for (InputStream facesConfigStream : facesConfigStreams) {
-            allBeans.addAll(
-                parseFacesConfig(facesConfigStream));
-        }
-
-        return allBeans;
-    }
-
-    private Collection<ManagedBeanDescriptor> parseFacesConfig(InputStream stream) {
+    protected Collection<ManagedBeanDescriptor> parseFacesConfig(InputStream stream) {
         try {
             FacesConfig facesConfig = getUnmarshaller().getFacesConfig(stream, stream.toString());
             stream.close();

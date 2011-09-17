@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12
+package net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12
 
 import org.junit.Test
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.ExpectedException
-import static org.hamcrest.CoreMatchers.*;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+
+
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
 public class Jsf12FacesConfigXmlBeanFinderTest {
 
     private Jsf12FacesConfigXmlBeanFinder beanFinder;

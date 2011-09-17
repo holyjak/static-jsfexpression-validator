@@ -13,7 +13,7 @@
 
     <managed-bean>
         <managed-bean-name>bean2</managed-bean-name>
-        <managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12FacesConfigXmlBeanFinder</managed-bean-class>
+        <managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder</managed-bean-class>
         <managed-bean-scope>application</managed-bean-scope>
     </managed-bean>
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
+package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 import java.io.File;
 import java.io.FileInputStream;

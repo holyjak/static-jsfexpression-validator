@@ -44,7 +44,7 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
     @Override
     protected ManagedBeanFinder createManagedBeanFinder(
             Collection<File> facesConfigFiles) {
-        return new Jsf11FacesConfigXmlBeanFinder(facesConfigFiles);
+        return Jsf11FacesConfigXmlBeanFinder.forFiles(facesConfigFiles);
     }
 
 }

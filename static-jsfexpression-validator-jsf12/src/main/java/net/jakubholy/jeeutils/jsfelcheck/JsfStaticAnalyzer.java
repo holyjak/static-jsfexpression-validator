@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.Collection;
 
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12ValidatingElResolver;
 
@@ -45,7 +45,7 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
     protected ManagedBeanFinder createManagedBeanFinder(
             Collection<File> facesConfigFiles) {
         // For now we just reuse the jsf11 parser
-        return new Jsf11FacesConfigXmlBeanFinder(facesConfigFiles);
+        return Jsf12FacesConfigXmlBeanFinder.forFiles(facesConfigFiles);
     }
 
 }
