@@ -17,7 +17,9 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12
 
 import org.junit.Test
-import org.junit.Beforeimport org.junit.Ruleimport org.junit.rules.ExpectedException
+import org.junit.Before
+import org.junit.Rule
+import org.junit.rules.ExpectedException
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -54,27 +56,47 @@ public class Jsf12FacesConfigXmlBeanFinderTest {
          finderForFile("faces-config-invalid_xml.xml").findDefinedBackingBeans()
      }
 
-     @Test
+     @Test(expected=RuntimeException)
      public void should_fail_for_closed_stream() throws Exception {
-         fail("TBD")
+         def stream = getClass().getResourceAsStream("/faces-config-no_beans.xml")
+         stream.close()
+         beanFinder.setFacesConfigStreams([stream]).findDefinedBackingBeans()
+         fail("Should have failed because of a closed stream")
+     }
+
+     @Test
+     public void should_close_supplied_stream() throws Exception {
+         def stream = getClass().getResourceAsStream("/faces-config-no_beans.xml")
+         beanFinder.setFacesConfigStreams([stream]).findDefinedBackingBeans()
+         try {
+            stream.read()
+            fail("should have failed because of the stream being closed")
+         } catch (IOException e) {
+             if (!e.getMessage().contains("Stream closed")) {
+                 fail("Unexpected exception: $e")
+             }
+         }
      }
 
      @Test
      public void should_return_all_beans_in_the_file() throws Exception {
          assert finderForFile("faces-config-some_beans.xml").findDefinedBackingBeans()
-             .collect {it.name}.containsAll(["bean1","bean2"])
+             .collect {it.name}.sort() == ["bean1","bean2"]
      }
 
      @Test
      public void should_return_also_resource_bundle_variables() throws Exception {
-         def beanNames = finderForFile("faces-config-resource_bundle_var.xml").findDefinedBackingBeans()
-         .collect {it.name}
-         assert beanNames.size() == 1
-         assert beanNames.containsAll(["resourceBundleFromFacesXml"])
+         assert finderForFile("faces-config-resource_bundle_var.xml").findDefinedBackingBeans()
+            .collect {it.name} == ["resourceBundleFromFacesXml"]
      }
 
      def finderForFile(fileName) {
          beanFinder.setFacesConfigFiles([new File("src/test/resources/" + fileName)])
+         return beanFinder
+     }
+
+     def finderForStream(fileName) {
+         beanFinder.setFacesConfigStreams([getClass().getResourceAsStream("/$fileName")])
          return beanFinder
      }
 

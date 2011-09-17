@@ -8,3 +8,12 @@ test-webapp-jsf12/derby.log
 test-webapp-jsf12/derby.log
 test-webapp-jsf12/testData/testDB/
 bin-groovy/
+.idea/
+jsfelcheck-parent.iml
+static-jsfexpression-validator-core/static-jsfexpression-validator-core.iml
+static-jsfexpression-validator-core-abstracttests/static-jsfexpression-validator-core-abstracttests.iml
+static-jsfexpression-validator-jsf11/static-jsfexpression-validator-jsf11.iml
+static-jsfexpression-validator-jsf12/static-jsfexpression-validator-jsf12.iml
+static-jsfexpression-validator-jsf20/static-jsfexpression-validator-jsf20.iml
+test-webapp-jsf12/test-webapp-jsf12.iml
+test-webapp-jsf12-facelets/test-webapp-jsf12-facelets.iml
