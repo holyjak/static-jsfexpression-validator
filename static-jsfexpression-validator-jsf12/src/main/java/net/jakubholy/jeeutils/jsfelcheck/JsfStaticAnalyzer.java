@@ -18,6 +18,7 @@
 package net.jakubholy.jeeutils.jsfelcheck;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
@@ -46,6 +47,12 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
             Collection<File> facesConfigFiles) {
         // For now we just reuse the jsf11 parser
         return Jsf12FacesConfigXmlBeanFinder.forFiles(facesConfigFiles);
+    }
+
+    @Override
+    protected ManagedBeanFinder createManagedBeanFinderForStreams(
+            Collection<InputStream> facesConfigFilesToRead) {
+        return Jsf12FacesConfigXmlBeanFinder.forStreams(facesConfigFilesToRead);
     }
 
 }

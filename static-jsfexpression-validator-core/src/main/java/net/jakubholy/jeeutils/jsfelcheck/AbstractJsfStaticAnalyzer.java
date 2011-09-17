@@ -20,6 +20,7 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -384,6 +385,9 @@ public abstract class AbstractJsfStaticAnalyzer {
 
     protected abstract ManagedBeanFinder createManagedBeanFinder(
             Collection<File> facesConfigFilesToRead);
+
+    protected abstract ManagedBeanFinder createManagedBeanFinderForStreams(
+            Collection<InputStream> facesConfigFilesToRead);
 
     private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
         if (getSpringConfigFiles().isEmpty()) {
