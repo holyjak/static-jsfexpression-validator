@@ -55,14 +55,6 @@ Note:  JSF 1.2 &lt;=&gt; JavaEE 5 =&gt; Servlet 2.5 and JSP 2.1 =&gt;Tomcat 6.0.
         </dependency>
 
         <dependency>
-            <!-- Temporary needed for we reuse JSF 1.1 faces-config parser -->
-            <groupId>javax.faces</groupId>
-            <artifactId>jsf-impl</artifactId>
-            <version>1.1_02</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>static-jsfexpression-validator-core-abstracttests</artifactId>
             <version>${project.version}</version>
