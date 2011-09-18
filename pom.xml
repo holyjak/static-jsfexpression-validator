@@ -21,6 +21,7 @@
 		<module>static-jsfexpression-validator-jsf20</module>
         <module>test-webapp-jsf12</module>
         <module>test-webapp-jsf12-facelets</module>
+        <module>test-webapp-jsf20-facelets_owb</module>
   </modules>
 
 	<licenses>
@@ -35,7 +36,7 @@
 			<name>Jakub Holy</name>
 			<email>malyvelky@users.sf.net</email>
 			<timezone>GMT+1</timezone>
-			<roles />
+			<roles/>
 		</contributor>
 	</contributors>
 
@@ -177,10 +178,12 @@
 	       <plugin>
 	           <groupId>org.codehause.mojo</groupId>
 	           <artifactId>findbugs-maven-plugin</artifactId>
+               <version>2.3.2</version>
 	       </plugin>
            <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-checkstyle-plugin</artifactId>
+               <version>2.6</version>
                <configuration>
                     <configLocation>jh-sun-eclipse-checkstyle.xml</configLocation>
                     <!--failsOnError>false</failsOnError-->
