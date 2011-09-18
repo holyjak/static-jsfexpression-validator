@@ -47,9 +47,18 @@ Note: JSF 2.0 &lt;=&gt; JavaEE 6 =&gt; Servlet 3.0 and JSP/EL 2.2 =&gt; Tomcat 7
             <groupId>${project.groupId}</groupId>
             <artifactId>static-jsfexpression-validator-jsf12</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-impl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!--
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-api</artifactId>
@@ -68,7 +77,6 @@ Note: JSF 2.0 &lt;=&gt; JavaEE 6 =&gt; Servlet 3.0 and JSP/EL 2.2 =&gt; Tomcat 7
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        -->
 
 	</dependencies>
 
