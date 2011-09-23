@@ -12,19 +12,15 @@ See detailed description of how to use the tool at
 http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/
 
 TODO
-- run Sonar
-- Spring, ---Faces-Config--- - replace File with Streams -> read from .jar
-- faces-config - handle resource-bundle variables, see failing test in test-webapp-jsf12
-
-- remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
-
 - make it possible/easy to register other local variable extractors, min. re-register h:dataTable for other
     similar tags (enhanced dataTables from JSF fwrks; value and var attributes perhaps configurable?)
 
+- run Sonar
+
+- remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
+
 - finishing touches:
     - add addFunctionReturnTypeOverride -> FakingMethodMapper
-    - each jsf impl. uses its own faces-config parser
-    - make true jsf20 impl. using myfaces 2.0
 - full JSF 1.2+ support:
     - Facelets
     - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...])

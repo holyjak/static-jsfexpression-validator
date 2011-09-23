@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
@@ -106,8 +107,8 @@ public abstract class AbstractJsfStaticAnalyzer {
     private final ResultsReporter resultsReporter = new ResultsReporter();
 
     private String jspsToIncludeCommaSeparated = null;
-    private Collection<File> facesConfigFiles = Collections.emptyList();
-    private Collection<File> springConfigFiles = Collections.emptyList();
+    private Collection<InputStream> facesConfigFiles = Collections.emptyList();
+    private Collection<InputStream> springConfigFiles = Collections.emptyList();
 
     /** New, unconfigured analyzer. */
     public AbstractJsfStaticAnalyzer() {
@@ -370,34 +371,29 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     private Collection<ManagedBeanDescriptor> findFacesManagedBeans() {
-        if (getFacesConfigFiles().isEmpty()) {
+        if (facesConfigFiles.isEmpty()) {
             return Collections.emptyList();
         }
 
-        LOG.info("Loading faces-config managed beans from "
-                + getFacesConfigFiles());
+        LOG.info("Loading faces-config managed beans from " + facesConfigFiles);
 
-        ManagedBeanFinder beanFinder = createManagedBeanFinder(getFacesConfigFiles());
+        ManagedBeanFinder beanFinder = createManagedBeanFinder(facesConfigFiles);
         Collection<ManagedBeanDescriptor> facesConfigBeans = beanFinder
                 .findDefinedBackingBeans();
         return facesConfigBeans;
     }
 
     protected abstract ManagedBeanFinder createManagedBeanFinder(
-            Collection<File> facesConfigFilesToRead);
-
-    protected abstract ManagedBeanFinder createManagedBeanFinderForStreams(
             Collection<InputStream> facesConfigFilesToRead);
 
     private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
-        if (getSpringConfigFiles().isEmpty()) {
+        if (springConfigFiles.isEmpty()) {
             return Collections.emptyList();
         }
 
-        LOG.info("Loading Spring managed beans from " + getSpringConfigFiles());
+        LOG.info("Loading Spring managed beans from " + springConfigFiles);
 
-        ManagedBeanFinder beanFinder = new SpringContextBeanFinder(
-                getSpringConfigFiles());
+        ManagedBeanFinder beanFinder = SpringContextBeanFinder.forStreams(springConfigFiles);
         return beanFinder.findDefinedBackingBeans();
     }
 
@@ -513,15 +509,24 @@ public abstract class AbstractJsfStaticAnalyzer {
      * @param facesConfigFiles (required) faces-config files to read managed beans from; may be empty
      */
     public void setFacesConfigFiles(Collection<File> facesConfigFiles) {
-        if (facesConfigFiles == null) {
+        if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
             this.facesConfigFiles = Collections.emptyList();
         } else {
-            this.facesConfigFiles = facesConfigFiles;
+            this.facesConfigFiles = FileUtils.filesToStream(facesConfigFiles);
         }
     }
 
-    public Collection<File> getFacesConfigFiles() {
-        return facesConfigFiles;
+    /**
+     * The faces-config.xml files to read managed beans from. Default: empty.
+     * Set to empty or null not to process any.
+     * @param facesConfigStreams (required) faces-config files to read managed beans from; may be empty
+     */
+    public void setFacesConfigStreams(Collection<InputStream> facesConfigStreams) {
+        if (facesConfigStreams == null || facesConfigStreams.isEmpty()) {
+            this.facesConfigFiles = Collections.emptyList();
+        } else {
+            this.facesConfigFiles = facesConfigStreams;
+        }
     }
 
     /**
@@ -530,15 +535,24 @@ public abstract class AbstractJsfStaticAnalyzer {
      * @param springConfigFiles (required) Spring applicationContext files to read managed beans from; may be empty
      */
     public void setSpringConfigFiles(Collection<File> springConfigFiles) {
-        if (springConfigFiles == null) {
+        if (springConfigFiles == null || springConfigFiles.isEmpty()) {
             this.springConfigFiles = Collections.emptyList();
         } else {
-            this.springConfigFiles = springConfigFiles;
+            this.springConfigFiles = FileUtils.filesToStream(springConfigFiles);
         }
     }
 
-    public Collection<File> getSpringConfigFiles() {
-        return springConfigFiles;
+    /**
+     * The Spring application context XML files to read managed beans from.
+     * Default: empty. Set to empty or null not to process any.
+     * @param springConfigStream (required) Spring applicationContext files to read managed beans from; may be empty
+     */
+    public void setSpringConfigStreams(Collection<InputStream> springConfigStream) {
+        if (springConfigStream == null || springConfigStream.isEmpty()) {
+            this.springConfigFiles = Collections.emptyList();
+        } else {
+            this.springConfigFiles = springConfigStream;
+        }
     }
 
     /**

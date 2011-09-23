@@ -46,13 +46,6 @@ public class Jsf12FacesConfigXmlBeanFinder extends AbstractFacesConfigXmlBeanFin
     /**
      * Finder reading from the supplied faces-config files.
      */
-    public static ManagedBeanFinder forFiles(final Collection<File> facesConfigFiles) {
-        return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigFiles(facesConfigFiles);
-    }
-
-    /**
-     * Finder reading from the supplied faces-config files.
-     */
     public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
         return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigStreams(facesConfigStreams);
     }

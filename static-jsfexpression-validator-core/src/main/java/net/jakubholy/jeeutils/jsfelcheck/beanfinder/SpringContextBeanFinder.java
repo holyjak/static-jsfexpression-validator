@@ -18,6 +18,7 @@
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
 /**
@@ -39,26 +41,20 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
 
     private static final Logger LOG = Logger.getLogger(SpringContextBeanFinder.class.getName());
 
-    private final Collection<File> springContextFiles;
+    private Collection<InputStream> springContextFiles;
 
     /**
-     * New finder reading Spring beans from the given applicationContext XML files.
-     * @param springContextFiles (optional) nothing done if empty/null
+     * Finder reading from the supplied Spring applicationContext XML files accessed via streams.
      */
-    public SpringContextBeanFinder(final Collection<File> springContextFiles) {
-        if (springContextFiles == null || springContextFiles.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "springContextFiles: Collection<File> cannot be null/empty, is: " + springContextFiles);
-        }
+    public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
+        return new SpringContextBeanFinder().setSpringConfigStreams(facesConfigStreams);
+    }
 
-        for (File file : springContextFiles) {
-            if (!file.canRead()) {
-                throw new IllegalArgumentException("The supplied Spring application context XML file "
-                		+ "cannot be opened for reading: " + file);
-            }
-        }
+    SpringContextBeanFinder() {}
 
-        this.springContextFiles = new LinkedList<File>(springContextFiles);
+    private SpringContextBeanFinder setSpringConfigStreams(final Collection<InputStream> springContextFiles) {
+        this.springContextFiles = springContextFiles;
+        return this;
     }
 
     /** {@inheritDoc} */
@@ -66,7 +62,8 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
         Collection<ManagedBeanDescriptor> allBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
 
         BeanDefinitionRegistry knownBeans = new SimpleBeanDefinitionRegistry();
-        BeanDefinitionReader beanParser = new XmlBeanDefinitionReader(knownBeans);
+        XmlBeanDefinitionReader beanParser = new XmlBeanDefinitionReader(knownBeans);
+        beanParser.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
 
         beanParser.loadBeanDefinitions(toResources(springContextFiles));
 
@@ -107,12 +104,12 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
         }
     }
 
-    private Resource[] toResources(Collection<File> resourceFiles) {
+    private Resource[] toResources(Collection<InputStream> resourceFiles) {
         Resource[] locations = new Resource[resourceFiles.size()];
 
         int index = 0;
-        for (File configFile : resourceFiles) {
-            locations[index++] = new FileSystemResource(configFile);
+        for (InputStream configFile : resourceFiles) {
+            locations[index++] = new InputStreamResource(configFile);
         }
 
         return locations;

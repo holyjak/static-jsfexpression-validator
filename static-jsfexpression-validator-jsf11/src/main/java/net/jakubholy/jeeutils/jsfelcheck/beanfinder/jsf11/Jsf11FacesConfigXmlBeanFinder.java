@@ -45,14 +45,6 @@ public class Jsf11FacesConfigXmlBeanFinder extends AbstractFacesConfigXmlBeanFin
 
     private static final Logger LOG = Logger.getLogger(Jsf11FacesConfigXmlBeanFinder.class.getName());
 
-
-    /**
-     * Finder reading from the supplied faces-config files.
-     */
-    public static ManagedBeanFinder forFiles(final Collection<File> facesConfigFiles) {
-        return new Jsf11FacesConfigXmlBeanFinder().setFacesConfigFiles(facesConfigFiles);
-    }
-
     /**
      * Finder reading from the supplied faces-config files.
      */

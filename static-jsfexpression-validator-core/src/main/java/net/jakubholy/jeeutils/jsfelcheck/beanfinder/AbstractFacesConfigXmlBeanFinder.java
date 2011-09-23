@@ -18,7 +18,6 @@
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -48,26 +47,8 @@ public abstract class AbstractFacesConfigXmlBeanFinder implements ManagedBeanFin
 
 
     protected final ManagedBeanFinder setFacesConfigFiles(final Collection<File> facesConfigFiles) {
-        if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
-            throw new IllegalArgumentException("facesConfigStreams: Collection<File> cannot be null/empty, is: "
-                    + facesConfigFiles);
-        }
-
-        for (File facesConfigXml : facesConfigFiles) {
-            if (!facesConfigXml.canRead()) {
-                throw new IllegalArgumentException("The supplied faces-config XML file "
-                        + "cannot be opened for reading: " + facesConfigXml);
-            }
-
-            try {
-                getFacesConfigStreams().add(new NamedInputStream(facesConfigXml));
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException("Failed to create an input stream for the file "
-                		+ facesConfigXml, e);
-            }
-
-        }
-
+        final Collection<InputStream> inputStream = getFacesConfigStreams();
+        this.facesConfigStreams = FileUtils.filesToStream(facesConfigFiles);
         return this;
     }
 

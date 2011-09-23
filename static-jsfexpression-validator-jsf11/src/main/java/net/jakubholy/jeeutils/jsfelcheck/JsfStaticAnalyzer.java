@@ -17,7 +17,6 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
 
@@ -44,12 +43,6 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
 
     @Override
     protected ManagedBeanFinder createManagedBeanFinder(
-            Collection<File> facesConfigFiles) {
-        return Jsf11FacesConfigXmlBeanFinder.forFiles(facesConfigFiles);
-    }
-
-    @Override
-    protected ManagedBeanFinder createManagedBeanFinderForStreams(
             Collection<InputStream> facesConfigFilesToRead) {
         return Jsf11FacesConfigXmlBeanFinder.forStreams(facesConfigFilesToRead);
     }
