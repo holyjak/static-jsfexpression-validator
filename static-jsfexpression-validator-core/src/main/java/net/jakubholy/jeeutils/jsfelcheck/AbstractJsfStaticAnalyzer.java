@@ -72,7 +72,8 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * a new fake value of the expected type using Mockito - thus we can check that expressions are
  * valid. When the type of a variable/property cannot be determined (which is often the case for
  * Collections, which can contain nay Object) and isn't defined via property override etc. then
- * we use {@link MockObjectOfUnknownType} - if you see it in a failed JSF EL check then you need
+ * we use {@link net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType} -
+ * if you see it in a failed JSF EL check then you need
  * to declare the type to use.
  *
  * <h3>Limitations</h3>
@@ -100,8 +101,7 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  */
 public abstract class AbstractJsfStaticAnalyzer {
 
-    private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class
-            .getName());
+    private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class.getName());
 
     private final ValidatingElResolver elValidator;
     private final ResultsReporter resultsReporter = new ResultsReporter();
@@ -165,7 +165,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         JsfElValidatingPageNodeListener pageNodeValidator = initializeValidationSubsystem(
                 localVariableTypes, extraVariables, propertyTypeOverrides);
 
-        applySystemProperties();
+        applyConfigurationFromSystemProperties();
 
         // Run it
         JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
@@ -197,7 +197,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         return results;
     }
 
-    private void applySystemProperties() {
+    private void applyConfigurationFromSystemProperties() {
         setPrintCorrectExpressions(
                 Boolean.getBoolean("jsfelcheck.printCorrectExpressions") || isPrintCorrectExpressions());
         setSuppressOutput(
@@ -220,7 +220,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         declareImplicitVariables();
         declareExtraVariables(extraVariables);
 
-        registerKnownManagedBeans(elValidator);
+        discoverAndRegisterDefinedManagedBeans(elValidator);
 
         // Listener
         JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
@@ -257,8 +257,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         DataTableVariableResolver dataTableResolver = initializeDataResolver(localVariableTypes);
 
         ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
-        contextVarRegistry.registerResolverForTag("h:dataTable",
-                dataTableResolver);
+        contextVarRegistry.registerResolverForTag("h:dataTable", dataTableResolver);
         return contextVarRegistry;
     }
 
@@ -304,9 +303,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         jspc.setUriroot(jspDir);
         jspc.setVerbose(1); // 0 = false, 1 = true
         if (jspsToIncludeCommaSeparated != null) {
-            jspc.setJspFiles(jspsToIncludeCommaSeparated); // leave unset to
-                                                           // process all;
-                                                           // comma-separated
+            jspc.setJspFiles(jspsToIncludeCommaSeparated); // leave unset to process all; comma-separated
         }
         return jspc;
     }
@@ -350,7 +347,7 @@ public abstract class AbstractJsfStaticAnalyzer {
      *
      * @param elValidator (required)
      */
-    private void registerKnownManagedBeans(JsfElValidator elValidator) {    // SUPPRESS CHECKSTYLE (param hides field)
+    private void discoverAndRegisterDefinedManagedBeans(JsfElValidator elValidator) {    // SUPPRESS CHECKSTYLE (param hides field)
         Collection<ManagedBeanDescriptor> allDefinedBeans = new LinkedList<ManagedBeanFinder.ManagedBeanDescriptor>();
 
         allDefinedBeans.addAll(findFacesManagedBeans());
