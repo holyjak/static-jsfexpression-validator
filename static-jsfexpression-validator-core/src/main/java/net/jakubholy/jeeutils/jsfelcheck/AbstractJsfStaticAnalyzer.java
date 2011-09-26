@@ -40,6 +40,7 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValid
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.TagJsfVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -109,6 +110,9 @@ public abstract class AbstractJsfStaticAnalyzer {
     private String jspsToIncludeCommaSeparated = null;
     private Collection<InputStream> facesConfigFiles = Collections.emptyList();
     private Collection<InputStream> springConfigFiles = Collections.emptyList();
+
+    private final ContextVariableRegistry contextVariableRegistry = new ContextVariableRegistry();
+    private final DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
 
     /** New, unconfigured analyzer. */
     public AbstractJsfStaticAnalyzer() {
@@ -208,10 +212,11 @@ public abstract class AbstractJsfStaticAnalyzer {
             final Map<String, Class<?>> localVariableTypes,
             final Map<String, Class<?>> extraVariables,
             final Map<String, Class<?>> propertyTypeOverrides) {
-        final ContextVariableRegistry contextVarRegistry = initializeContextVariableRegistry(localVariableTypes);
 
-        elValidator.setUnknownVariableResolver(
-                contextVarRegistry);
+        applyDefinedLocalVarTypesToDataTableResolver(localVariableTypes);
+        this.registerTagVariableResolver("h:dataTable", dataTableResolver);
+
+        elValidator.setUnknownVariableResolver(contextVariableRegistry);
         elValidator.setIncludeKnownVariablesInException(false);
 
         setPropertyTypeOverrides(propertyTypeOverrides);
@@ -224,7 +229,7 @@ public abstract class AbstractJsfStaticAnalyzer {
 
         // Listener
         JsfElValidatingPageNodeListener pageNodeValidator = new JsfElValidatingPageNodeListener(
-                elValidator, contextVarRegistry);
+                elValidator, contextVariableRegistry);
         return pageNodeValidator;
     }
 
@@ -251,24 +256,13 @@ public abstract class AbstractJsfStaticAnalyzer {
         }
     }
 
-    private ContextVariableRegistry initializeContextVariableRegistry(
+    private void applyDefinedLocalVarTypesToDataTableResolver(
             final Map<String, Class<?>> localVariableTypes) {
         // Context-local variables
-        DataTableVariableResolver dataTableResolver = initializeDataResolver(localVariableTypes);
-
-        ContextVariableRegistry contextVarRegistry = new ContextVariableRegistry();
-        contextVarRegistry.registerResolverForTag("h:dataTable", dataTableResolver);
-        return contextVarRegistry;
-    }
-
-    private DataTableVariableResolver initializeDataResolver(
-            final Map<String, Class<?>> localVariableTypes) {
-        DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
         for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
             dataTableResolver.declareTypeFor(variable.getKey(),
                     variable.getValue());
         }
-        return dataTableResolver;
     }
 
     private Map<String, Class<?>> assignMapOrEmpty(
@@ -568,4 +562,50 @@ public abstract class AbstractJsfStaticAnalyzer {
         return resultsReporter.isSuppressOutput();
     }
 
+    /** For testing only */
+    ContextVariableRegistry getContextVariableRegistry() {
+        return contextVariableRegistry;
+    }
+
+    /**
+     * Register a resolver that can extract local variables defined in a JSF tag.
+     * Internally this is used to register the {@link DataTableVariableResolver} for the tag h:dataTable.
+     *
+     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables
+     * @param customResolver (required) the resolver that can find out what local variable the tag delcares
+     * @return this
+     */
+    public AbstractJsfStaticAnalyzer registerTagVariableResolver(String tagQName, TagJsfVariableResolver customResolver) {
+        if (tagQName == null) {
+            throw new IllegalArgumentException("tagQName: String must be fully qualified JSF tag name " +
+                    "such as 'h:dataTable'");
+        }
+        if (customResolver == null) {
+            throw new IllegalArgumentException("customResolver: TagJsfVariableResolver must not be null");
+        }
+        contextVariableRegistry.registerResolverForTag(tagQName, customResolver);
+
+        return this;
+    }
+
+    /**
+     * Register the default {@link DataTableVariableResolver} for another yet compatible JSF tag,
+     * namely a tag that declares its local variable in the 'var' attribute and takes values from it
+     * from a 'value' attribute. Mostly useful for use with JSF libraries that have their own extensions of
+     * the default h:dataTable compatible with how it works.
+     * <p>
+     *     Also necessary if you use different than the default prefix of 'h:'.
+     * </p>
+     * @param tagQName (required)  fully qualified name of the JSF tag that can define new local variables,
+     * e.g. t:dataTable for MyFaces.
+     *
+     * @see #registerTagVariableResolver(String, net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.TagJsfVariableResolver) 
+     */
+    public void registerDataTableTag(String tagQName) {
+        if (tagQName == null) {
+            throw new IllegalArgumentException("tagQName: String must be fully qualified JSF tag name " +
+                    "such as 'h:dataTable'");
+        }
+        contextVariableRegistry.registerResolverForTag(tagQName, dataTableResolver);
+    }
 }

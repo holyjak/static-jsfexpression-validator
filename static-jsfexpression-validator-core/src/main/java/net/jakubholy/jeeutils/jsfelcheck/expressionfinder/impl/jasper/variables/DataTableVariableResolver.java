@@ -91,11 +91,9 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
 
         String iterationVariableName = attributes.get("var");
         String sourceExpression = normalizeExpression(attributes.get("value"));
-
-        // TODO verify value set to avoid NPE
-
         ValidationResult sourceModel = resolvedJsfExpressions.get("value");
-        // TODO verify sourceModel <> null and one of the allowed types
+
+        assertValidTagAttributes(iterationVariableName, sourceExpression, sourceModel);
 
         Class<?> declaredVariableType = declaredTypes.get(sourceExpression);
         declaredVariableType = tryToExtractTypeFromSourceExpression(
@@ -108,6 +106,24 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
             return new VariableInfo(iterationVariableName, declaredVariableType);
         }
 
+    }
+
+    private void assertValidTagAttributes(String iterationVariableName, String sourceExpression, ValidationResult sourceModel) {
+
+        String errorMessage = null;
+        if (iterationVariableName == null) {
+            errorMessage = "The expected attribute 'var' wasn't found in the tag.";
+        } else if (sourceExpression == null) {
+            errorMessage = "The expected attribute 'value' wasn't found in the tag.";
+        } else if (sourceModel == null) {
+            errorMessage = "Even though the attribute 'value' wa found in the tag, it couldn't be " +
+                    "resolved as a JSF EL expression";
+        }
+
+        if (errorMessage != null) {
+            throw new IllegalStateException("Resolver for local variables in JSF dataTable tags failed to " +
+                    "extract necessary information from a tag: " + errorMessage);
+        }
     }
 
     /**

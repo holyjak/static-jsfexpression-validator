@@ -12,9 +12,7 @@ See detailed description of how to use the tool at
 http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/
 
 TODO
-- make it possible/easy to register other local variable extractors, min. re-register h:dataTable for other
-    similar tags (enhanced dataTables from JSF fwrks; value and var attributes perhaps configurable?)
-    * see AbstractJsfStaticAnalyzer.initializeContextVariableRegistry
+- Add test of custom tag resolver/re-registerd DataTableRes. to the JSF webapp tests
 
 - run Sonar
 
