@@ -10,6 +10,7 @@ import java.util.Map;
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
 
+import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.testbean.MyCollectionBean;
 import org.junit.Test;
 
 public class JsfElExpressionValidityTest {
@@ -21,9 +22,12 @@ public class JsfElExpressionValidityTest {
         Map<String, Class<?>> localVariableTypes = new HashMap<String, Class<?>>();
         Map<String, Class<?>> propertyTypeOverrides = Collections.emptyMap();
 
-        localVariableTypes.put("shop.books", Book.class);
-
         JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
+
+        // Local variables continued
+        localVariableTypes.put("shop.books", Book.class);
+        localVariableTypes.put("myCollectionBean.list", MyCollectionBean.ValueHolder.class);
+        jsfStaticAnalyzer.registerDataTableTag("t:dataTable");
 
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
                 "src/main/webapp"

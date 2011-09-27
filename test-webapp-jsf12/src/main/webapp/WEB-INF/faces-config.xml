@@ -23,7 +23,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd">
 
-	<!-- managed beans of the simple hello world app -->
+	<!-- Managed beans of the simple hello world app -->
 	<managed-bean>
 		<managed-bean-name>helloWorld</managed-bean-name>
 		<managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.HelloWorldController</managed-bean-class>
@@ -35,6 +35,14 @@
         <managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.BookController</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
+
+    <!-- Custom test beans -->
+    <managed-bean>
+        <managed-bean-name>myCollectionBean</managed-bean-name>
+        <managed-bean-class>net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12.testbean.MyCollectionBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
 
 	<!-- navigation rules for helloWorld.jsp -->
 	<navigation-rule>

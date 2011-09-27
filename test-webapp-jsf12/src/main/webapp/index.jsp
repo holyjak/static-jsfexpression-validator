@@ -17,6 +17,15 @@
     under the License.
 --%>
 <%@ page session="false"%>
-<%
-response.sendRedirect("helloWorld.jsf");
-%>
+<head>
+    <title>Index</title>
+</head>
+<body>
+    <h1>Available pages</h1>
+
+    <ul>
+        <li><a href="helloWorld.jsf">helloWorld</a></li>
+        <li><a href="testLocalVariables.jsf">testLocalVariables</a></li>
+    </ul>
+
+</body>
