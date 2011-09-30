@@ -18,22 +18,87 @@
 package net.jakubholy.jeeutils.jsfelcheck;
 
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Stupid non-abstract subclass so that we can test the class' code.
  */
 public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer {
+
+    /** BEWARE: Only partly implemented, i.e. doesn't record all. */
+    public static class RecordingDummyElResolver implements ValidatingElResolver {
+
+        private Map<String, Object> extraVariables = new Hashtable<String, Object>();
+        private Map<String, Class<?>> propertyTypeOverrides = new Hashtable<String, Class<?>>();
+
         @Override
-        protected ValidatingElResolver createValidatingElResolver() {
-            return null;
+        public void setUnknownVariableResolver(ElVariableResolver unknownVariableResolver) {
         }
 
         @Override
-        protected ManagedBeanFinder createManagedBeanFinder(Collection<InputStream> facesConfigFilesToRead) {
-            return null;
+        public void setIncludeKnownVariablesInException(boolean includeKnownVariablesInException) {
         }
+
+        @Override
+        public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
+        }
+
+        @Override
+        public ValidationResult validateValueElExpression(String elExpression) {
+            return new FailedValidationResult(new InvalidExpressionException("N/A", "Validation not implemented"));
+        }
+
+        @Override
+        public JsfElValidator declareVariable(String name, Object value) {
+            extraVariables.put(name, value);
+            return this;
+        }
+
+        @Override
+        public JsfElValidator definePropertyTypeOverride(String mapJsfExpression, Class<?> newType) {
+            propertyTypeOverrides.put(mapJsfExpression, newType);
+            return this;
+        }
+
+        @Override
+        public ValidationResult validateMethodElExpression(String expression) {
+            return new FailedValidationResult(new InvalidExpressionException("N/A", "Validation not implemented"));
+        }
+
+        public Map<String, Object> getExtraVariables() {
+            return extraVariables;
+        }
+
+        public Map<String, Class<?>> getPropertyTypeOverrides() {
+            return propertyTypeOverrides;
+        }
+    }
+
+    private RecordingDummyElResolver recordingDummyElResolver;
+
+    @Override
+    protected ValidatingElResolver createValidatingElResolver() {
+        recordingDummyElResolver = new RecordingDummyElResolver();
+        return recordingDummyElResolver;
+    }
+
+    @Override
+    protected ManagedBeanFinder createManagedBeanFinder(Collection<InputStream> facesConfigFilesToRead) {
+        return null;
+    }
+
+    public RecordingDummyElResolver getResolver() {
+        return recordingDummyElResolver;
+    }
 }

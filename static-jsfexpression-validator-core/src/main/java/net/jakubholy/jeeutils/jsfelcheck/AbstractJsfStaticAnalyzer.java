@@ -17,8 +17,23 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import static org.mockito.Mockito.mock;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.ContextVariableRegistry;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
+import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
+import org.apache.jasper.JasperException;
+import org.apache.jasper.compiler.JsfElCheckingVisitor;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
@@ -26,28 +41,10 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.TagJsfVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
-import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
-import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-
-import org.apache.jasper.JasperException;
-import org.apache.jasper.compiler.JsfElCheckingVisitor;
+import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNull;
+import static org.mockito.Mockito.*;
 
 /**
  * Perform analysis of (selected) JSF 1.1 JSP files and validate that all EL
@@ -57,18 +54,23 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * For local variables, such as the <code>var</code> produced by h:dataTable, you
  * must first declare of what type they are as this cannot be determined based
  * on the code, see
- * {@link DataTableVariableResolver#declareTypeFor(String, Class)}.
+ * {@link LocalVariableConfiguration#withLocalVariable(String, Class)}.
  * <p>
  * If there are some EL variables aside of managed beans in faces-config (and
  * perhaps Spring config) and the local variables you can declare them to the
- * validator via {@link JsfElValidator#declareVariable(String, Object)}.
+ * validator via {@link #withExtraVariable(String, Object)}.
  * <p>
  * If there are other tags than h:dataTable that can create local variables, you
  * must create and register an appropriate resolver for them as is done with the
- * dataTable.
+ * dataTable - see {@link LocalVariableConfiguration#withCustomDataTableTagAlias} and
+ * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}
+ * <p>
+ *     You can also help the resolver by telling it what is the type of elements in collection/maps
+ *     via {@link #withPropertyTypeOverride(String, Class)}
+ * </p>
  *
  * <h3>How it works</h3>
- * We use "fake value resolvers" for a real JSF resolver; those resolvers do not retrieve
+ * We use "fake value resolversIn" for a real JSF resolver; those resolversIn do not retrieve
  * variables and property values from the context as JSF normally does but instead produce
  * a new fake value of the expected type using Mockito - thus we can check that expressions are
  * valid. When the type of a variable/property cannot be determined (which is often the case for
@@ -81,7 +83,6 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  *
  * <pre>
  * - Function in expressions do not cause failures but are not checked for validity (e.g. fn:contains(s1,s2)).
- * - JSF 2.0 doesn't have a native support yet, reuses JSF 1.2 implementation.
  * - Currently it's assumed that a tag can declare only 1 local variable (var in dataTable).
  * - Included files (statically or dynamically) are processed without taking their inclusion
  * into account, i.e. variables defined in the including page aren't available when checking them.
@@ -93,11 +94,7 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
  * , org.apache.jasper.compiler.Node.Visitor.visit(IncludeDirective)).
  * </pre>
  *
- * <h3>TO DO</h3>
- * - Perform a separate run using the RegExp EL extractor to verify that the
- * Jasper-based one has found all EL expressions.
- *
- * @author jholy
+ * @author jakubholy.net
  *
  */
 public abstract class AbstractJsfStaticAnalyzer {
@@ -111,12 +108,14 @@ public abstract class AbstractJsfStaticAnalyzer {
     private Collection<InputStream> facesConfigFiles = Collections.emptyList();
     private Collection<InputStream> springConfigFiles = Collections.emptyList();
 
-    private final ContextVariableRegistry contextVariableRegistry = new ContextVariableRegistry();
-    private final DataTableVariableResolver dataTableResolver = new DataTableVariableResolver();
+    private LocalVariableConfiguration localVariableConfiguration = new LocalVariableConfiguration();
 
     /** New, unconfigured analyzer. */
     public AbstractJsfStaticAnalyzer() {
         elValidator = createValidatingElResolver();
+        if (elValidator == null) {
+            throw new IllegalStateException("Implementation returned null elValidator: ValidatingElResolver");
+        }
     }
 
     /** Create the JSF-implementation specific valiator to use. */
@@ -133,41 +132,18 @@ public abstract class AbstractJsfStaticAnalyzer {
      *
      * @param jspDir
      *            (required) where to search for JSP pages
-     * @param localVariableTypesParam
-     *            (required) type definitions for local EL variables such as
-     *            produced by h:dataTable, see
-     *            {@link DataTableVariableResolver#declareTypeFor(String, Class)}
-     * @param extraVariablesParam
-     *            (required) extra variables/managed beans not defined in
-     *            faces-context, see
-     *            {@link JsfElValidator#declareVariable(String, Object)}
-     * @param propertyTypeOverridesParam
-     *            (required) override the type to use for a property; mostly
-     *            useful for properties where the proper type cannot be derived
-     *            such as a Collection, see
-     *            {@link JsfElValidator#definePropertyTypeOverride(String, Class)}
      * @return results of the validation (never null)
      * @throws Exception
      */
-    public CollectedValidationResults validateElExpressions(String jspDir,
-            Map<String, Class<?>> localVariableTypesParam,
-            Map<String, Class<?>> extraVariablesParam,
-            Map<String, Class<?>> propertyTypeOverridesParam) {
-
-        final Map<String, Class<?>> localVariableTypes = assignMapOrEmpty(localVariableTypesParam);
-        final Map<String, Class<?>> extraVariables = assignMapOrEmpty(extraVariablesParam);
-        final Map<String, Class<?>> propertyTypeOverrides = assignMapOrEmpty(propertyTypeOverridesParam);
+    public CollectedValidationResults validateElExpressions(String jspDir) {
 
         assertJspDirValid(jspDir);
 
-        LOG.info("validateElExpressions: entry for JSP root " + jspDir + ", " + extraVariables.size()
-                + " extra variables, " + localVariableTypes.size() + " type-defined local variables, "
-                + propertyTypeOverrides.size() + " property type overrides.");
+        LOG.info("validateElExpressions: entry for JSP root " + jspDir);
 
         final long start = System.currentTimeMillis();
 
-        JsfElValidatingPageNodeListener pageNodeValidator = initializeValidationSubsystem(
-                localVariableTypes, extraVariables, propertyTypeOverrides);
+        JsfElValidatingPageNodeListener pageNodeValidator = initializeValidationSubsystem();
 
         applyConfigurationFromSystemProperties();
 
@@ -208,22 +184,15 @@ public abstract class AbstractJsfStaticAnalyzer {
                 Boolean.getBoolean("jsfelcheck.suppressOutput") || isSuppressOutput());
     }
 
-    private JsfElValidatingPageNodeListener initializeValidationSubsystem(
-            final Map<String, Class<?>> localVariableTypes,
-            final Map<String, Class<?>> extraVariables,
-            final Map<String, Class<?>> propertyTypeOverrides) {
+    private JsfElValidatingPageNodeListener initializeValidationSubsystem() {
 
-        applyDefinedLocalVarTypesToDataTableResolver(localVariableTypes);
-        this.registerTagVariableResolver("h:dataTable", dataTableResolver);
-
+        ContextVariableRegistry contextVariableRegistry = localVariableConfiguration.toRegistry();
+        
         elValidator.setUnknownVariableResolver(contextVariableRegistry);
         elValidator.setIncludeKnownVariablesInException(false);
 
-        setPropertyTypeOverrides(propertyTypeOverrides);
-
         // DEFAULT EXTRA VARIABLES
         declareImplicitVariables();
-        declareExtraVariables(extraVariables);
 
         discoverAndRegisterDefinedManagedBeans(elValidator);
 
@@ -233,45 +202,9 @@ public abstract class AbstractJsfStaticAnalyzer {
         return pageNodeValidator;
     }
 
-    private void declareExtraVariables(
-            final Map<String, Class<?>> extraVariables) {
-        for (Entry<String, Class<?>> variable : extraVariables.entrySet()) {
-            Object fakedValue = FakeValueFactory.fakeValueOfType(
-                    variable.getValue(), variable.getKey());
-            elValidator.declareVariable(variable.getKey(), fakedValue);
-        }
-    }
-
     private void declareImplicitVariables() {
         elValidator.declareVariable("request", FakeValueFactory
                 .fakeValueOfType(HttpServletRequest.class, "request"));
-    }
-
-    private void setPropertyTypeOverrides(
-            final Map<String, Class<?>> propertyTypeOverrides) {
-        for (Entry<String, Class<?>> override : propertyTypeOverrides
-                .entrySet()) {
-            elValidator.definePropertyTypeOverride(override.getKey(),
-                    override.getValue());
-        }
-    }
-
-    private void applyDefinedLocalVarTypesToDataTableResolver(
-            final Map<String, Class<?>> localVariableTypes) {
-        // Context-local variables
-        for (Entry<String, Class<?>> variable : localVariableTypes.entrySet()) {
-            dataTableResolver.declareTypeFor(variable.getKey(),
-                    variable.getValue());
-        }
-    }
-
-    private Map<String, Class<?>> assignMapOrEmpty(
-            Map<String, Class<?>> parameter) {
-        Map<String, Class<?>> localVariableTypes = parameter;
-        if (localVariableTypes == null) {
-            localVariableTypes = Collections.emptyMap();
-        }
-        return localVariableTypes;
     }
 
     private void assertJspDirValid(String jspDir) throws IllegalArgumentException {
@@ -437,8 +370,8 @@ public abstract class AbstractJsfStaticAnalyzer {
             System.exit(-1);
         }
 
-        analyzer.validateElExpressions(jspRoot,
-                componentTypeOverrides, extraVariables, propertyOverrides);
+        analyzer.validateElExpressions(jspRoot
+        );
     }
 
     private static void parseNameToTypeMappings(String argumentValue,
@@ -564,48 +497,64 @@ public abstract class AbstractJsfStaticAnalyzer {
 
     /** For testing only */
     ContextVariableRegistry getContextVariableRegistry() {
-        return contextVariableRegistry;
+        return localVariableConfiguration.toRegistry();
     }
 
     /**
-     * Register a resolver that can extract local variables defined in a JSF tag.
-     * Internally this is used to register the {@link DataTableVariableResolver} for the tag h:dataTable.
-     *
-     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables
-     * @param customResolver (required) the resolver that can find out what local variable the tag delcares
+     * Declare local variables (defined by tags such as h:dataTable) and resolvers for non-default
+     * tags that declare local variables.
+     * @param configuration (required)
      * @return this
      */
-    public AbstractJsfStaticAnalyzer registerTagVariableResolver(String tagQName, TagJsfVariableResolver customResolver) {
-        if (tagQName == null) {
-            throw new IllegalArgumentException("tagQName: String must be fully qualified JSF tag name " +
-                    "such as 'h:dataTable'");
+    public AbstractJsfStaticAnalyzer withLocalVariablesConfiguration(LocalVariableConfiguration configuration) {
+        if (localVariableConfiguration == null) {
+            throw new IllegalArgumentException("configuration: LocalVariableConfiguration may not be null");
         }
-        if (customResolver == null) {
-            throw new IllegalArgumentException("customResolver: TagJsfVariableResolver must not be null");
-        }
-        contextVariableRegistry.registerResolverForTag(tagQName, customResolver);
-
+        this.localVariableConfiguration = configuration;
         return this;
     }
 
     /**
-     * Register the default {@link DataTableVariableResolver} for another yet compatible JSF tag,
-     * namely a tag that declares its local variable in the 'var' attribute and takes values from it
-     * from a 'value' attribute. Mostly useful for use with JSF libraries that have their own extensions of
-     * the default h:dataTable compatible with how it works.
+     * Specify the type of a 'property' in a JSF EL expression, usually a component of a collection etc.
+     * If you have #{myBean.myMap['anyKey'].whatever} you may declare the type returned from the myMap
+     * by specifying override for 'myBean.myMap.*' to be e.g. WhateverType.class.
      * <p>
-     *     Also necessary if you use different than the default prefix of 'h:'.
-     * </p>
-     * @param tagQName (required)  fully qualified name of the JSF tag that can define new local variables,
-     * e.g. t:dataTable for MyFaces.
+     * There are two types of overrides:
+     * (1) property overrides: pass in the complete property, ex: bean.property1.property2
+     * (2) collection component type overrides: for all sub-properties of a variable/property
+     * (unless there is also a property override for it), used for arrays etc. Ex: bean.mapProperty.* =>
+     * bean.mapProperty['someKey'] and bean.mapProperty.anotherProperty will be both affected by the override
      *
-     * @see #registerTagVariableResolver(String, net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.TagJsfVariableResolver) 
+     * @param mapJsfExpression (required) The expression where to override the guessed type with only names and dots,
+     * perhaps plus .*; i.e. 'var.prop['key']' becomes var.prop
+     * @param newType (required) the type to use for the property
+     * @return this
      */
-    public void registerDataTableTag(String tagQName) {
-        if (tagQName == null) {
-            throw new IllegalArgumentException("tagQName: String must be fully qualified JSF tag name " +
-                    "such as 'h:dataTable'");
-        }
-        contextVariableRegistry.registerResolverForTag(tagQName, dataTableResolver);
+    public AbstractJsfStaticAnalyzer withPropertyTypeOverride(final String mapJsfExpression, final Class<?> newType) {
+        assertNotNull(mapJsfExpression, "mapJsfExpression", String.class);
+        assertNotNull(newType, "newType", Class.class);
+        elValidator.definePropertyTypeOverride(mapJsfExpression, newType);
+        return this;
+    }
+
+    /**
+     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
+     * resolve it.
+     * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
+     * is thrown when an undeclared/unknown variable in encountered.
+     * You use this typically to declare managed beans and their value, which is, for the purpose of EL validation,
+     * usually produced by {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
+     *
+     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
+     * var.prop1.prop2)
+     * @param value (required) the value to be returned for the variable, used in further evaluation. WARNING: It should
+     * be an actual instance, not a Class!
+     * @return this
+     */
+    public AbstractJsfStaticAnalyzer withExtraVariable(final String name, final Object value) {
+        assertNotNull(name, "name", String.class);
+        assertNotNull(value, "value", Object.class);
+        elValidator.declareVariable(name, value);
+        return this;
     }
 }

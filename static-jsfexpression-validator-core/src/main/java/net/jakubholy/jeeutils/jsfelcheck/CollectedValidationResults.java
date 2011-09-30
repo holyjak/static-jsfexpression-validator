@@ -19,7 +19,7 @@ package net.jakubholy.jeeutils.jsfelcheck;
 
 import java.util.Collection;
 
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ResultsIterable;
@@ -40,8 +40,8 @@ public interface CollectedValidationResults {
      *
      * @return possibly empty
      *
-     * @see AbstractJsfStaticAnalyzer#validateElExpressions(String, java.util.Map, java.util.Map, java.util.Map)
-     * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.DataTableVariableResolver
+     * @see AbstractJsfStaticAnalyzer#validateElExpressions(String, java.util.Map
+     * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.DataTableVariableResolver
      * #declareTypeFor(String, Class)
      */
     Collection<MissingLocalVariableTypeDeclarationException> getVariablesNeedingTypeDeclaration();

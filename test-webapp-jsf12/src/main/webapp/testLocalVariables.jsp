@@ -28,6 +28,12 @@
             <h2>Completely custom local variable producing tag</h2>
             TBD
 
+            <h1>Property override in a collection</h1>
+            <h:outputText value="List item value: #{myCollectionBean.list[0].value}" />
+
+            <h1>Extra variables</h1>
+            <h:outputText value="Unknown managed bean - extra variable: #{iAmExtraVariable}" />
+
         </f:view>
     </body>
 </html>

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables;
 
 /**
  * Thrown when we detect declaration of a local variable (typically inside an h:dataTable tag)

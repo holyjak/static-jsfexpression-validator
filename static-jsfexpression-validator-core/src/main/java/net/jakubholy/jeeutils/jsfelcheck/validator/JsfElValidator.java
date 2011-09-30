@@ -24,7 +24,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
  * using a custom Variable and Property resolver without requiring real values for the
  * variables being referenced in the expressions.
  *
- * The variable resolver resolvers against a pre-defined list of known variables, the property resolver doesn't actually
+ * The variable resolver resolversIn against a pre-defined list of known variables, the property resolver doesn't actually
  * invoke any getter but just returns a Mock of the appropriate type (so that evaluation of the expression can
  * proceed, which wouldn't be possible if we used real objects and they returned null).
  *
@@ -50,7 +50,7 @@ public interface JsfElValidator {
     /**
      * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
      * resolve it.
-     * Normally the {@link VariableNotFoundException} is thrown when an undeclared/unknown variable in encountered.
+     * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException} is thrown when an undeclared/unknown variable in encountered.
      * You use this typically to declare managed beans and their value, which is, for the purpose of EL validation,
      * usually produced by {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
      *

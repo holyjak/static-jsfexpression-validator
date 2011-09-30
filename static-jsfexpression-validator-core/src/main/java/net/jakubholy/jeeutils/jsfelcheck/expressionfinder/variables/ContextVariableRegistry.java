@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables;
 
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +31,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
  * Registry of local JSF EL variables defined in a view page used for resolving
  * them in a context-sensitive way.
  *
- * It delegates the actual resolution to individual tag resolvers respecting the current
+ * It delegates the actual resolution to individual tag resolversIn respecting the current
  * context (scope) starting from the innermost context and proceeding upwards.
  */
 public class ContextVariableRegistry implements ElVariableResolver {
@@ -136,4 +137,8 @@ public class ContextVariableRegistry implements ElVariableResolver {
 
     }
 
+    /** *For testing only* */
+    public Map<String, TagJsfVariableResolver> getRegisteredResolvers() {
+        return Collections.unmodifiableMap(resolvers);
+    }
 }

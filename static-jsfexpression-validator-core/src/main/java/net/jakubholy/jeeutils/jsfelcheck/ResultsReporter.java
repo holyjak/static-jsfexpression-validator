@@ -21,7 +21,7 @@ import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;

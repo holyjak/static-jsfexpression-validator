@@ -20,8 +20,8 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 import java.util.Stack;
 import java.util.logging.Logger;
 
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.ContextVariableRegistry;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.ContextVariableRegistry;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;

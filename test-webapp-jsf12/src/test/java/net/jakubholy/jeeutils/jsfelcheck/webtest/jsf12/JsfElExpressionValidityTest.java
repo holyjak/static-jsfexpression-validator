@@ -1,10 +1,10 @@
 package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf12;
 
+import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.declareLocalVariable;
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
@@ -18,22 +18,17 @@ public class JsfElExpressionValidityTest {
     @Test
     public void verify_all_el_expressions_valid() throws Exception {
 
-        Map<String, Class<?>> extraVariables = Collections.emptyMap();
-        Map<String, Class<?>> localVariableTypes = new HashMap<String, Class<?>>();
-        Map<String, Class<?>> propertyTypeOverrides = Collections.emptyMap();
-
         JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
 
-        // Local variables continued
-        localVariableTypes.put("shop.books", Book.class);
-        localVariableTypes.put("myCollectionBean.list", MyCollectionBean.ValueHolder.class);
-        jsfStaticAnalyzer.registerDataTableTag("t:dataTable");
+        jsfStaticAnalyzer.withLocalVariablesConfiguration(
+                declareLocalVariable("shop.books", Book.class)
+                    .and("myCollectionBean.list", MyCollectionBean.ValueHolder.class)
+                    .withCustomDataTableTagAlias("t:dataTable"))
+                .withPropertyTypeOverride("myCollectionBean.list.*", MyCollectionBean.ValueHolder.class)
+                .withExtraVariable("iAmExtraVariable", Object.class)
+                ;
 
-        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
-                "src/main/webapp"
-                , localVariableTypes
-                , extraVariables
-                , propertyTypeOverrides);
+        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions("src/main/webapp");
 
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
                 + results.failures()

@@ -17,55 +17,62 @@
 
 package net.jakubholy.jeeutils.jsfelcheck
 
-import org.junit.*
-
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.TagJsfVariableResolver
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.VariableInfo
-
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.AttributesValidationResult
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNode
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
+import net.jakubholy.jeeutils.jsfelcheck.TestJsfStaticAnalyzerImpl.RecordingDummyElResolver
+import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration
+import org.junit.Before
+import org.junit.Test
 
 public class AbstractJsfStaticAnalyzerTest {
 
-    private final PageNode fakeTag = new PageNode("my:custTag", Object.class, -1, ["var":"myVar", value:"someElHere"])
-    private final AttributesValidationResult emptyAttributes = new AttributesValidationResult()
-
-    private AbstractJsfStaticAnalyzer analyzer;
+    private AbstractJsfStaticAnalyzer analyzer
+    RecordingDummyElResolver recordingResolver
 
     @Before
     public void setUp() {
-        analyzer = new TestJsfStaticAnalyzerImpl();
+        def testAnalyzer = new TestJsfStaticAnalyzerImpl()
+        recordingResolver = testAnalyzer.getResolver()
+        analyzer = testAnalyzer;
     }
 
     @Test
-    public void should_add_custom_tag_variable_resolver() {
-        TagJsfVariableResolver customResolver = new TagJsfVariableResolver() {
-            VariableInfo extractContextVariables(Map<String, String> ignore1, AttributesValidationResult ignore2) {
-            return new VariableInfo("myVar", String)
-            }
-        }
-
-        analyzer.registerTagVariableResolver(fakeTag.getQName(), customResolver)
-        assertCustomResolverUsed()
+    public void should_accept_local_variable_configuration() throws Exception {
+        def config = new LocalVariableConfiguration()
+        analyzer.withLocalVariablesConfiguration(config)
+        assert analyzer.getContextVariableRegistry() == config.toRegistry()
     }
 
     @Test
-    public void should_reregister_dataTableResolver_under_custom_name() throws Exception {
-
-        def attrs = new AttributesValidationResult()
-        attrs.add("value", new SuccessfulValidationResult("I'm a value"))
-
-        analyzer.registerDataTableTag(fakeTag.getQName())
-        assertCustomResolverUsed(attrs)
+    public void should_propagate_type_overrides_to_resolver() throws Exception {
+        analyzer.withPropertyTypeOverride("myBean.myProp", Integer)
+        assert recordingResolver.getPropertyTypeOverrides().find {
+            it.key == "myBean.myProp" && it.value == Integer.class
+        }
     }
 
-    private def assertCustomResolverUsed(attrs = emptyAttributes) {
-        analyzer.getContextVariableRegistry().with {
-            extractContextVariables(fakeTag, attrs)
-            assert resolveVariable("myVar") != null
-        }
+    @Test(expected=IllegalArgumentException)
+    public void should_fail_for_type_override_without_name() throws Exception {
+        analyzer.withPropertyTypeOverride(null, Integer)
+    }
+
+    @Test(expected=IllegalArgumentException)
+    public void should_fail_for_type_override_without_value() throws Exception {
+        analyzer.withPropertyTypeOverride("name", null)
+    }
+
+    @Test
+    public void should_propagate_extra_variables_to_resolver() throws Exception {
+        analyzer.withExtraVariable("myVariable", Math)
+        assert recordingResolver.getExtraVariables() == ["myVariable" : Math]
+    }
+
+    @Test(expected=IllegalArgumentException)
+    public void should_fail_for_extra_variable_without_name() throws Exception {
+        analyzer.withExtraVariable(null, String)
+    }
+
+    @Test(expected=IllegalArgumentException)
+    public void should_fail_for_extra_variable_without_value() throws Exception {
+        analyzer.withExtraVariable("myVariable", null)
     }
 
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables;
 
 import java.sql.ResultSet;
 import java.util.Collection;

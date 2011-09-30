@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.MultipleValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
