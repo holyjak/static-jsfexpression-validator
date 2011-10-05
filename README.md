@@ -18,9 +18,26 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 
 TODO
 ----
+- Fix defect reg. not checking all branches in an EL (e.g. bool? b1:b2) - perhaps using ElParser
+ as in net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.MethodFakingFunctionMapper.extractFunctionArities,
+ see org.apache.el.parser.Node implementations like AstChoice, BooleanNode
+ Alternatives:
+ - NO: Evaluate the expression N times, changing booleans produced - we might have non-bools: 'b.prop > 3'
+ - ?: Parse the expr. into 'atomic expressions' of the form (identifier|fun|choice).dotOrBracketSuffix*
+    - simplify by not evaluating nested epxr. as in prop\[bean2.p2] and just using '0'
+ - ?: Hack the EL implementation not to do lazy evaluation
+    - SOLUTION: Hack getValue in AstAnd, AstOr, AstChoice to eval. all branches -
+    build own copy of jasper-el & use AOP to modify them
+    org.javassist:javassist:3.15.0
+    Refs: http://ubuntuforums.org/showthread.php?t=1679880
+
 - run Sonar & Findbugs ???
 
+- consider using more modern jasper-el for JSF2.x than 6.0.29 used in 1.2
+
 - remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
+- fix issue reported by Saikat in [javascript](https://github.com/VIATravel/ViaOnline/blob/master/web/changebookingselectflights.jsp#L54)
+where flight.lastLegInfo.numberOfLegs doesn't exist yet it passes
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> FakingMethodMapper
