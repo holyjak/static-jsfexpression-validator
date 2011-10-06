@@ -49,9 +49,10 @@
             <groupId>org.fusesource.mvnplugins</groupId>
             <artifactId>maven-uberize-plugin</artifactId>
             <version>1.20</version>
-            <scope>provided</scope> <!-- do not propagate it further -->
+            <scope>provided</scope>
+            <!-- do not propagate it further -->
         </dependency>
-        
+
     </dependencies>
 
     <!--
@@ -62,43 +63,77 @@
     <build>
         <plugins>
 
+            <!-- 1. Phase process-sources: Unpack jasper-el to the target/dependency/ folder -->
             <plugin>
-                <groupId>org.fusesource.mvnplugins</groupId>
-                <artifactId>maven-uberize-plugin</artifactId>
-                <version>1.20</version>
-                
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
                 <executions>
-                  <execution>
-                    <phase>package</phase>
-                    <goals><goal>uberize</goal></goals>
-                    <configuration>
-
-                      <artifactSet>
-                        <includes>
-                          <include>org.apache.tomcat:jasper-el</include>
-                        </includes>
-                      </artifactSet>
-
-                      <transformers>
-                        <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
-                          <relocations>
-                            <relocation>
-                              <pattern>org.apache.el</pattern>
-                              <shadedPattern>jholy.org.apache.el</shadedPattern>
-                            </relocation>
-                          </relocations>
-                        </transformer>
-                          <!-- net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.uberize.JavassistTransformer -->
-                      </transformers>
-
-                    </configuration>
-                  </execution>
+                    <execution>
+                        <id>unpack</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.tomcat</groupId>
+                                    <artifactId>jasper-el</artifactId>
+                                    <version>6.0.29</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <excludes>META-INF/**</excludes>
+                            <outputDirectory>${jasperel.unpacked.directory}</outputDirectory>
+                            <overWriteReleases>true</overWriteReleases>
+                        </configuration>
+                    </execution>
                 </executions>
-
-
             </plugin>
+
+            <!-- 2. Phase compile (implicit) - compile the bytecode manipulation code -->
+
+            <!-- 3. Phase process-classes: do the bytecode magic -->
+
+            <!-- TO BE DONE -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.JavassistTransformer</mainClass>
+                    <arguments>
+                        <argument>${jasperel.unpacked.directory}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <!-- 4. Phase test (implicit): tun the tests of the processed stuff -->
+
+            <!-- 5. Phase package: package the processed classes !from the directory whey they are, ignoring my own classes!! -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <classesDirectory>${jasperel.unpacked.directory}</classesDirectory>
+                </configuration>
+            </plugin>
+
 
         </plugins>
     </build>
+
+    <properties>
+        <jasperel.unpacked.directory>${project.build.directory}/dependency</jasperel.unpacked.directory>
+    </properties>
 
 </project>

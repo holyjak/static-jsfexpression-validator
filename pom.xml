@@ -22,7 +22,8 @@
         <module>test-webapp-jsf12</module>
         <module>test-webapp-jsf12-facelets</module>
         <module>test-webapp-jsf20-facelets_owb</module>
-  </modules>
+        <module>jasper-el-customized-jsf12</module>
+    </modules>
 
 	<licenses>
 		<license>

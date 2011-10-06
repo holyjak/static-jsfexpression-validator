@@ -61,6 +61,15 @@ Note:  JSF 1.2 &lt;=&gt; JavaEE 5 =&gt; Servlet 2.5 and JSP 2.1 =&gt;Tomcat 6.0.
             <scope>test</scope>
         </dependency>
 
+        <!-- TMP - for testing - ->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.2</version>
+        </dependency-->
+
 	</dependencies>
+
+    
 
 </project>

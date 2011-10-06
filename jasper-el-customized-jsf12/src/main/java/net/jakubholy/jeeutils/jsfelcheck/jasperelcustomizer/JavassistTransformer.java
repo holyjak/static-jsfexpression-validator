@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.uberize;
-
-import org.fusesource.mvnplugins.uberize.Transformer;
-import org.fusesource.mvnplugins.uberize.UberEntry;
-import org.fusesource.mvnplugins.uberize.Uberizer;
+package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.TreeMap;
 
-public class JavassistTransformer implements Transformer {
-    @Override
-    public void process(Uberizer uberizer, File file, TreeMap<String, UberEntry> stringUberEntryTreeMap) throws IOException {
-        System.err.println(getClass().getName() + " called for " + file);
+public class JavassistTransformer {
+
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            throw new IllegalArgumentException("Expected 1 argument: directory with classes to transform");
+        }
+        File classesDir = new File(args[0]);
+
+        System.out.println(">>>" + JavassistTransformer.class.getSimpleName() + ": Trasnformation done for "
+                + classesDir.getAbsolutePath());
     }
 }
