@@ -21,15 +21,6 @@ TODO
 - Fix defect reg. not checking all branches in an EL (e.g. bool? b1:b2) - perhaps using ElParser
  as in net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.MethodFakingFunctionMapper.extractFunctionArities,
  see org.apache.el.parser.Node implementations like AstChoice, BooleanNode
- Alternatives:
- - NO: Evaluate the expression N times, changing booleans produced - we might have non-bools: 'b.prop > 3'
- - ?: Parse the expr. into 'atomic expressions' of the form (identifier|fun|choice).dotOrBracketSuffix*
-    - simplify by not evaluating nested epxr. as in prop\[bean2.p2] and just using '0'
- - ?: Hack the EL implementation not to do lazy evaluation
-    - SOLUTION: Hack getValue in AstAnd, AstOr, AstChoice to eval. all branches -
-    build own copy of jasper-el & use AOP to modify them
-    org.javassist:javassist:3.15.0
-    Refs: http://ubuntuforums.org/showthread.php?t=1679880
 
 - run Sonar & Findbugs ???
 
@@ -47,6 +38,11 @@ where flight.lastLegInfo.numberOfLegs doesn't exist yet it passes
     - support EL functions (not just 'function tolerance' as implemented now)
 
 - report all functions found (and of course not validated)
+
+- better support for view file filtrering (includes/excludes)
+- JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
+    - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
+- Modify JsfAnalyzer: setters to return this
 
 - add (more) example JSF page
 - test with various JSF projects

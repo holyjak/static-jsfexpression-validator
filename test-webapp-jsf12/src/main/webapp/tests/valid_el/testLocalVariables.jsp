@@ -1,4 +1,4 @@
-<%-- Access this page as testLocalVariables.jsf --%>
+<%-- Access this page as tests/valid_el/testLocalVariables.jsf --%>
 
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>

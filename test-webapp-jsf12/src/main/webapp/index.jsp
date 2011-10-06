@@ -25,7 +25,7 @@
 
     <ul>
         <li><a href="helloWorld.jsf">helloWorld</a></li>
-        <li><a href="testLocalVariables.jsf">testLocalVariables</a></li>
+        <li><a href="tests/valid_el/testLocalVariables.jsp">testLocalVariables</a></li>
     </ul>
 
 </body>

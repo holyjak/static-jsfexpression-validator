@@ -17,30 +17,25 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Map;
-
-import javax.servlet.jsp.PageContext;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import javax.servlet.jsp.PageContext;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test validation of EL expressions, to be extended by every (JSF version-specific) validator implementation.
@@ -201,9 +196,24 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         // if we are here it's already good - the resolver hasn't thrown OutOfBound or similar exception but
         // let's check the return value anyway
         assertThat("The resolution should have succeeded even though no element with the index 123"
-               + " exists; actual result: " + result
+                + " exists; actual result: " + result
+                , result
+                , is(instanceOf(SuccessfulValidationResult.class)));
+    }
+
+    @Test
+    public void should_evaluate_all_branches_of_conditional_expression() throws Exception {
+        String[] expressions =  {
+                "#{false and noSuchBean}"
+                , "#{if(false) ...}"
+                , "#{(true? validBean : noSuchBean).propertyOfFirstBeanOnly}"
+                , "#{true? null : noSuchVar}"
+        };
+        ValidationResult result = elResolver.validateValueElExpression("#{true? null : noSuchVar}");
+        assertThat("The resolution should have checked all the expression incl. the invalid one in false branch"
+               + "; actual result: " + result
                , result
-               , is(instanceOf(SuccessfulValidationResult.class)));
+               , is(instanceOf(FailedValidationResult.class)));
     }
 
     @Test

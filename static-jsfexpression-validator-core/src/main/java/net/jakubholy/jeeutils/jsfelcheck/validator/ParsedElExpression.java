@@ -63,7 +63,7 @@ public class ParsedElExpression implements Iterable<String> {
      * Add a property part to the expression to the end of the list of parts.
      * @param property (required)
      */
-    public void addProperty(String property) {
+    void addProperty(String property) {
         expressionParts.add(property);
     }
 
