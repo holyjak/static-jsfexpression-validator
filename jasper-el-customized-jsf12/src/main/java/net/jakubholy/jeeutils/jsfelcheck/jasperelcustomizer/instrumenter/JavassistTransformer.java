@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer;
+package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.instrumenter;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.CtNewMethod;
 import javassist.NotFoundException;
+import net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.GetValueFix;
 
 import java.io.File;
 
@@ -44,14 +46,19 @@ public class JavassistTransformer {
     private void camel(File classesDir) throws Exception {
         pool.appendClassPath(classesDir.getPath());
 
-        String[] targetClasses = new String[] {
-                "org.apache.el.parser.AstOr"
-                , "org.apache.el.parser.AstAnd"
-                , "org.apache.el.parser.AstChoice"
+        String fixClass = GetValueFix.class.getName();
+        //GetValueFix.and($1, $0);
+        //GetValueFix.or($1, $0);
+        //GetValueFix.choice($1, $0);
+        String[][] targetClasses = new String[][] {
+                // Note: $1 is the first parameter, $0 is 'this'
+                {"org.apache.el.parser.AstOr", "return " + fixClass + ".and($1, $0);"}
+                , {"org.apache.el.parser.AstAnd", "return " + fixClass + ".or($1, $0);"}
+                , {"org.apache.el.parser.AstChoice", "return " + fixClass + ".choice($1, $0);"}
         };
 
-        for (String targetClass : targetClasses) {
-            final CtClass compiledClass = instrument(targetClass);
+        for (String[] target : targetClasses) {
+            final CtClass compiledClass = instrument(target[0], target[1]);
             compiledClass.writeFile(classesDir.getPath());
         }
 
@@ -59,10 +66,17 @@ public class JavassistTransformer {
         // verify that the hacked impl. is indeed used
     }
 
-    private CtClass instrument(String targetClass) throws NotFoundException, CannotCompileException {
-        final CtClass compiledClass = pool.get(targetClass);
-        CtMethod m = compiledClass.getDeclaredMethod("getValue");
-        m.insertBefore("throw new UnsupportedOperationException(\"Exception injected by Holy!\");");
-        return compiledClass;
+    private CtClass instrument(String targetClass, String code) throws NotFoundException, CannotCompileException {
+        final CtClass nodeClass = pool.get(targetClass);
+        CtMethod getValue = nodeClass.getDeclaredMethod("getValue");
+        getValue.insertBefore(code);
+        CtMethod toString = CtNewMethod.make(
+                "public String toString() {return \"HACKED BY JSFELCHECK \" + super.toString();}", nodeClass);
+        nodeClass.addMethod(toString);
+        //toString.insertBefore("return \"HACKED BY JSFELCHECK \" + super.toString();");
+        return nodeClass;
     }
+
+    @Override
+    public String toString() {return "HACKED BY JSFELCHECK " + super.toString();}
 }

@@ -96,7 +96,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.JavassistTransformer</mainClass>
+                    <mainClass>net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer.instrumenter.JavassistTransformer</mainClass>
                     <arguments>
                         <argument>${jasperel.unpacked.directory}</argument>
                     </arguments>
@@ -123,7 +123,7 @@
                 <configuration>
                     <classesDirectory>${jasperel.unpacked.directory}</classesDirectory>
                     <excludes>
-                        <exclude>net/jakubholy/**</exclude>
+                        <exclude>net/jakubholy/jeeutils/jsfelcheck/jasperelcustomizer/instrumenter/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

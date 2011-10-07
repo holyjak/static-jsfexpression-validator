@@ -15,25 +15,29 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer;
+package net.jakubholy.jeeutils.jsfelcheck.jasperelcustomizer
 
-import org.apache.el.parser.AstOr;
-import org.junit.Test;
+import org.apache.el.lang.EvaluationContext
+import org.apache.el.parser.SimpleNode
 
-import static org.junit.Assert.fail;
+public class RecordingNodeStub extends SimpleNode {
 
-public class JavassistTransformerTest {
+    def called = false
+    def value;
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void should_fail() throws Exception {
-        new AstOr(0).getValue(null);
-        System.out.println("DONE " + getClass());
+    RecordingNodeStub(value) {
+        super(0)
+        this.value = value
     }
 
-    @Test
-    public void todo_implement_proper_tests() {
-        fail("Implement proper tests!");
+    Object getValue(EvaluationContext evaluationContext) {
+        called = true;
+        return value
     }
 
+    RecordingNodeStub withValue(value) {
+        this.value = value;
+        this
+    }
 
 }
