@@ -19,4 +19,7 @@ test-webapp-jsf12/test-webapp-jsf12.iml
 test-webapp-jsf12-facelets/test-webapp-jsf12-facelets.iml
 test-webapp-jsf20-facelets_owb/test-webapp-jsf20-facelets_owb.iml
 jasper-el-customized-jsf12/jasper-el-customized-jsf12.iml
-jasper-el-customized-12
+jasper-el-customized-jsf20/jasper-el-customized-jsf12.iml
+jasper-el-customized-jsf20/jasper-el-customized-jsf20.iml
+sun-el-customized-jsf11/sun-el-customized-jsf11.iml
+test-webapp-jsf20-jsp/test-webapp-jsf20-jsp.iml

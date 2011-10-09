@@ -17,9 +17,9 @@
 
 package org.apache.jasper.compiler;
 
-import java.io.FileNotFoundException;
-
 import org.apache.jasper.JasperException;
+
+import java.io.FileNotFoundException;
 
 // CHECKSTYLE:OFF (copied from Jasper's source code)
 /**
@@ -88,7 +88,10 @@ public class OnlyReadingJspPseudoCompiler extends Compiler {
             // directives we validated in pass 1
             pageNodes.visit(JsfElCheckingVisitor.forFile(ctxt.getJspFile()));
 
-        } finally {}
+        } catch (JasperException e) {
+            System.err.println(getClass().getSimpleName() + ".generateJava failed to parse "
+                + ctxt.getJspFile() + ", reason: " + e);
+        }
 
         return null;
     }

@@ -542,19 +542,66 @@ public abstract class AbstractJsfStaticAnalyzer {
      * resolve it.
      * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
      * is thrown when an undeclared/unknown variable in encountered.
-     * You use this typically to declare managed beans and their value, which is, for the purpose of EL validation,
-     * usually produced by {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
+     * <p>You most likely actually want to use {@link #withExtraVariable(String, Class)} as passing an actual
+     * value has rarely any benefits.
+     * </p>
+     * You use this typically to declare managed beans and their value.
+     * The purpose of this method is to make it possible to declare variables of types that whose value we
+     * currently cannot fake.
      *
      * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
      * var.prop1.prop2)
      * @param value (required) the value to be returned for the variable, used in further evaluation. WARNING: It should
      * be an actual instance, not a Class!
      * @return this
+     * @see #withExtraVariable(String, Class)
+     *
      */
     public AbstractJsfStaticAnalyzer withExtraVariable(final String name, final Object value) {
         assertNotNull(name, "name", String.class);
         assertNotNull(value, "value", Object.class);
         elValidator.declareVariable(name, value);
         return this;
+    }
+
+    /**
+     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
+     * resolve it.
+     * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
+     * is thrown when an undeclared/unknown variable in encountered.
+     * You use this typically to declare managed beans and their class.
+     * <p>
+     *     For the puropose of validation a fake value of the type is created using
+     *     {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
+     * </p>
+     *
+     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
+     * var.prop1.prop2)
+     * @param valueType (required) the value to be returned for the variable, used in further evaluation.
+     * @return this
+     * @see #withExtraVariable(String, Object)
+     */
+    public AbstractJsfStaticAnalyzer withExtraVariable(final String name, final Class valueType) {
+        assertNotNull(name, "name", String.class);
+        assertNotNull(valueType, "value", Object.class);
+        Object fakeValue = FakeValueFactory.fakeValueOfType(valueType, name);
+        elValidator.declareVariable(name, fakeValue);
+        return this;
+    }
+
+    /**
+     * Inform the user that other than our modified EL implementation has been loaded, unless forced not to fail.
+     * @param dependencyName (required) the name of the maven dependency
+     * @throws IllegalStateException
+     */
+    protected final void handleUnhackedElImplementationLoaded(String dependencyName) throws IllegalStateException {
+        String ignoreFailureProperty = "jsfelcheck.ignoreUnhackedElDependency";
+        if (! Boolean.getBoolean(ignoreFailureProperty)) {
+            throw new IllegalStateException("You are not using the hacked version of " + dependencyName
+                + " and thus not all"
+                + "expressions can be checked due to short-circuit evaluation of and/or/?:. Please fix your"
+                + " classpath or set the system property '" + ignoreFailureProperty + "' to true if it's "
+                + "OK for you that we can't guratantee validation of everything.");
+        }
     }
 }

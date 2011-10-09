@@ -79,7 +79,7 @@ public class SuccessfulValidationResult extends ValidationResult {
     @Override
     public String toString() {
     	    return "Correct: " + super.toString()
-        		+ " (fake EL result=" + expressionResult + ")";
+        		+ " with mocked EL result=" + expressionResult + "";
     }
 
 }

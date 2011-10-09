@@ -60,9 +60,10 @@ public class AbstractJsfStaticAnalyzerTest {
     }
 
     @Test
-    public void should_propagate_extra_variables_to_resolver() throws Exception {
-        analyzer.withExtraVariable("myVariable", Math)
-        assert recordingResolver.getExtraVariables() == ["myVariable" : Math]
+    public void should_propagate_extra_variables_instance_to_resolver() throws Exception {
+        def value = "someValue"
+        analyzer.withExtraVariable("myVariable", value)
+        assert recordingResolver.getExtraVariables() == ["myVariable" : value]
     }
 
     @Test(expected=IllegalArgumentException)
@@ -73,6 +74,12 @@ public class AbstractJsfStaticAnalyzerTest {
     @Test(expected=IllegalArgumentException)
     public void should_fail_for_extra_variable_without_value() throws Exception {
         analyzer.withExtraVariable("myVariable", null)
+    }
+
+    @Test
+    public void withVariable_should_convert_class_to_fake_value() throws Exception {
+        analyzer.withExtraVariable("myTypedVar", InputStream.class);
+        assert recordingResolver.getExtraVariables().get("myTypedVar") instanceof InputStream
     }
 
 }

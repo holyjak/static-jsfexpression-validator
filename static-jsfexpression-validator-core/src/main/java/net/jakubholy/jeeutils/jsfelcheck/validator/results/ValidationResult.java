@@ -40,7 +40,7 @@ public abstract class ValidationResult {
 
     @Override
     public String toString() {
-        return (expressionDescriptor == null)? super.toString()
+        return (expressionDescriptor == null)? getClass().getSimpleName()
                 : getClass().getSimpleName() + "[" + expressionDescriptor + "]";
     }
 
