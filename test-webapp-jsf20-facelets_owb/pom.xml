@@ -23,7 +23,7 @@
     <artifactId>test-webapp-jsf20-facelets_owb</artifactId>
     <packaging>war</packaging>
     <version>0.9.5-SNAPSHOT</version>
-    <name>Test JSF 2.0 webapp using MyFaces 2.0 and CDI with OpenWebBeans</name>
+    <name>Test JSF 2.0 webapp using Facelets and MyFaces 2.0 and CDI with OpenWebBeans</name>
     <description>Exemplifies JSF 2.0 which should be supported by the JSF EL validator for JSF 2.0 (using facelets)</description>
 
     <parent>

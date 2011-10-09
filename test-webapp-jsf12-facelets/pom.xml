@@ -5,7 +5,7 @@
     <artifactId>test-webapp-jsf12-facelets</artifactId>
     <packaging>war</packaging>
     <version>0.9.5-SNAPSHOT</version>
-    <name>A custom project using myfaces 1.2 and facelets</name>
+    <name>Test JSF 1.2 webapp using Facelets</name>
 
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>

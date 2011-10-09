@@ -18,13 +18,10 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 
 TODO
 ----
-- Fix defect reg. not checking all branches in an EL (e.g. bool? b1:b2) - perhaps using ElParser
- as in net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.MethodFakingFunctionMapper.extractFunctionArities,
- see org.apache.el.parser.Node implementations like AstChoice, BooleanNode
 
 - run Sonar & Findbugs ???
 
-- consider using more modern jasper-el for JSF2.x than 6.0.29 used in 1.2
+- consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2
 
 - remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
 - fix issue reported by Saikat in [javascript](https://github.com/VIATravel/ViaOnline/blob/master/web/changebookingselectflights.jsp#L54)
@@ -98,7 +95,14 @@ DEVELOPEMET INTRO
 
 ### Note on JSF 1.2 and 2.0 ###
 
- JSF 1.2
+http://www.roseindia.net/jsf/jsf-versions.shtml
+
+Expression Language, referred to as EL, was first introduced in JSTL 1.0, and later included in JSP 2.0.
+  A variant of the EL was used in JSF 1.0. In JSP 2.1, JSF 1.2 and JSTL 1.2, an unified EL was defined.
+
+ JSF 1.1 (27 may 2004) -   Bug fix release. No specification changes.
+ 
+ JSF 1.2(11 may 2006)
   - Unified EL for JSP and JSF, introduced ELResolver => support for setters, calling methods
 
  JSF 2.0

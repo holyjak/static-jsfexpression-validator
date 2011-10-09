@@ -42,6 +42,12 @@ Note: JSF 2.0 &lt;=&gt; JavaEE 6 =&gt; Servlet 3.0 and JSP/EL 2.2 =&gt; Tomcat 7
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jasper-el-customized-jsf20</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 	<!-- for now we just delegate all work to the compatible JSF 1.2 implementation -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -55,6 +61,10 @@ Note: JSF 2.0 &lt;=&gt; JavaEE 6 =&gt; Servlet 3.0 and JSP/EL 2.2 =&gt; Tomcat 7
                 <exclusion>
                     <groupId>org.apache.myfaces.core</groupId>
                     <artifactId>myfaces-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>jasper-el-customized-jsf12</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

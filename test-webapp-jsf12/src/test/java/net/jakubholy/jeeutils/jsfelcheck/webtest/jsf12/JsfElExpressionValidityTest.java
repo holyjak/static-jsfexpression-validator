@@ -26,7 +26,7 @@ public class JsfElExpressionValidityTest {
                     .and("myCollectionBean.list", MyCollectionBean.ValueHolder.class)
                     .withCustomDataTableTagAlias("t:dataTable"))
                 .withPropertyTypeOverride("myCollectionBean.list.*", MyCollectionBean.ValueHolder.class)
-                .withExtraVariable("iAmExtraVariable", Object.class)
+                .withExtraVariable("iAmExtraVariable", new Object())
                 ;
 
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions("src/main/webapp//tests/valid_el");

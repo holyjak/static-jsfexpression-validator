@@ -43,6 +43,12 @@ Note:  JSF 1.2 &lt;=&gt; JavaEE 5 =&gt; Servlet 2.5 and JSP 2.1 =&gt;Tomcat 6.0.
         </dependency>
 
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jasper-el-customized-jsf12</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-api</artifactId>
             <version>${myfaces.jsf12.version}</version>

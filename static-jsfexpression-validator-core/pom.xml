@@ -50,23 +50,19 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+            <!-- Needed for parsing of JSPs. Should be pushed down, 6 -> jsf 1.2, 7 -> jsf 2.x -->
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>jasper</artifactId>
-			<version>6.0.29</version>
+			<version>${jasper.jsf12.version}</version>
 			<scope>compile</scope>
             <exclusions>
                 <exclusion>
+                    <!-- replaced by my jasper-el-customized-jsf12 -->
                     <groupId>org.apache.tomcat</groupId>
                     <artifactId>jasper-el</artifactId>
                 </exclusion>
             </exclusions>
 		</dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>jasper-el-customized-jsf12</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

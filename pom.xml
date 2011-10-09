@@ -15,14 +15,17 @@
 
 	<modules>
 		<module>static-jsfexpression-validator-core</module>
-        <module>static-jsfexpression-validator-core-abstracttests</module>
+        	<module>static-jsfexpression-validator-core-abstracttests</module>
 		<module>static-jsfexpression-validator-jsf11</module>
 		<module>static-jsfexpression-validator-jsf12</module>
 		<module>static-jsfexpression-validator-jsf20</module>
-        <module>test-webapp-jsf12</module>
-        <module>test-webapp-jsf12-facelets</module>
-        <module>test-webapp-jsf20-facelets_owb</module>
-        <module>jasper-el-customized-jsf12</module>
+		<module>test-webapp-jsf12</module>
+		<module>test-webapp-jsf12-facelets</module>
+		<module>test-webapp-jsf20-facelets_owb</module>
+		<module>test-webapp-jsf20-jsp</module>
+		<module>sun-el-customized-jsf11</module>
+		<module>jasper-el-customized-jsf12</module>
+		<module>jasper-el-customized-jsf20</module>
     </modules>
 
 	<licenses>
@@ -273,6 +276,9 @@
 	<properties>
 	   <myfaces.jsf12.version>1.2.10</myfaces.jsf12.version>
 	   <myfaces.jsf20.version>2.1.1</myfaces.jsf20.version>
+       <javassist.version>3.15.0-GA</javassist.version>
+       <jasper.jsf12.version>6.0.29</jasper.jsf12.version>
+       <jasper.jsf20.version>7.0.21</jasper.jsf20.version>
 	</properties>
 
 </project>

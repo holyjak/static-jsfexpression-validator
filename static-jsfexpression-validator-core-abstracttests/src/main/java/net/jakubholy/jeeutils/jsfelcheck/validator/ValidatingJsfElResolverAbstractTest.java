@@ -21,6 +21,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByF
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -205,15 +206,32 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     public void should_evaluate_all_branches_of_conditional_expression() throws Exception {
         String[] expressions =  {
                 "#{false and noSuchBean}"
-                , "#{if(false) ...}"
-                , "#{(true? validBean : noSuchBean).propertyOfFirstBeanOnly}"
-                , "#{true? null : noSuchVar}"
+                , "#{false or noSuchBean}"
+                , "#{true? null : noSuchBean}"
+                , "#{(true? validBean : noSuchBean).arrayProperty}"
         };
-        ValidationResult result = elResolver.validateValueElExpression("#{true? null : noSuchVar}");
-        assertThat("The resolution should have checked all the expression incl. the invalid one in false branch"
-               + "; actual result: " + result
-               , result
-               , is(instanceOf(FailedValidationResult.class)));
+
+        Map<String, SuccessfulValidationResult> falsePositives = new Hashtable<String, SuccessfulValidationResult>();
+        elResolver.declareVariable("validBean", new BeanWithMapAndList());
+
+        for (String expression : expressions) {
+            ValidationResult result = elResolver.validateValueElExpression(expression);
+            if (result instanceof SuccessfulValidationResult) {
+                SuccessfulValidationResult resultThasShoulHaveFailed = (SuccessfulValidationResult) result;
+                falsePositives.put(expression, resultThasShoulHaveFailed);
+            } else if (result instanceof FailedValidationResult) {
+                FailedValidationResult failed = (FailedValidationResult) result;
+                if (!failed.getFailure().getMessage().contains("VariableNotFoundException")) {
+                    fail("Unexpected failer - validation of the EL failed for other reasons than expected:"
+                        +  failed);
+                }
+            }
+        }
+
+        assertThat("The resolution should have checked all expressions despite of boolean optimizations and thus "
+                + "return no valid ELs."
+                , falsePositives.entrySet()
+                , Matchers.<Map.Entry<String, SuccessfulValidationResult>>empty());
     }
 
     @Test

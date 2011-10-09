@@ -34,21 +34,18 @@
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.15.0-GA</version>
+            <version>${javassist.version}</version>
+            <scope>provided</scope> <!-- only needed at build-time -->
         </dependency>
 
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>jasper-el</artifactId>
             <version>${jasper.jsf12.version}</version>
+            <scope>provided</scope> <!-- only needed at build-time (or maybe not even there) -->
         </dependency>
 
     </dependencies>
-
-    <!--
-    TODO Check whether wee need the JDK-dependant profiles to access tools.jar as javassist self does, see
-    http://search.maven.org/remotecontent?filepath=org/javassist/javassist/3.15.0-GA/javassist-3.15.0-GA.pom
-    -->
 
     <build>
         <plugins>
@@ -100,7 +97,15 @@
                     <arguments>
                         <argument>${jasperel.unpacked.directory}</argument>
                     </arguments>
+                    <includePluginDependencies>true</includePluginDependencies>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.javassist</groupId>
+                        <artifactId>javassist</artifactId>
+                        <version>${javassist.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- 4. Phase test: tun the tests of the processed stuff -->
@@ -134,8 +139,6 @@
 
     <properties>
         <jasperel.unpacked.directory>${project.build.outputDirectory}</jasperel.unpacked.directory>
-        <!-- TODO Use a parent-defined property for the version: jasper.version or jasper.jsf12.version -->
-        <jasper.jsf12.version>6.0.29</jasper.jsf12.version>
     </properties>
 
 </project>

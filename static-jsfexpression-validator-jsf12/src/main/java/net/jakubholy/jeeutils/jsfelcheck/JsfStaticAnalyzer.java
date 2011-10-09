@@ -17,13 +17,14 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import java.io.InputStream;
-import java.util.Collection;
-
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12ValidatingElResolver;
+import org.apache.el.parser.AstAnd;
+
+import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * {@inheritDoc}
@@ -38,6 +39,9 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
 
     @Override
     protected ValidatingElResolver createValidatingElResolver() {
+        if (! new AstAnd(0).toString().startsWith("HACKED BY JSFELCHECK ")) {
+            handleUnhackedElImplementationLoaded("jasper-el");  // JSF 2.0: tomcat-jasper-el
+        }
         return new Jsf12ValidatingElResolver();
     }
 
