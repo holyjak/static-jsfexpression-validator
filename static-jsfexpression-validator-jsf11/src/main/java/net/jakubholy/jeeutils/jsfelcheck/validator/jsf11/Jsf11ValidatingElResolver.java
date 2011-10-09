@@ -17,16 +17,6 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import javax.faces.application.Application;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.el.EvaluationException;
-import javax.faces.el.MethodBinding;
-import javax.faces.el.ValueBinding;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -35,9 +25,18 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidationResultHelper;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactory;
-import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactoryProvider;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_02ElBindingFactoryImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+
+import javax.faces.application.Application;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.el.EvaluationException;
+import javax.faces.el.MethodBinding;
+import javax.faces.el.ValueBinding;
+
+import static org.mockito.Mockito.*;
 
 /**
  * {@inheritDoc}
@@ -65,7 +64,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         when(application.getVariableResolver()).thenReturn(new Jsf11VariableResolverAdapter(variableResolver));
         when(application.getPropertyResolver()).thenReturn(new Jsf11PropertyResolverAdapter(propertyResolver));
 
-        elBindingFactory = ElBindingFactoryProvider.getFactory(application);
+        elBindingFactory = new Sun11_02ElBindingFactoryImpl(application);
     }
 
 
