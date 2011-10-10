@@ -16,27 +16,23 @@
  */
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class PageNodeExpressionValidatorTest {
 
@@ -80,7 +76,7 @@ public class PageNodeExpressionValidatorTest {
             .with("el1", "#{valid1}")
             .and("el2", "#{2nd is a bad one}");
 
-        ValidationResult r1 = new SuccessfulValidationResult(1);
+        ValidationResult r1 = new SuccessfulValidationResult("#{valid1}", 1);
         ValidationResult r2 = new FailedValidationResult(null);
 
         when(expressionValidator.validateValueElExpression(eq("#{valid1}")))

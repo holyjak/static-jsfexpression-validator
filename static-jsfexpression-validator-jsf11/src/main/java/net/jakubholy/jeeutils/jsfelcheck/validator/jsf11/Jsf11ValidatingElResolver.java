@@ -78,7 +78,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         try {
             // Create binding - throws an exception if no matching method found
             final MethodBinding binding = elBindingFactory.createMethodBinding(elExpression);
-            return new SuccessfulValidationResult(binding);
+            return new SuccessfulValidationResult(elExpression, binding);
         } catch (EvaluationException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {
@@ -92,7 +92,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         try {
             final Object resolvedMockedValue = binding.getValue(mockFacesContext);
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
-            return new SuccessfulValidationResult(resolvedMockedValue);
+            return new SuccessfulValidationResult(elExpression, resolvedMockedValue);
         } catch (EvaluationException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {

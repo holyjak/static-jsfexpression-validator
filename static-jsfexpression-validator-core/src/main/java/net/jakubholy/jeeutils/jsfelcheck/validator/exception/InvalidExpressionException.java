@@ -61,4 +61,10 @@ public class InvalidExpressionException extends Exception {
         return "InvalidExpressionException [" + getMessage() + "]";
     }
 
+    /**
+     * Returns the invalid EL expression.
+     */
+    public String getElExpression() {
+        return expression;
+    }
 }

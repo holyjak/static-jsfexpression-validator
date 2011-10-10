@@ -74,7 +74,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     public void should_return_simple_session_bean() throws Exception {
         final String myBean = "my string bean's value";
         elResolver.declareVariable("myBean", myBean);
-        assertEquals(new SuccessfulValidationResult(myBean)
+        assertEquals(new SuccessfulValidationResult("#{myBean}", myBean)
                 , elResolver.validateValueElExpression("#{myBean}"));
     }
 
@@ -110,7 +110,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         elResolver.declareVariable("valueBean", valueBean);
 
         Object result = elResolver.validateValueElExpression("#{!valueBean['key.here'].value}");
-        assertEquals(new SuccessfulValidationResult(false), result);
+        assertEquals(new SuccessfulValidationResult("#{!valueBean['key.here'].value}", false), result);
     }
 
     @Test

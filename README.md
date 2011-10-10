@@ -19,20 +19,17 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 TODO
 ----
 
+- analyzer's validateElExpressions() - take File... viewFilesRoots
+- introduce analyzer.withManagedBeansAndVariablesConfiguration
+
 - run Sonar & Findbugs ???
 
 - consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2
 
 - remove confusing $$EnhancerByMockitoWithCGLIB from var/property names in failure reports
-- fix issue reported by Saikat in [javascript](https://github.com/VIATravel/ViaOnline/blob/master/web/changebookingselectflights.jsp#L54)
-where flight.lastLegInfo.numberOfLegs doesn't exist yet it passes
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> FakingMethodMapper
-- full JSF 1.2+ support:
-    - Facelets (the Facelets page says it has compile-type EL validation?!)
-    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...])
-    - support EL functions (not just 'function tolerance' as implemented now)
 
 - report all functions found (and of course not validated)
 
@@ -40,6 +37,11 @@ where flight.lastLegInfo.numberOfLegs doesn't exist yet it passes
 - JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
     - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
 - Modify JsfAnalyzer: setters to return this
+
+- full JSF 1.2+ support:
+    - Facelets (the Facelets page says it has compile-type EL validation?!)
+    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...])
+    - support EL functions (not just 'function tolerance' as implemented now)
 
 - add (more) example JSF page
 - test with various JSF projects

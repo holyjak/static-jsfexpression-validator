@@ -109,7 +109,7 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         try {
             final Object resolvedMockedValue = valueExpression.getValue(elContext);
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
-            return new SuccessfulValidationResult(resolvedMockedValue);
+            return new SuccessfulValidationResult(elExpression, resolvedMockedValue);
         } catch (ELException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (BaseEvaluationException e) {
@@ -126,7 +126,7 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(
                     elContext, elExpression, Object.class, NO_PARAMS);
-            return new SuccessfulValidationResult(methodExpression);
+            return new SuccessfulValidationResult(elExpression, methodExpression);
         } catch (ELException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (BaseEvaluationException e) {

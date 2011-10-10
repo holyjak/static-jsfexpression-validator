@@ -25,6 +25,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionEx
 public class FailedValidationResult extends ValidationResult {
 
     private final InvalidExpressionException failure;
+    private final String elExpression;
 
     /**
      * Result for the given failure.
@@ -32,6 +33,12 @@ public class FailedValidationResult extends ValidationResult {
      */
     public FailedValidationResult(InvalidExpressionException failure) {
         this.failure = failure;
+        // Failure can be null in tests but not in reality
+        if (failure == null) {
+            elExpression = "";
+        } else {
+            elExpression = failure.getElExpression();
+        }
     }
 
     @Override
@@ -43,8 +50,16 @@ public class FailedValidationResult extends ValidationResult {
         return failure;
     }
 
+    /**
+     * The invalid EL expression.
+     */
+    public String getElExpression() {
+        return elExpression;
+    }
+
     @Override
     public String toString() {
+        // Note: The EL is already included in the descriptor
         return "FailedValidationResult [failure=" + failure + "; "
             + super.getExpressionDescriptor() + "]";
     }

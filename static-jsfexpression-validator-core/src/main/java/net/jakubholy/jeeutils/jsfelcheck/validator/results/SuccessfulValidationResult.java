@@ -23,15 +23,18 @@ package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 public class SuccessfulValidationResult extends ValidationResult {
 
     private final Object expressionResult;
+    private final String elExpression;
 
     /**
      * Result for EL expression whose evaluation produced the given value.
      * In the context of the "fake" validating resolver this is usually a "fake value" of the expression's output type.
-     * @param expressionResult (optional) result of evaluating the EL
+     * @param elExpression (required) the expression that was succesfully evaluated
+     * @param expressionResult (optional) result of evaluating the EL (optional because the result can be null)
      *
      * @see net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory
      */
-    public SuccessfulValidationResult(Object expressionResult) {
+    public SuccessfulValidationResult(String elExpression, Object expressionResult) {
+        this.elExpression = elExpression;
         this.expressionResult = expressionResult;
     }
 
@@ -47,39 +50,38 @@ public class SuccessfulValidationResult extends ValidationResult {
         return expressionResult;
     }
 
+    /**
+     * The validated EL expression.
+     */
+    public String getElExpression() {
+        return elExpression;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SuccessfulValidationResult that = (SuccessfulValidationResult) o;
+
+        if (elExpression != null ? !elExpression.equals(that.elExpression) : that.elExpression != null) return false;
+        if (expressionResult != null ? !expressionResult.equals(that.expressionResult) : that.expressionResult != null)
+            return false;
+
+        return true;
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime
-                * result
-                + ((expressionResult == null) ? 0 : expressionResult.hashCode());
+        int result = expressionResult != null ? expressionResult.hashCode() : 0;
+        result = 31 * result + (elExpression != null ? elExpression.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // CHECKSTYLE:OFF
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SuccessfulValidationResult other = (SuccessfulValidationResult) obj;
-        if (expressionResult == null) {
-            if (other.expressionResult != null)
-                return false;
-        } else if (!expressionResult.equals(other.expressionResult))
-            return false;
-        return true;
-        // CHECKSTYLE:ON
-    }
-
-    @Override
     public String toString() {
-    	    return "Correct: " + super.toString()
-        		+ " with mocked EL result=" + expressionResult + "";
+    	    return "Correct expression '" + elExpression
+        		+ "' with mocked EL result=" + expressionResult + "";
     }
 
 }
