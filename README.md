@@ -19,7 +19,6 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 TODO
 ----
 
-- analyzer's validateElExpressions() - take File... viewFilesRoots
 - introduce analyzer.withManagedBeansAndVariablesConfiguration
 
 - run Sonar & Findbugs ???

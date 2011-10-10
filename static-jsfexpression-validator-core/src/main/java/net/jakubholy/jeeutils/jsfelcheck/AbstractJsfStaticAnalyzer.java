@@ -123,23 +123,23 @@ public abstract class AbstractJsfStaticAnalyzer {
 
 
     /**
-     * Check expressions in all JSP files under the jspDir and print the failed (or all) ones
+     * Check expressions in all JSP files under the viewFilesRoot and print the failed (or all) ones
      * to System out.
      * <p>
      * Notion: Variable - the first element in an EL expression; property: any
      * but the first element. Example:
      * #{variable.propert1.property2['some.key']}
      *
-     * @param jspDir
+     * @param viewFilesRoot
      *            (required) where to search for JSP pages
      * @return results of the validation (never null)
      * @throws Exception
      */
-    public CollectedValidationResults validateElExpressions(String jspDir) {
+    public CollectedValidationResults validateElExpressions(File viewFilesRoot) {
 
-        assertJspDirValid(jspDir);
+        assertJspDirValid(viewFilesRoot);
 
-        LOG.info("validateElExpressions: entry for JSP root " + jspDir);
+        LOG.info("validateElExpressions: entry for JSP root " + viewFilesRoot);
 
         final long start = System.currentTimeMillis();
 
@@ -148,7 +148,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         applyConfigurationFromSystemProperties();
 
         // Run it
-        JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(jspDir,
+        JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(viewFilesRoot.getPath(),
                 pageNodeValidator);
         try {
             jspc.execute();
@@ -207,18 +207,17 @@ public abstract class AbstractJsfStaticAnalyzer {
                 .fakeValueOfType(HttpServletRequest.class, "request"));
     }
 
-    private void assertJspDirValid(String jspDir) throws IllegalArgumentException {
-        if (jspDir == null) {
-            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) may not be null");
+    private void assertJspDirValid(File viewFilesRoot) throws IllegalArgumentException {
+        if (viewFilesRoot == null) {
+            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) may not be null");
         }
 
-        File jspDirFile = new File(jspDir);
-        if (!jspDirFile.isDirectory()) {
-            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) is not a directory! "
-                    + "Path: " + jspDir + " (absolute: " + jspDirFile.getAbsolutePath() + ")");
-        } else if (!jspDirFile.canRead()) {
-            throw new IllegalArgumentException("jspDir (path of the directory with JSP files) is not readable! "
-                    + "Path: " + jspDir + " (absolute: " + jspDirFile.getAbsolutePath() + ")");
+        if (!viewFilesRoot.isDirectory()) {
+            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) is not a directory! "
+                    + "Path: " + viewFilesRoot + " (absolute: " + viewFilesRoot.getAbsolutePath() + ")");
+        } else if (!viewFilesRoot.canRead()) {
+            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) is not readable! "
+                    + "Path: " + viewFilesRoot + " (absolute: " + viewFilesRoot.getAbsolutePath() + ")");
         }
     }
 
@@ -370,8 +369,7 @@ public abstract class AbstractJsfStaticAnalyzer {
             System.exit(-1);
         }
 
-        analyzer.validateElExpressions(jspRoot
-        );
+        analyzer.validateElExpressions(new File(jspRoot));
     }
 
     private static void parseNameToTypeMappings(String argumentValue,

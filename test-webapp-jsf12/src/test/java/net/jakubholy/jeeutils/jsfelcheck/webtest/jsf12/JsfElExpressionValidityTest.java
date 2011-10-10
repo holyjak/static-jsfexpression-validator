@@ -29,7 +29,7 @@ public class JsfElExpressionValidityTest {
                 .withExtraVariable("iAmExtraVariable", new Object())
                 ;
 
-        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions("src/main/webapp//tests/valid_el");
+        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp//tests/valid_el"));
 
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
                 + results.failures()

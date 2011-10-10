@@ -35,7 +35,7 @@ public class JsfElInvalidExpressionsTest {
     public void verify_all_el_expressions_fail() throws Exception {
 
         JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
-        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions("src/main/webapp//tests/failing_el");
+        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp//tests/failing_el"));
 
         assertEquals("All the expressions found should have failed to validate! Expected to fail:"
                 + results.goodResults()
