@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Stupid non-abstract subclass so that we can test the class' code.
  */
-public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer {
+public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer<TestJsfStaticAnalyzerImpl> {
 
     /** BEWARE: Only partly implemented, i.e. doesn't record all. */
     public static class RecordingDummyElResolver implements ValidatingElResolver {

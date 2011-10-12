@@ -24,6 +24,9 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.TagJsfVariab
 /**
  * Declaration of local variables in JSF pages and optionally
  * resolversIn for tags that can produce local variables.
+ * <p>
+ *     You will typically want to static import the static methods to make configurations more readable.
+ * </p>
  *
  * <h3>Usage example</h3>
  * {@code

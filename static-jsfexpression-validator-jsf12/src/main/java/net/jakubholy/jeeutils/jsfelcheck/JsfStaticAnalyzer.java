@@ -31,7 +31,7 @@ import java.util.Collection;
  *
  * Implementation based on JSF 1.2.
  */
-public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer {
+public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyzer> {
 
     public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no javadoc)
         AbstractJsfStaticAnalyzer.main(new JsfStaticAnalyzer(), args);

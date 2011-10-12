@@ -19,32 +19,62 @@ package net.jakubholy.jeeutils.jsfelcheck
 
 import net.jakubholy.jeeutils.jsfelcheck.TestJsfStaticAnalyzerImpl.RecordingDummyElResolver
 import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration
+import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration
 import org.junit.Before
 import org.junit.Test
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.forExtraVariables
 
 public class AbstractJsfStaticAnalyzerTest {
 
     private AbstractJsfStaticAnalyzer analyzer
-    RecordingDummyElResolver recordingResolver
+    RecordingDummyElResolver recordingElValidator
 
     @Before
     public void setUp() {
         def testAnalyzer = new TestJsfStaticAnalyzerImpl()
-        recordingResolver = testAnalyzer.getResolver()
+        recordingElValidator = testAnalyzer.getResolver()
         analyzer = testAnalyzer;
     }
 
     @Test
     public void should_accept_local_variable_configuration() throws Exception {
         def config = new LocalVariableConfiguration()
-        analyzer.withLocalVariablesConfiguration(config)
+        assert analyzer.withLocalVariablesConfiguration(config) == analyzer
         assert analyzer.getContextVariableRegistry() == config.toRegistry()
+    }
+
+    @Test(expected = IllegalArgumentException)
+    public void should_deny_null_local_variable_configuration() throws Exception {
+        analyzer.withLocalVariablesConfiguration(null)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    public void should_deny_null_managed_beans_and_variables_configuration() throws Exception {
+        analyzer.withManagedBeansAndVariablesConfiguration(null)
+    }
+
+    @Test
+    public void should_accept_managed_beans_and_variables_configuration() throws Exception {
+        def v1 = "123"; def v2 = new Long(42)
+        def config = new ManagedBeansAndVariablesConfiguration()
+            .withExtraVariable("var1", v1)
+            .withExtraVariable("var2", v2)
+        assert analyzer.withManagedBeansAndVariablesConfiguration(config) == analyzer
+        assert recordingElValidator.extraVariables == ["var1" : v1, "var2": v2]
+        // Any way to check that the files will actually be loaded?!
+    }
+
+    @Test
+    public void should_propagate_extra_variables_instance_to_resolver() throws Exception {
+        def value = "someValue"
+        analyzer.withManagedBeansAndVariablesConfiguration(forExtraVariables().withExtraVariable("myVariable", value))
+        assert recordingElValidator.getExtraVariables() == ["myVariable" : value]
     }
 
     @Test
     public void should_propagate_type_overrides_to_resolver() throws Exception {
         analyzer.withPropertyTypeOverride("myBean.myProp", Integer)
-        assert recordingResolver.getPropertyTypeOverrides().find {
+        assert recordingElValidator.getPropertyTypeOverrides().find {
             it.key == "myBean.myProp" && it.value == Integer.class
         }
     }
@@ -57,29 +87,6 @@ public class AbstractJsfStaticAnalyzerTest {
     @Test(expected=IllegalArgumentException)
     public void should_fail_for_type_override_without_value() throws Exception {
         analyzer.withPropertyTypeOverride("name", null)
-    }
-
-    @Test
-    public void should_propagate_extra_variables_instance_to_resolver() throws Exception {
-        def value = "someValue"
-        analyzer.withExtraVariable("myVariable", value)
-        assert recordingResolver.getExtraVariables() == ["myVariable" : value]
-    }
-
-    @Test(expected=IllegalArgumentException)
-    public void should_fail_for_extra_variable_without_name() throws Exception {
-        analyzer.withExtraVariable(null, String)
-    }
-
-    @Test(expected=IllegalArgumentException)
-    public void should_fail_for_extra_variable_without_value() throws Exception {
-        analyzer.withExtraVariable("myVariable", null)
-    }
-
-    @Test
-    public void withVariable_should_convert_class_to_fake_value() throws Exception {
-        analyzer.withExtraVariable("myTypedVar", InputStream.class);
-        assert recordingResolver.getExtraVariables().get("myTypedVar") instanceof InputStream
     }
 
 }

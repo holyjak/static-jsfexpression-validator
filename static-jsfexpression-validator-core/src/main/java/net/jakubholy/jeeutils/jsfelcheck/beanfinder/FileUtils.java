@@ -43,7 +43,8 @@ public class FileUtils {
         for (File inputFile : files) {
             if (!inputFile.canRead()) {
                 throw new IllegalArgumentException("The supplied input file "
-                        + "cannot be opened for reading: " + inputFile);
+                        + "cannot be opened for reading: " + inputFile + "(absolute path: "
+                        + inputFile.getAbsolutePath() + ")");
             }
 
             try {

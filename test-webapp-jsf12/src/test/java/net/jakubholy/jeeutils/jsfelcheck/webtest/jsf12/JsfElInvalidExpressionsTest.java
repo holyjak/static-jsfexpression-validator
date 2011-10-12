@@ -22,8 +22,8 @@ import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Collections;
 
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.fromFacesConfigFiles;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -47,8 +47,8 @@ public class JsfElInvalidExpressionsTest {
     private JsfStaticAnalyzer createConfiguredAnalyzer() {
         JsfStaticAnalyzer jsfStaticAnalyzer = new JsfStaticAnalyzer();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
-        jsfStaticAnalyzer.setFacesConfigFiles(Collections.singleton(new File(
-                "src/main/webapp/WEB-INF/faces-config.xml")));
+        jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
+                fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml")));
         return jsfStaticAnalyzer;
     }
 

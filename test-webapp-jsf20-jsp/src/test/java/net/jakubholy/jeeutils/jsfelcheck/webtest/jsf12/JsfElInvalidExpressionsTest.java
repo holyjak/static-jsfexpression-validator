@@ -22,8 +22,8 @@ import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Collections;
 
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.fromFacesConfigFiles;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -34,7 +34,9 @@ public class JsfElInvalidExpressionsTest {
     @Test
     public void verify_all_el_expressions_fail() throws Exception {
 
-        JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
+        JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer()
+                .withManagedBeansAndVariablesConfiguration(
+                        fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml")));
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp//tests/failing_el"));
 
         assertEquals("All the expressions found should have failed to validate! Expected to fail:"
@@ -47,8 +49,6 @@ public class JsfElInvalidExpressionsTest {
     private JsfStaticAnalyzer createConfiguredAnalyzer() {
         JsfStaticAnalyzer jsfStaticAnalyzer = new JsfStaticAnalyzer();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
-        jsfStaticAnalyzer.setFacesConfigFiles(Collections.singleton(new File(
-                "src/main/webapp/WEB-INF/faces-config.xml")));
         return jsfStaticAnalyzer;
     }
 

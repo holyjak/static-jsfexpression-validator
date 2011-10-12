@@ -23,9 +23,9 @@ import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.testbean.MyCollectionBean
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Collections;
 
 import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.declareLocalVariable;
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.fromFacesConfigFiles;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -42,8 +42,10 @@ public class JsfElExpressionValidityTest {
                     declareLocalVariable("myCollectionBean.list", MyCollectionBean.ValueHolder.class)
                     .withCustomDataTableTagAlias("t:dataTable"))
                 .withPropertyTypeOverride("myCollectionBean.list.*", MyCollectionBean.ValueHolder.class)
-                .withExtraVariable("iAmExtraVariable", new Object())
-                .withExtraVariable("myCollectionBean", new MyCollectionBean())
+                .withManagedBeansAndVariablesConfiguration(
+                        fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml"))
+                        .withExtraVariable("iAmExtraVariable", new Object())
+                        .withExtraVariable("myCollectionBean", new MyCollectionBean()))
                 ;
 
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp//tests/valid_el"));
@@ -57,8 +59,6 @@ public class JsfElExpressionValidityTest {
     private JsfStaticAnalyzer createConfiguredAnalyzer() {
         JsfStaticAnalyzer jsfStaticAnalyzer = new JsfStaticAnalyzer();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
-        jsfStaticAnalyzer.setFacesConfigFiles(Collections.singleton(new File(
-                "src/main/webapp/WEB-INF/faces-config.xml")));
         return jsfStaticAnalyzer;
     }
 

@@ -19,8 +19,6 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 TODO
 ----
 
-- introduce analyzer.withManagedBeansAndVariablesConfiguration
-
 - run Sonar & Findbugs ???
 
 - consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2

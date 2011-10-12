@@ -17,11 +17,11 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration;
+import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.*;
  * <p>
  * If there are some EL variables aside of managed beans in faces-config (and
  * perhaps Spring config) and the local variables you can declare them to the
- * validator via {@link #withExtraVariable(String, Object)}.
+ * validator via {@link ManagedBeansAndVariablesConfiguration#withExtraVariable(String, Object)}.
  * <p>
  * If there are other tags than h:dataTable that can create local variables, you
  * must create and register an appropriate resolver for them as is done with the
@@ -97,18 +97,19 @@ import static org.mockito.Mockito.*;
  * @author jakubholy.net
  *
  */
-public abstract class AbstractJsfStaticAnalyzer {
+public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnalyzer> {
 
     private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class.getName());
+
+    private final T self;
 
     private final ValidatingElResolver elValidator;
     private final ResultsReporter resultsReporter = new ResultsReporter();
 
     private String jspsToIncludeCommaSeparated = null;
-    private Collection<InputStream> facesConfigFiles = Collections.emptyList();
-    private Collection<InputStream> springConfigFiles = Collections.emptyList();
 
     private LocalVariableConfiguration localVariableConfiguration = new LocalVariableConfiguration();
+    private ManagedBeansAndVariablesConfiguration managedBeansConfiguration = new ManagedBeansAndVariablesConfiguration();
 
     /** New, unconfigured analyzer. */
     public AbstractJsfStaticAnalyzer() {
@@ -116,6 +117,7 @@ public abstract class AbstractJsfStaticAnalyzer {
         if (elValidator == null) {
             throw new IllegalStateException("Implementation returned null elValidator: ValidatingElResolver");
         }
+        self = (T) this;
     }
 
     /** Create the JSF-implementation specific valiator to use. */
@@ -294,13 +296,14 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     private Collection<ManagedBeanDescriptor> findFacesManagedBeans() {
-        if (facesConfigFiles.isEmpty()) {
+        Collection<InputStream> configStreams = managedBeansConfiguration.getFacesConfigStreams();
+        if (configStreams.isEmpty()) {
             return Collections.emptyList();
         }
 
-        LOG.info("Loading faces-config managed beans from " + facesConfigFiles);
+        LOG.info("Loading faces-config managed beans from " + configStreams);
 
-        ManagedBeanFinder beanFinder = createManagedBeanFinder(facesConfigFiles);
+        ManagedBeanFinder beanFinder = createManagedBeanFinder(configStreams);
         Collection<ManagedBeanDescriptor> facesConfigBeans = beanFinder
                 .findDefinedBackingBeans();
         return facesConfigBeans;
@@ -310,13 +313,14 @@ public abstract class AbstractJsfStaticAnalyzer {
             Collection<InputStream> facesConfigFilesToRead);
 
     private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
-        if (springConfigFiles.isEmpty()) {
+        Collection<InputStream> configStreams = managedBeansConfiguration.getSpringConfigStreams();
+        if (configStreams.isEmpty()) {
             return Collections.emptyList();
         }
 
-        LOG.info("Loading Spring managed beans from " + springConfigFiles);
+        LOG.info("Loading Spring managed beans from " + configStreams);
 
-        ManagedBeanFinder beanFinder = SpringContextBeanFinder.forStreams(springConfigFiles);
+        ManagedBeanFinder beanFinder = SpringContextBeanFinder.forStreams(configStreams);
         return beanFinder.findDefinedBackingBeans();
     }
 
@@ -426,58 +430,6 @@ public abstract class AbstractJsfStaticAnalyzer {
     }
 
     /**
-     * The faces-config.xml files to read managed beans from. Default: empty.
-     * Set to empty or null not to process any.
-     * @param facesConfigFiles (required) faces-config files to read managed beans from; may be empty
-     */
-    public void setFacesConfigFiles(Collection<File> facesConfigFiles) {
-        if (facesConfigFiles == null || facesConfigFiles.isEmpty()) {
-            this.facesConfigFiles = Collections.emptyList();
-        } else {
-            this.facesConfigFiles = FileUtils.filesToStream(facesConfigFiles);
-        }
-    }
-
-    /**
-     * The faces-config.xml files to read managed beans from. Default: empty.
-     * Set to empty or null not to process any.
-     * @param facesConfigStreams (required) faces-config files to read managed beans from; may be empty
-     */
-    public void setFacesConfigStreams(Collection<InputStream> facesConfigStreams) {
-        if (facesConfigStreams == null || facesConfigStreams.isEmpty()) {
-            this.facesConfigFiles = Collections.emptyList();
-        } else {
-            this.facesConfigFiles = facesConfigStreams;
-        }
-    }
-
-    /**
-     * The Spring application context XML files to read managed beans from.
-     * Default: empty. Set to empty or null not to process any.
-     * @param springConfigFiles (required) Spring applicationContext files to read managed beans from; may be empty
-     */
-    public void setSpringConfigFiles(Collection<File> springConfigFiles) {
-        if (springConfigFiles == null || springConfigFiles.isEmpty()) {
-            this.springConfigFiles = Collections.emptyList();
-        } else {
-            this.springConfigFiles = FileUtils.filesToStream(springConfigFiles);
-        }
-    }
-
-    /**
-     * The Spring application context XML files to read managed beans from.
-     * Default: empty. Set to empty or null not to process any.
-     * @param springConfigStream (required) Spring applicationContext files to read managed beans from; may be empty
-     */
-    public void setSpringConfigStreams(Collection<InputStream> springConfigStream) {
-        if (springConfigStream == null || springConfigStream.isEmpty()) {
-            this.springConfigFiles = Collections.emptyList();
-        } else {
-            this.springConfigFiles = springConfigStream;
-        }
-    }
-
-    /**
      * True - do not print results to the standard output / error stream. Default: false.
      * <p>
      * It can be also set by setting the system property
@@ -504,12 +456,32 @@ public abstract class AbstractJsfStaticAnalyzer {
      * @param configuration (required)
      * @return this
      */
-    public AbstractJsfStaticAnalyzer withLocalVariablesConfiguration(LocalVariableConfiguration configuration) {
-        if (localVariableConfiguration == null) {
+    public T withLocalVariablesConfiguration(LocalVariableConfiguration configuration) {
+        if (configuration == null) {
             throw new IllegalArgumentException("configuration: LocalVariableConfiguration may not be null");
         }
         this.localVariableConfiguration = configuration;
-        return this;
+        return self;
+    }
+
+    /**
+     * Configure where should be definitions of known managed beans loaded from
+     * and optionally global (as opposed to tag-local) variables that the validator cannot detect itself.
+     * (Basically a managed bean is also just a variable.)
+     * @param configuration (required)
+     * @return this
+     */
+    public T withManagedBeansAndVariablesConfiguration(ManagedBeansAndVariablesConfiguration configuration) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("configuration: LocalVariableConfiguration may not be null");
+        }
+        this.managedBeansConfiguration = configuration;
+
+        for (Map.Entry<String, Object> extraVariable : configuration.getExtraVariables().entrySet()) {
+            elValidator.declareVariable(extraVariable.getKey(), extraVariable.getValue());
+        }
+
+        return self;
     }
 
     /**
@@ -528,63 +500,11 @@ public abstract class AbstractJsfStaticAnalyzer {
      * @param newType (required) the type to use for the property
      * @return this
      */
-    public AbstractJsfStaticAnalyzer withPropertyTypeOverride(final String mapJsfExpression, final Class<?> newType) {
+    public T withPropertyTypeOverride(final String mapJsfExpression, final Class<?> newType) {
         assertNotNull(mapJsfExpression, "mapJsfExpression", String.class);
         assertNotNull(newType, "newType", Class.class);
         elValidator.definePropertyTypeOverride(mapJsfExpression, newType);
-        return this;
-    }
-
-    /**
-     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
-     * resolve it.
-     * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
-     * is thrown when an undeclared/unknown variable in encountered.
-     * <p>You most likely actually want to use {@link #withExtraVariable(String, Class)} as passing an actual
-     * value has rarely any benefits.
-     * </p>
-     * You use this typically to declare managed beans and their value.
-     * The purpose of this method is to make it possible to declare variables of types that whose value we
-     * currently cannot fake.
-     *
-     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
-     * var.prop1.prop2)
-     * @param value (required) the value to be returned for the variable, used in further evaluation. WARNING: It should
-     * be an actual instance, not a Class!
-     * @return this
-     * @see #withExtraVariable(String, Class)
-     *
-     */
-    public AbstractJsfStaticAnalyzer withExtraVariable(final String name, final Object value) {
-        assertNotNull(name, "name", String.class);
-        assertNotNull(value, "value", Object.class);
-        elValidator.declareVariable(name, value);
-        return this;
-    }
-
-    /**
-     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
-     * resolve it.
-     * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
-     * is thrown when an undeclared/unknown variable in encountered.
-     * You use this typically to declare managed beans and their class.
-     * <p>
-     *     For the puropose of validation a fake value of the type is created using
-     *     {@link FakeValueFactory#fakeValueOfType(Class, Object)}.
-     * </p>
-     *
-     * @param name (required) the name of the EL variable (i.e. the first identifier in any EL expression:
-     * var.prop1.prop2)
-     * @param valueType (required) the value to be returned for the variable, used in further evaluation.
-     * @return this
-     * @see #withExtraVariable(String, Object)
-     */
-    public AbstractJsfStaticAnalyzer withExtraVariable(final String name, final Class valueType) {
-        assertNotNull(name, "name", String.class);
-        assertNotNull(valueType, "value", Object.class);
-        Object fakeValue = FakeValueFactory.fakeValueOfType(valueType, name);
-        elValidator.declareVariable(name, fakeValue);
-        return this;
+        return self;
     }
 
     /**
