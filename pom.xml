@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 	<artifactId>jsfelcheck-parent</artifactId>
-	<version>0.9.5</version>
+	<version>0.9.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<description>Parent POM with common settings.</description>
 

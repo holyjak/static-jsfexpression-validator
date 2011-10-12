@@ -4,14 +4,14 @@
     <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
     <artifactId>test-webapp-jsf12</artifactId>
     <packaging>war</packaging>
-    <version>0.9.5</version>
+    <version>0.9.6-SNAPSHOT</version>
     <name>Test JSF 1.2 webapp using JSP</name>
     <description>Exemplifies JSF 1.2 which should be supported by the JSF EL validator for JSF 1.2 (using JSP)</description>
 
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-		<version>0.9.5</version>
+		<version>0.9.6-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
