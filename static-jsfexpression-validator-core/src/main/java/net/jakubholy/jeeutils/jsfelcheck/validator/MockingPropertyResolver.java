@@ -17,18 +17,17 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
+
+import javax.faces.el.EvaluationException;
+import javax.faces.el.PropertyNotFoundException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.faces.el.EvaluationException;
-import javax.faces.el.PropertyNotFoundException;
-
-import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 
 /**
  * Automatically return a Mockito mock for any property that is valid, otherwise throw a
@@ -127,6 +126,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
             return this.determineFinalTypeOfCurrentExpressionAnd(property, null);
         }
 
+        // Throws PropertyNotFoundException if there is no such property on the bean
         return getTypeResolver().getType(target, property);
     }
 

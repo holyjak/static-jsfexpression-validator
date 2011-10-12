@@ -35,6 +35,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -131,6 +132,14 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         ValidationResult result = elResolver.validateValueElExpression("#{myObject.noSuchProperty}");
         //assertFailureWithMessageContaining(result, "Property 'noSuchProperty' not found"); //legacy jsf-impl 1.1
         assertFailureWithMessageContaining(result, "Invalid EL expression '#{myObject.noSuchProperty}': "); // jsf-impl 1.1_02b
+    }
+
+    @Test
+    public void should_show_original_class_without_cglib_suffix_in_property_fialure_report() throws Exception {
+        elResolver.declareVariable("myObject", FakeValueFactory.fakeValueOfType(ValueHolder.class, "myObject"));
+        ValidationResult result = elResolver.validateValueElExpression("#{myObject.noSuchProperty}");
+        assertThat("", result.toString()
+                , not(containsString("EnhancerByMockitoWithCGLIB")));
     }
 
     @Test

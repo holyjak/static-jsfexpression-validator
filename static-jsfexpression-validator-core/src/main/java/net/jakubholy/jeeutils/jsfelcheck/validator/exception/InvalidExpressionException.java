@@ -17,6 +17,8 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
+import java.util.regex.Pattern;
+
 /**
  * Used to pass on EL validation failures in a JSF implementation independent way.
  */
@@ -53,7 +55,19 @@ public class InvalidExpressionException extends Exception {
         String message = (defaultMessage.contains(expression))
             || causeInfo.contains(expression)? defaultMessage : "Invalid EL expression '"
             + expression + "': " + defaultMessage;
-        return message + causeInfo;
+        return withoutMockitoCglibSuffixInClassnames(message + causeInfo);
+    }
+
+    /**
+     * Remove confusing Mockit CGLIB suffix from faked object values.
+     * Example message: Invalid EL expression '#{myObject.noSuchProperty}': PropertyNotFoundException -
+     * Property 'noSuchProperty' not found on type your.BeanType$$EnhancerByMockitoWithCGLIB$$c22a782d
+     * @param message
+     * @return
+     */
+    private String withoutMockitoCglibSuffixInClassnames(String message) {
+        Pattern cglibSuffixPattern = Pattern.compile(Pattern.quote("$$EnhancerByMockitoWithCGLIB$$") + "\\w*");
+        return cglibSuffixPattern.matcher(message).replaceAll("");
     }
 
     @Override

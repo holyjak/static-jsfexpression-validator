@@ -17,21 +17,18 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.util.Collections;
-
-import javax.faces.el.PropertyNotFoundException;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ParsedElExpression;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.faces.el.PropertyNotFoundException;
+import java.util.Collections;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 
 public class Jsf11PropertyResolverAdapterTest {

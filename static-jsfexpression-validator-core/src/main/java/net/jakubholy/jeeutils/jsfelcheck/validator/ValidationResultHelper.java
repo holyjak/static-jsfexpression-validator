@@ -17,15 +17,15 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Helper for handling validation failures.
