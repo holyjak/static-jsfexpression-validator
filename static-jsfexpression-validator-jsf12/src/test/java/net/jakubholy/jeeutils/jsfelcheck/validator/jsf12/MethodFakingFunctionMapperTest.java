@@ -17,14 +17,18 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
-import static org.junit.Assert.*;
-import static net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.MethodFakingFunctionMapper.FAKE_METHODS;
-
-import java.lang.reflect.Method;
-
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+
+import static net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.MethodFakingFunctionMapper.FAKE_METHODS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.Matchers.*;
 
 public class MethodFakingFunctionMapperTest {
 
@@ -58,6 +62,27 @@ public class MethodFakingFunctionMapperTest {
         Method actualSecondMethod = mapper.resolveFunction("pref1", "anotherMethod");
         assertSame(FAKE_METHODS[0], actualFirstMethod);
         assertSame(FAKE_METHODS[1], actualSecondMethod);
+    }
+
+    @Test
+    public void should_remember_all_functions_encountered_in_the_last_expression() throws Exception {
+
+        // First EL and its functions
+        mapper.setCurrentExpression("#{pref0:firstMethod() + pref1:anotherMethod('argument 1')}");
+        mapper.resolveFunction("pref0", "firstMethod");
+        mapper.resolveFunction("pref1", "anotherMethod");
+        assertThat(mapper.getLastExpressionsFunctionQNames(), containsInAnyOrder("pref0:firstMethod", "pref1:anotherMethod"));
+
+        // Second EL and its function
+        mapper.setCurrentExpression("#{pref3:yetAnotherMethod()}");
+        mapper.resolveFunction("pref3", "yetAnotherMethod");
+        assertThat(mapper.getLastExpressionsFunctionQNames(), containsInAnyOrder("pref3:yetAnotherMethod"));
+
+    }
+
+    @Test
+    public void should_initially_return_empty_functions_encountered() throws Exception {
+        assertThat(mapper.getLastExpressionsFunctionQNames(), Matchers.<String>empty());
     }
 
     @Test(expected = IllegalArgumentException.class)

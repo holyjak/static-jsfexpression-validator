@@ -17,11 +17,15 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.Map;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.ValidationResultHelper;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+import org.apache.myfaces.el.unified.FacesELContext;
 
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
@@ -37,17 +41,10 @@ import javax.el.ResourceBundleELResolver;
 import javax.el.ValueExpression;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import java.util.Collections;
+import java.util.Map;
 
-import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.ValidationResultHelper;
-import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
-
-import org.apache.myfaces.el.unified.FacesELContext;
+import static org.mockito.Mockito.*;
 
 /** {@inheritDoc}
  *
@@ -109,7 +106,8 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         try {
             final Object resolvedMockedValue = valueExpression.getValue(elContext);
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
-            return new SuccessfulValidationResult(elExpression, resolvedMockedValue);
+            return new SuccessfulValidationResult(elExpression, resolvedMockedValue)
+                    .withFunctionsInExpression(functionMapper.getLastExpressionsFunctionQNames());
         } catch (ELException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (BaseEvaluationException e) {
@@ -126,7 +124,8 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(
                     elContext, elExpression, Object.class, NO_PARAMS);
-            return new SuccessfulValidationResult(elExpression, methodExpression);
+            return new SuccessfulValidationResult(elExpression, methodExpression)
+                    .withFunctionsInExpression(functionMapper.getLastExpressionsFunctionQNames());
         } catch (ELException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (BaseEvaluationException e) {

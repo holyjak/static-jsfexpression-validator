@@ -21,13 +21,16 @@ TODO
 
 
 - finishing touches:
-    - add addFunctionReturnTypeOverride -> FakingMethodMapper
+    - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper
 
-- report all functions found (and of course not validated)
+- report all functions found (and of course not validated (SUPPORT PARTLY IMPLEMENTED))
 
 - better support for view file filtrering (includes/excludes)
+
 - JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
     - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
+
+---
 
 - full JSF 1.2+ support:
     - Facelets (the Facelets page says it has compile-type EL validation?!)
@@ -35,6 +38,8 @@ TODO
     - support EL functions (not just 'function tolerance' as implemented now)
 
 - run Sonar & Findbugs ???
+
+- FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
 
 - add (more) example JSF page
 - test with various JSF projects ?

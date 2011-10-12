@@ -17,6 +17,10 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.results;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Result for a JSF EL expression that was successfully validated.
  */
@@ -24,6 +28,7 @@ public class SuccessfulValidationResult extends ValidationResult {
 
     private final Object expressionResult;
     private final String elExpression;
+    private final Set<String> functionsInExpression = new HashSet<String>();
 
     /**
      * Result for EL expression whose evaluation produced the given value.
@@ -84,4 +89,12 @@ public class SuccessfulValidationResult extends ValidationResult {
         		+ "' with mocked EL result=" + expressionResult + "";
     }
 
+    public SuccessfulValidationResult withFunctionsInExpression(Collection<String> functionQNames) {
+        functionsInExpression.addAll(functionQNames);
+        return this;
+    }
+
+    public Set<String> getFunctionsInExpression() {
+        return functionsInExpression;
+    }
 }

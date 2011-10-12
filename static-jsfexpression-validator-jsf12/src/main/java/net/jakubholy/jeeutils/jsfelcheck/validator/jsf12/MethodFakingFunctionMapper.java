@@ -17,17 +17,19 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.el.FunctionMapper;
-
 import org.apache.el.parser.AstFunction;
 import org.apache.el.parser.ELParser;
 import org.apache.el.parser.Node;
 import org.apache.el.parser.NodeVisitor;
+
+import javax.el.FunctionMapper;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Instead of resolving to the correct Method based on prefix, name, taglib URI and
@@ -38,6 +40,10 @@ import org.apache.el.parser.NodeVisitor;
  */
 public class MethodFakingFunctionMapper extends FunctionMapper {
 
+    /**
+     * For each function node found in an EL, remember the number if its
+     * children (arity).
+     */
     private final class FunctionArityExtractingVisitor implements NodeVisitor {
 
         private final Map<String, Integer> functionArity = new HashMap<String, Integer>();
@@ -73,7 +79,8 @@ public class MethodFakingFunctionMapper extends FunctionMapper {
     };
     // CHECKSTYLE:ON
 
-    private final Map<String, Integer> functionArities = new HashMap<String, Integer>();
+    private final Map<String, Integer> functionToAritiesCache = new HashMap<String, Integer>();
+    private final Set<String> currentExpressionsFunctions = new TreeSet<String>();
     private String currentExpression;
 
     private static Method createFakeMethod(int arity) {
@@ -102,16 +109,23 @@ public class MethodFakingFunctionMapper extends FunctionMapper {
     // hopefully nobody uses method of more than 5 parameters
     // CHECKSTYLE:ON
 
+    public Collection<String> getLastExpressionsFunctionQNames() {
+        return currentExpressionsFunctions;
+    }
+
     @Override
     public Method resolveFunction(String prefix, String name) {
 
         final String resolvedFunctionQName = prefix + ":" + name;
 
-        Integer arity = functionArities.get(resolvedFunctionQName);
+        // FIXME The code below allows for a function name to have just one number of parameters, i.e. no f(1), f(1,2)
+        // What does the specification say?
+
+        Integer arity = functionToAritiesCache.get(resolvedFunctionQName);
         if (arity == null) {
-            Map<String, Integer> localFunctionArities = extractFunctionArities();
-            arity = localFunctionArities.get(resolvedFunctionQName);
-            functionArities.putAll(localFunctionArities);
+            Map<String, Integer> functionsAndAritiesInCurrentEL = extractFunctionArities();
+            arity = functionsAndAritiesInCurrentEL.get(resolvedFunctionQName);
+            functionToAritiesCache.putAll(functionsAndAritiesInCurrentEL);
         }
 
         if (arity == null) {
@@ -121,10 +135,14 @@ public class MethodFakingFunctionMapper extends FunctionMapper {
             throw new IllegalArgumentException("Currently we only can fake methods with up to 5 parameters but "
                     + resolvedFunctionQName + " has " + arity + ". This is really a bad practice anyway.");
         } else {
+            currentExpressionsFunctions.add(resolvedFunctionQName);
             return FAKE_METHODS[arity];
         }
     }
 
+    /**
+     * Extract all arities of all functions in the current EL expression.
+     */
     private Map<String, Integer> extractFunctionArities() {
         Node parsedEl = ELParser.parse(getCurrentExpressionOrFail());
         try {
@@ -138,6 +156,7 @@ public class MethodFakingFunctionMapper extends FunctionMapper {
 
     public void setCurrentExpression(String currentExpression) {
         this.currentExpression = currentExpression;
+        currentExpressionsFunctions.clear();
     }
 
     private String getCurrentExpressionOrFail() {
