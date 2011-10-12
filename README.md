@@ -1,14 +1,24 @@
 Static JSF EL Expression Validator
 ==================================
 
-Perform analysis of (selected) JSF 1.1 JSP files and validate that
+Perform analysis of JSF 1.1/1.2/2.x JSP files and validate that
 all EL expressions reference only existing managed beans and their
 properties/action methods.
 
 USAGE
 -----
-See the main class net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer
+
+See the main class [net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java#L140)
 and perhaps try to run it from the command line (it prints usage info).
+
+DOWNLOADS
+---------
+
+You can get the binaries via Maven or manually from the Maven Central Repository. Select version compatible with your JSF:
+
+1. JSF 1.1: [static-jsfexpression-validator-jsf11](http://search.maven.org/#browse%7C1186899637)
+1. JSF 1.2: [static-jsfexpression-validator-jsf12](http://search.maven.org/#browse%7C1186899668)
+1. JSF 2.x: [static-jsfexpression-validator-jsf20](http://search.maven.org/#browse%7C1186900567)
 
 MORE INFO
 ---------
@@ -16,8 +26,10 @@ MORE INFO
 See detailed description of how to use the tool at [the blog post validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator]
 (http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/)
 
-TODO
-----
+---
+
+TODO - FURTHER DEVELOPMENT
+--------------------------
 
 
 - finishing touches:

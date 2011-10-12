@@ -326,6 +326,9 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 
     /**
      * Used to ignore some expressions, i.e. not to validate them.
+     * <p>
+     * 		Note that you can use it quite creatively f.ex. to build statistics about what EL and managed beans your app really uses (w/o any filtering).
+     * </p>
      * @param elExpressionFilter (required)
      */
     public void addElExpressionFilter(ElExpressionFilter elExpressionFilter) {
