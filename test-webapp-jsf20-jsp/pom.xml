@@ -22,14 +22,14 @@
     <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
     <artifactId>test-webapp-jsf20-jsp</artifactId>
     <packaging>war</packaging>
-    <version>0.9.6-SNAPSHOT</version>
+    <version>0.9.6</version>
     <name>Test JSF 2.0 webapp using JSP and MyFaces 2.0</name>
     <description>Exemplifies JSF 2.0 which should be supported by the JSF EL validator for JSF 2.0 (using JSPs)</description>
 
     <parent>
         <artifactId>jsfelcheck-parent</artifactId>
         <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-        <version>0.9.6-SNAPSHOT</version>
+        <version>0.9.6</version>
     </parent>
 
     <dependencies>
