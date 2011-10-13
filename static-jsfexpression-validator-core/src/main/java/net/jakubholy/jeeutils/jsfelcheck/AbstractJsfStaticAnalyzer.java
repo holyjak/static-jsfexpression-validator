@@ -312,7 +312,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     protected abstract ManagedBeanFinder createManagedBeanFinder(
             Collection<InputStream> facesConfigFilesToRead);
 
-    private Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
+    Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
         Collection<InputStream> configStreams = managedBeansConfiguration.getSpringConfigStreams();
         if (configStreams.isEmpty()) {
             return Collections.emptyList();

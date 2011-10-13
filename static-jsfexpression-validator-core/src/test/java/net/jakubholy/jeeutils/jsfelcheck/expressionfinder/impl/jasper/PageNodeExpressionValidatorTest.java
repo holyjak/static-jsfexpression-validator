@@ -129,13 +129,23 @@ public class PageNodeExpressionValidatorTest {
 
     /**
      * JSF EL up to 1.1 were marked with #{..}, since the introduction of UEL in 1.2 they use
-     * ${..} (used for JSP EL only before that).
+     * #{} for on-requested evaluated expressions (i.e. JSF expr.)
+     * and ${..} for immediatelly evaluated ones (i.e. normal JSTL expr.)
      */
     @Test
-    public void should_recognize_both_jsf11_and_uel_expressions() throws Exception {
-        assertTrue("Should recognize jsf <= 1.1 expression, i.e. #{}"
+    public void should_recognize_hash_marked_ie_deferrenced_expressions() throws Exception {
+        assertTrue("Should recognize normal JSF expression (deferrenced), i.e. #{}"
                 , nodeValidator.containsElExpression("garbage before... #{jsf11_expression} ...and after"));
-        assertTrue("Should recognize jsf 1.2+ UEL expression, i.e. ${}"
+    }
+
+    /**
+     * JSF EL up to 1.1 were marked with #{..}, since the introduction of UEL in 1.2 they use
+     * #{} for on-requested evaluated expressions (i.e. JSF expr.)
+     * and ${..} for immediatelly evaluated ones (i.e. normal JSTL expr.)
+     */
+    @Test
+    public void should_reject_dollar_marked_ie_immediate_expressions() throws Exception {
+        assertFalse("Should reject immediately evaluated UEL expressions, i.e. ${}"
                 , nodeValidator.containsElExpression("garbage before... ${jsf12+_expression} ...and after"));
     }
 

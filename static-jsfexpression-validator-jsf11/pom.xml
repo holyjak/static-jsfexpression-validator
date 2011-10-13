@@ -57,6 +57,7 @@
 			<scope>compile</scope>
 		</dependency>
 
+        <!-- For faces-config.xml parsing? -->
 		<dependency>
 			<groupId>commons-digester</groupId>
 			<artifactId>commons-digester</artifactId>
@@ -64,6 +65,14 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+
+        <!-- Required by jasper when compiling JSPs, currently excluded in the parent -->
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>jasper-el</artifactId>
+            <version>${jasper.jsf12.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>

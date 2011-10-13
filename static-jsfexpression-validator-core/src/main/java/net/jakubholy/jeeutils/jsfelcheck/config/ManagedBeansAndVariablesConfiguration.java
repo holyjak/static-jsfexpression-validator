@@ -61,8 +61,7 @@ public class ManagedBeansAndVariablesConfiguration {
      * @param facesConfigFiles (optional) faces-config files to read managed beans from; may be empty or null
      */
     public static ManagedBeansAndVariablesConfiguration fromFacesConfigFiles(File... facesConfigFiles) {
-        Collection<File> fileList = (facesConfigFiles == null)? null : Arrays.asList(facesConfigFiles);
-        return new ManagedBeansAndVariablesConfiguration().andFromFacesConfigFiles(fileList);
+        return new ManagedBeansAndVariablesConfiguration().andFromFacesConfigFiles(toListNullSafe(facesConfigFiles));
     }
 
     /**
@@ -90,8 +89,7 @@ public class ManagedBeansAndVariablesConfiguration {
      * @param springConfigFiles (optional) Spring applicationContext files to read managed beans from; may be empty or null
      */
     public static ManagedBeansAndVariablesConfiguration fromSpringConfigFiles(File... springConfigFiles) {
-        Collection<File> fileList = (springConfigFiles == null)? null : Arrays.asList(springConfigFiles);
-        return new ManagedBeansAndVariablesConfiguration().andFromSpringConfigFiles(fileList);
+        return new ManagedBeansAndVariablesConfiguration().andFromSpringConfigFiles(toListNullSafe(springConfigFiles));
     }
 
     /**
@@ -133,6 +131,12 @@ public class ManagedBeansAndVariablesConfiguration {
         Collection<InputStream> streams = (facesConfigFiles == null) ? null : FileUtils.filesToStream(facesConfigFiles);
         return andFromFacesConfigStreams(streams);
     }
+    /**
+     * Non-static version of {@link #fromFacesConfigFiles(java.io.File...)}.
+     */
+    public ManagedBeansAndVariablesConfiguration andFromFacesConfigFiles(File... facesConfigFiles) {
+        return andFromFacesConfigFiles(toListNullSafe(facesConfigFiles));
+    }
 
     /**
      * Non-static version of {@link #fromFacesConfigStreams(java.util.Collection)}}.
@@ -156,7 +160,13 @@ public class ManagedBeansAndVariablesConfiguration {
     /**
      * Non-static version of {@link #fromSpringConfigFiles(java.util.Collection)}.
      */
+    public ManagedBeansAndVariablesConfiguration andFromSpringConfigFiles(File... springConfigFiles) {
+        return andFromSpringConfigFiles(toListNullSafe(springConfigFiles));
+    }
 
+    /**
+     * Non-static version of {@link #fromSpringConfigFiles(java.io.File...)}.
+     */
     public ManagedBeansAndVariablesConfiguration andFromSpringConfigFiles(Collection<File> springConfigFiles) {
         Collection<InputStream> streams = (springConfigFiles == null) ? null : FileUtils.filesToStream(springConfigFiles);
         return andFromSpringConfigStreams(streams);
@@ -240,5 +250,9 @@ public class ManagedBeansAndVariablesConfiguration {
      */
     public Map<String, Object> getExtraVariables() {
         return Collections.unmodifiableMap(extraVariables);
+    }
+
+    private static Collection<File> toListNullSafe(File[] springConfigFiles) {
+        return (springConfigFiles == null)? null : Arrays.asList(springConfigFiles);
     }
 }

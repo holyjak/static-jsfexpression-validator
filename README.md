@@ -31,6 +31,14 @@ See detailed description of how to use the tool at [the blog post validating-jsf
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
+ADD TEST FOR v0.9.6 FIXES
+- support imported Spring subconfigx and multiple/... faces configs
+-  static-jsfexpression-validator-jsf*.jar: Add integration test verifying JSP parsing -> ... => no missing dependencies etc.
+- make sure all -jsf* modules have correct dependencies on jasper and the *jasper-el it needs to be able to parse JSPs
+- how is it possible we now can get ReferenceSyntaxException: ${notesParsedXml} (not #{}) which we hadn't before?
+ Should we always ignore ${}, even for JSF1.2/2.0? (i.e. check deferenced eval. expr. only)
+
+- net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding - make names configurable?
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper
@@ -141,3 +149,14 @@ Interesting Links
 - http://stackoverflow.com/questions/4441713/migrating-from-jsf-1-2-to-jsf-2-0
 
 ---------
+
+NOTES
+-----
+
+### Version 0.9.6
+
+Quick bugfix release:
+- support imported Spring subconfigx and multiple/... faces configs
+- static-jsfexpression-validator-jsf11.jar: Add missing dependencies on jasper-el to avoid ClassNotFound ex. when parsing
+- fixed EL expression recognizer to ignore immediate evaluation expr. (${..}) and only accept ordinary JSF (deffered eval.) ones
+- added File... version of from* methods also for the non-static ones in Man.BeansAndVarConfig

@@ -17,21 +17,21 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Helper for extracting JSF EL expressions from a tag's attributes and validating them via a validator.
  */
 public class PageNodeExpressionValidator {
 
-    private static final String JSF11_EL_START_MARKER = "#{";
-    private static final String JSF12_EL_START_MARKER = "${";
+    private static final String DEFERRED_EVALUATION_EL_START_MARKER = "#{";
+    private static final String IMMEDIATE_EVALUATION_EL_START_MARKER = "${";
 
     private final JsfElValidator expressionValidator;
 
@@ -54,7 +54,7 @@ public class PageNodeExpressionValidator {
     }
 
     boolean containsElExpression(String attributeValue) {
-        return attributeValue.contains(JSF11_EL_START_MARKER) || attributeValue.contains(JSF12_EL_START_MARKER);
+        return attributeValue.contains(DEFERRED_EVALUATION_EL_START_MARKER);
     }
 
     private boolean isMethodBinding(String attribute) {

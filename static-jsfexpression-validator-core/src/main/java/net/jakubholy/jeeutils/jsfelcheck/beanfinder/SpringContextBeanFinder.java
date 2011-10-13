@@ -17,20 +17,19 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.logging.Logger;
-
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.logging.Logger;
 
 /**
  * Register all Spring Beans defined in Spring applicationContext file(s) as JSF
@@ -109,7 +108,13 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
 
         int index = 0;
         for (InputStream configFile : resourceFiles) {
-            locations[index++] = new InputStreamResource(configFile);
+            if ((configFile instanceof NamedInputStream)) {
+                // Quick hack to support relative subcontext imports before proper fix
+                File configFileFile = ((NamedInputStream) configFile).getFile();
+                locations[index++] = new FileSystemResource(configFileFile);
+            } else {
+                locations[index++] = new InputStreamResource(configFile);
+            }
         }
 
         return locations;

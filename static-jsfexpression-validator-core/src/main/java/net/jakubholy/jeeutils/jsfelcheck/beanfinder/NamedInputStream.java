@@ -28,13 +28,22 @@ public class NamedInputStream extends FileInputStream {
 
     private final String name;
 
+    /** Quick temporary hack to support Spring's imported subcontexts on relative paths */
+    private final File file;
+
     public NamedInputStream(File file) throws FileNotFoundException {
         super(file);
+        this.file = file;
         this.name = file.getAbsolutePath();
     }
 
     @Override
     public String toString() {
         return name;
+    }
+
+    /** Quick temporary hack to support Spring's imported subcontexts on relative paths */
+    public File getFile() {
+        return file;
     }
 }

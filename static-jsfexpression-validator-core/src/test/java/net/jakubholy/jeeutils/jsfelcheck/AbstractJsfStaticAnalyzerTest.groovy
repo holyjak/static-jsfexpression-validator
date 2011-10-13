@@ -23,6 +23,7 @@ import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfigur
 import org.junit.Before
 import org.junit.Test
 import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.forExtraVariables
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.fromSpringConfigFiles
 
 public class AbstractJsfStaticAnalyzerTest {
 
@@ -87,6 +88,14 @@ public class AbstractJsfStaticAnalyzerTest {
     @Test(expected=IllegalArgumentException)
     public void should_fail_for_type_override_without_value() throws Exception {
         analyzer.withPropertyTypeOverride("name", null)
+    }
+
+    @Test
+    public void should_support_spring_config_with_path_relative_import() throws Exception {
+
+        assert analyzer.withManagedBeansAndVariablesConfiguration(
+            fromSpringConfigFiles("src/test/resources/springConfig-with_import.xml" as File))
+                .findSpringManagedBeans().find { it.name == "beanInImportedFile" }
     }
 
 }
