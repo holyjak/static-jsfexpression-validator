@@ -83,42 +83,4 @@
 
 	</dependencies>
 
-	<profiles>
-		<profile>
-		    <!--
-		    USAGE:
-		      - copy Sun11_legacyElBindingFactoryImpl.java from resources to src/main/java/..
-		      - run as: mvn -P compile-legacy clean compile
-		      - copy Sun11_legacyElBindingFactoryImpl.class from target/classes to src/main/resources/..
-		      - delete Sun11_legacyElBindingFactoryImpl.java from main
-		    -->
-			<id>compile-legacy</id>
-			<dependencies>
-				<dependency>
-					<groupId>javax.faces</groupId>
-					<artifactId>jsf-impl</artifactId>
-					<version>1.1_legacy</version>
-					<scope>system</scope>
-					<systemPath>${user.home}/.ivy2/cache/no.via/jsf-impl/jars/jsf-impl-1.1.jar</systemPath>
-				</dependency>
-			</dependencies>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<version>2.3.2</version>
-						<configuration>
-                            <includes>
-                             <include>**/ElBindingFactory.java</include>
-                             <include>**/Sun11_legacyElBindingFactoryImpl.java</include>
-                            </includes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>

@@ -15,7 +15,7 @@
 
 	<modules>
 		<module>static-jsfexpression-validator-core</module>
-        	<module>static-jsfexpression-validator-core-abstracttests</module>
+		<module>static-jsfexpression-validator-core-abstracttests</module>
 		<module>static-jsfexpression-validator-jsf11</module>
 		<module>static-jsfexpression-validator-jsf12</module>
 		<module>static-jsfexpression-validator-jsf20</module>
@@ -26,6 +26,7 @@
 		<module>sun-el-customized-jsf11</module>
 		<module>jasper-el-customized-jsf12</module>
 		<module>jasper-el-customized-jsf20</module>
+		<module>test-webapp-jsf11</module>
     </modules>
 
 	<licenses>

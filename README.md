@@ -32,11 +32,12 @@ TODO - FURTHER DEVELOPMENT
 --------------------------
 
 ADD TEST FOR v0.9.6 FIXES
-- support imported Spring subconfigx and multiple/... faces configs
+- support imported Spring subconfigx and multiple/... faces configs via a Resource abstraction over files/streams
 -  static-jsfexpression-validator-jsf*.jar: Add integration test verifying JSP parsing -> ... => no missing dependencies etc.
 - make sure all -jsf* modules have correct dependencies on jasper and the *jasper-el it needs to be able to parse JSPs
 - how is it possible we now can get ReferenceSyntaxException: ${notesParsedXml} (not #{}) which we hadn't before?
  Should we always ignore ${}, even for JSF1.2/2.0? (i.e. check deferenced eval. expr. only)
+- why there is mockito-core in  taget/test-webapp-jsf11/WEB-INF/lib ?
 
 - net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding - make names configurable?
 
@@ -74,6 +75,30 @@ ADD TEST FOR v0.9.6 FIXES
 - better handling of includes:
     1) possibility to exclude pages from processing (the non-standalone ones)
     2) whenever dynamic jsp include encountered, switch to processing of that page, passing local variables in
+
+---
+Architecture refactoring: Stateless objects and message passing through a central delegator with support
+for plugging-in filters. Key components:
+- Message: Contains Context, input, output (may be of the same type as the input). Context holds the
+    static global state (e.g. user-registered local vars), public state from upstream workers
+    (e.g. current EL), and private state of each worker that needs it (e.g. per-page cache of functions),
+    and indicator whether processing of the current resource (page/tag/EL) should continue or not
+    (for filtering, ...)
+- WorkHub:
+    - has delegateWork (exp. sb. to transform the input into output) and notifyOf (no recipient required)
+    - creates instances of work processors un demand, initializes them with itself/other stuff
+- Worker: Has an instance of WorkHub
+=> advantages:1) Easy to do multithreaded processing; 2) Powerful & flexible arch. for users: the can plug in
+    filters that reject resources or modify messages (inputs/outputs) or just collect info for reporting/stats
+- Global shared state objects: E.g. cache shared across all threads (or force them into the ctx?)
+- Issues
+    - complicates interfaces and thus reuse outside of JsfElV, e,g, Result validate(String EL) => Event val.(Event)
+    - storing private state in the ctx makes it more expensive to access (logN, negligible?), sb.
+        else can possibly modify it
+    - how to pass state needed in collbacks? (easy with instance var., not so with ctx as method param.)
+    - system initialization (Compiler is created by Jasper via new C.() => can't get objects from outside)
+    - how to handle exceptions in listeners/workers?
+    - ...
 
 ### TODO - improve error messages ###
 #### Ex.1.: PropertyNotFoundException on class Error_YouMustDelcareTypeForThisVariable
