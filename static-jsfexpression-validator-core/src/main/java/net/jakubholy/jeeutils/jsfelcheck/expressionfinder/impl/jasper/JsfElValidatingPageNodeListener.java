@@ -62,7 +62,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
         try {
 
             AttributesValidationResult resolvedJsfExpressions = nodeValidator.validateJsfExpressions(
-                jspTag.getAttributes());
+                jspTag.getTagHandlerClass(), jspTag.getAttributes());
 
             validationResults.addAllFromTagLineNr(
                 jspTag.getLineNumber()

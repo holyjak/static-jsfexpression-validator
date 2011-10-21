@@ -33,13 +33,19 @@ import org.xml.sax.Attributes;
 /**
  * Process tree structure of a JSP tags of a page represented by Node objects
  * and delegate any handling to a {@link PageNodeListener}, if set.
+ * <p>
+ *     This class is instantied by the OnlyReadingJspPseudoCompiler
+ *     and serves as an adapter to our tag JSF EL checking code to
+ *     shield it from a direct dependency on Japser.
+ * </p>
+ *
  */
 public final class JsfElCheckingVisitor extends Visitor {
 
     /**
      * Listen to nodes (tags) being found in the [JSP] source file.
      */
-    public static class NullPageNodeListener implements PageNodeListener {
+    private static class NullPageNodeListener implements PageNodeListener {
 
         /**
          * Start tag encountered.
@@ -88,6 +94,16 @@ public final class JsfElCheckingVisitor extends Visitor {
 
     /**
      * Set the listeners that should be notified of nodes (tags) as they are found and processed.
+     * <p>
+     *     This is *static* because of Japser API limitations - we can only instruct it what
+     *     Compiler class it should use but it instantiates it itself. The
+     *     OnlyReadingJspPseudoCompiler in turn instantiates the JsfElCheckingVisitor and
+     *     therefore there is no way how to pass arguments from the JsfElValidator to the visitor
+     *     instance so we just set it on the visitor's class.
+     *     (Alternatively we could use a factory that would locate an existing instance
+     *     on demand but still we will need to use either a static singleton or the new
+     *     version of thereof called Spring.)
+     * </p>
      * @param nodeListener the listener
      */
     public static void setNodeListener(PageNodeListener nodeListener) {
@@ -118,6 +134,9 @@ public final class JsfElCheckingVisitor extends Visitor {
     @Override
     public void visit(CustomTag n) throws JasperException {
         Map<String, String> attributeMap = asMap(n.getAttributes());
+
+	    // n.getTagHandlerClass() => map attribute name to the type (method|value) of the target field
+	    // n.getTagHandlerClass().getDeclaredMethod("setValue", javax.el.ValueExpression.class)
 
         final PageNode currentCustomTag = new PageNode(
                 n.getQName(), n.getTagHandlerClass(), n.getStart().getLineNumber(), attributeMap);

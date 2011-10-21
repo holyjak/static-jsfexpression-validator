@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -98,8 +99,17 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
         return elResolver;
     }
 
-    /** {@inheritDoc} */
-    public ValidationResult validateValueElExpression(String elExpression) {
+	@Override
+	/** {@inheritDoc} */
+	public ValidationResult validateElExpression(String elExpression, AttributeInfo attributeInfo) {
+		if (javax.el.MethodExpression.class.isAssignableFrom(attributeInfo.getAttributeType())) {
+			return validateMethodElExpression(elExpression);
+		} else {
+			return validateValueElExpression(elExpression);
+		}
+	}
+
+    private ValidationResult validateValueElExpression(String elExpression) {
         functionMapper.setCurrentExpression(elExpression);
         final ValueExpression valueExpression = expressionFactory.createValueExpression(
                 elContext, elExpression, Object.class);
@@ -118,8 +128,7 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     }
 
-    /** {@inheritDoc} */
-    public ValidationResult validateMethodElExpression(String elExpression) {
+    private ValidationResult validateMethodElExpression(String elExpression) {
         functionMapper.setCurrentExpression(elExpression);      // most likely absolutely unnecessary
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(

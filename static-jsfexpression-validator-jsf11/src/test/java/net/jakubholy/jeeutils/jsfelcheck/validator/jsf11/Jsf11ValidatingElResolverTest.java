@@ -17,15 +17,32 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
 import javax.faces.el.ReferenceSyntaxException;
+import javax.faces.event.ActionEvent;
+import javax.faces.event.ValueChangeEvent;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolverAbstractTest;
 
+import static org.junit.Assert.fail;
+
 
 public class Jsf11ValidatingElResolverTest extends ValidatingJsfElResolverAbstractTest {
+
+	private static class MyActionBean {
+		public String doAction() { return null; }
+		public void doActionListening(ActionEvent e) {}
+		public void doValueChangeListening(ValueChangeEvent e) {}
+		public void doValidating(FacesContext ctx, UIInput ui) {}
+		public int getValue() { return 0; }
+	}
 
     @Override
     protected ValidatingElResolver setUpResolver() {
@@ -34,7 +51,27 @@ public class Jsf11ValidatingElResolverTest extends ValidatingJsfElResolverAbstra
 
     @Test(expected = ReferenceSyntaxException.class)
     public void should_reject_non_el_literal() throws Exception {
-        elResolver.validateValueElExpression("this is a literal string, not an EL expression");
+        elResolver.validateElExpression("this is a literal string, not an EL expression", new AttributeInfo("<dummy>", Object.class));
     }
+
+	@Test
+	public void should_recognize_action_attributes_as_method_binding() throws Exception {
+		elResolver.declareVariable("myActionBean", new MyActionBean());
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.doAction}", new AttributeInfo("action", String.class)));
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.doActionListening}", new AttributeInfo("actionListener", String.class)));
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.doValueChangeListening}", new AttributeInfo("valueChangeListener", String.class)));
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.doValidating}", new AttributeInfo("validator", String.class)));
+	}
+
+	@Test
+	public void should_recognize_other_attributes_as_value_binding() throws Exception {
+		elResolver.declareVariable("myActionBean", new MyActionBean());
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.value}", new AttributeInfo("whateverOther", String.class)));
+	}
 
 }

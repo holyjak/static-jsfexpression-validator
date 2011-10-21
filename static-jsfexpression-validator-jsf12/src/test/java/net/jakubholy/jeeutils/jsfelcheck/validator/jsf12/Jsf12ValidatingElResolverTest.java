@@ -17,13 +17,24 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf12;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import org.junit.Test;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingJsfElResolverAbstractTest;
 
+import javax.el.ValueExpression;
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
+
 
 public class Jsf12ValidatingElResolverTest extends ValidatingJsfElResolverAbstractTest {
+
+	private static class MyActionBean {
+		public String doAction() { return null; }
+		public int getValue() { return 0; }
+	}
 
     @Override
     protected ValidatingElResolver setUpResolver() {
@@ -58,5 +69,20 @@ public class Jsf12ValidatingElResolverTest extends ValidatingJsfElResolverAbstra
         //assertExpressionValid("#{(fake:fakeFunction0() + another:anotherFunc(456)) > 0}");
         // `- now fails, can't coerce "" -> int (NumberFormatException)
     }
+
+	@Test
+	public void should_recognize_method_binding_attribute() throws Exception {
+		// See e.g. org.apache.myfaces.taglib.html.HtmlCommandButtonTag
+		elResolver.declareVariable("myActionBean", new MyActionBean());
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.doAction}", new AttributeInfo("whatever", javax.el.MethodExpression.class)));
+	}
+
+	@Test
+	public void should_recognize_value_binding_attribute() throws Exception {
+		elResolver.declareVariable("myActionBean", new MyActionBean());
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.value}", new AttributeInfo("whateverElse", ValueExpression.class)));
+	}
 
 }

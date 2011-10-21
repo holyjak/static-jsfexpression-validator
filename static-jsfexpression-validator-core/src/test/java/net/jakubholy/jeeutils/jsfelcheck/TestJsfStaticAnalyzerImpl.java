@@ -19,6 +19,7 @@ package net.jakubholy.jeeutils.jsfelcheck;
 
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -55,11 +56,6 @@ public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer<TestJsf
         }
 
         @Override
-        public ValidationResult validateValueElExpression(String elExpression) {
-            return new FailedValidationResult(new InvalidExpressionException("N/A", "Validation not implemented"));
-        }
-
-        @Override
         public JsfElValidator declareVariable(String name, Object value) {
             extraVariables.put(name, value);
             return this;
@@ -72,7 +68,7 @@ public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer<TestJsf
         }
 
         @Override
-        public ValidationResult validateMethodElExpression(String expression) {
+        public ValidationResult validateElExpression(String expression, AttributeInfo attributeInfo) {
             return new FailedValidationResult(new InvalidExpressionException("N/A", "Validation not implemented"));
         }
 

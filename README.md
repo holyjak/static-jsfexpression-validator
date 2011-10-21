@@ -26,19 +26,18 @@ MORE INFO
 See detailed description of how to use the tool at [the blog post validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator]
 (http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/)
 
+CURRENT LIMITATIONS
+-------------------
+
+- JSF 1.1 implementation distinguishes between value and method bindings only based on the attribute name
+    (methods: action, actionListener, validator, valueChangeListener) and thus won't recongize other method bindings
+- The signature of methods used in a MethodBinding isn't checked (i.e. whether an action method is "String name()" etc.)
+- Functions are not checked for existence and correct signature
+
 ---
 
 TODO - FURTHER DEVELOPMENT
 --------------------------
-
-ADD TEST FOR v0.9.6 FIXES
--  static-jsfexpression-validator-jsf*.jar: Add integration test verifying JSP parsing -> ... => no missing dependencies etc.
-- make sure all -jsf* modules have correct dependencies on jasper and the *jasper-el it needs to be able to parse JSPs
-- how is it possible we now can get ReferenceSyntaxException: ${notesParsedXml} (not #{}) which we hadn't before?
- Should we always ignore ${}, even for JSF1.2/2.0? (i.e. check deferenced eval. expr. only)
-- why there is mockito-core in  taget/test-webapp-jsf11/WEB-INF/lib ?
-
-- net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding - make names configurable?
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper
@@ -62,6 +61,7 @@ ADD TEST FOR v0.9.6 FIXES
 - FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
 
 - add (more) example JSF page
+    - methid binding with params in JSF 2.?
 - test with various JSF projects ?
 - better error msgs - see below
  => make it clear the solution is st. like propertyTypeOverrides.put("bean.listProperty.*",  TheElementType.class);
@@ -98,6 +98,9 @@ for plugging-in filters. Key components:
     - system initialization (Compiler is created by Jasper via new C.() => can't get objects from outside)
     - how to handle exceptions in listeners/workers?
     - ...
+Use it:
+    - let the user decide whether an attribute is method or value binding
+    - powerful file/tag/attribute filtering
 
 ### TODO - improve error messages ###
 #### Ex.1.: PropertyNotFoundException on class Error_YouMustDelcareTypeForThisVariable
@@ -176,6 +179,10 @@ Interesting Links
 
 NOTES
 -----
+
+### Version 0.9.7
+
+- Autodetection of method bindingin JSF 1.2+ (based on the tag attribute's type being javax.el.MethodExpression; before we decided what it it just based on the attribute name)
 
 ### Version 0.9.6
 

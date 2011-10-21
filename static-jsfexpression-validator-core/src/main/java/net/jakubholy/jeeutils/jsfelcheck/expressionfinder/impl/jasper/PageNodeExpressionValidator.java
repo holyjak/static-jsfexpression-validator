@@ -17,6 +17,8 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
+import net.jakubholy.jeeutils.jsfelcheck.util.BeanPropertyUtils;
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.JsfExpressionDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
@@ -57,34 +59,35 @@ public class PageNodeExpressionValidator {
         return attributeValue.contains(DEFERRED_EVALUATION_EL_START_MARKER);
     }
 
-    private boolean isMethodBinding(String attribute) {
+    /*private boolean isMethodBinding(String attribute) {
         return attribute.equals("action")
             || attribute.equals("actionListener")
             || attribute.equals("valueChangeListener"); // e.g. h:selectOneMenu
-    }
+    }*/
 
     /**
      * Validate all JSF EL expressions in the tag's attributes and return
      * the resolved values of those expressions, do nothing of no expressions.
+     *
+     * @param tagHandlerClass (required) the tag's handler - to extract attribute classes
      * @param attributes (required) attributes of the tag
      * @return attribute name -> EL expression evaluation result or empty
      */
-    public AttributesValidationResult validateJsfExpressions(Map<String, String> attributes) {
+    public AttributesValidationResult validateJsfExpressions(Class<?> tagHandlerClass, Map<String, String> attributes) {
 
         Map<String, String> jsfExpressions = extractJsfExpressions(attributes);
         AttributesValidationResult resolvedExpressions = new AttributesValidationResult();
+	    BeanPropertyUtils properties = BeanPropertyUtils.forType(tagHandlerClass);
 
         for (Entry<String, String> jsfElAttribute : jsfExpressions.entrySet()) {
-            String attributeName = jsfElAttribute.getKey();
+
+	        String attributeName = jsfElAttribute.getKey();
+	        Class<?> attributeType = properties.getPropertyTypeOf(attributeName);
+	        AttributeInfo attributeInfo = new AttributeInfo(attributeName, attributeType);
+
             String elExpression = jsfElAttribute.getValue();
 
-            ValidationResult result;
-
-            if (isMethodBinding(attributeName)) {
-                result = expressionValidator.validateMethodElExpression(elExpression);
-            } else {
-                result = expressionValidator.validateValueElExpression(elExpression);
-            }
+	        ValidationResult result = expressionValidator.validateElExpression(elExpression, attributeInfo);
 
             result.setExpressionDescriptor(new JsfExpressionDescriptor(elExpression));
 

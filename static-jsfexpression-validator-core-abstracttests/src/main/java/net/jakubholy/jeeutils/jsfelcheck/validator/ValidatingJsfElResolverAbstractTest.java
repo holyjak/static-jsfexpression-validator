@@ -45,6 +45,9 @@ import static org.mockito.Mockito.*;
  * The actual implementation is plugged in by implementing {@link #setUpResolver()}.
  */
 public abstract class ValidatingJsfElResolverAbstractTest {
+	
+	/** Temporary solution not to pass null to validation & not to depend on concrete class */
+	private static class FakeValueBinding {}
 
     private static <T> ValueHolder<T> valueHolder(final T value) {
         return new ValueHolder<T>(value);
@@ -52,6 +55,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     protected ValidatingElResolver elResolver; // SUPPRESS CHECKSTYLE
     @Mock private ElVariableResolver mockUnknownVariableResolver;
+	private AttributeInfo attribute;
 
     /** Provide the resolver to be tested. */
     protected abstract ValidatingElResolver setUpResolver();
@@ -63,6 +67,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         MockitoAnnotations.initMocks(this);
         elResolver = setUpResolver();
         elResolver.setUnknownVariableResolver(mockUnknownVariableResolver);
+	    attribute = new AttributeInfo("<dummy>", FakeValueBinding.class);
     }
 
     @Test
@@ -76,7 +81,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         final String myBean = "my string bean's value";
         elResolver.declareVariable("myBean", myBean);
         assertEquals(new SuccessfulValidationResult("#{myBean}", myBean)
-                , elResolver.validateValueElExpression("#{myBean}"));
+                , elResolver.validateElExpression("#{myBean}", attribute));
     }
 
     @Test
@@ -110,7 +115,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         valueBean.put("key.here", new ValueHoldingBean(true));
         elResolver.declareVariable("valueBean", valueBean);
 
-        Object result = elResolver.validateValueElExpression("#{!valueBean['key.here'].value}");
+        Object result = elResolver.validateElExpression("#{!valueBean['key.here'].value}", attribute);
         assertEquals(new SuccessfulValidationResult("#{!valueBean['key.here'].value}", false), result);
     }
 
@@ -122,14 +127,14 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     @Test
     public void should_fail_for_undefined_variable() throws Exception {
-        ValidationResult result = elResolver.validateValueElExpression("#{undefinedBean}");
+        ValidationResult result = elResolver.validateElExpression("#{undefinedBean}", attribute);
         assertFailureWithMessageContaining(result, "No variable 'undefinedBean' among the predefined ones");
     }
 
     @Test
     public void should_fail_for_undefined_getter() throws Exception {
         elResolver.declareVariable("myObject", new Object());
-        ValidationResult result = elResolver.validateValueElExpression("#{myObject.noSuchProperty}");
+        ValidationResult result = elResolver.validateElExpression("#{myObject.noSuchProperty}", attribute);
         //assertFailureWithMessageContaining(result, "Property 'noSuchProperty' not found"); //legacy jsf-impl 1.1
         assertFailureWithMessageContaining(result, "Invalid EL expression '#{myObject.noSuchProperty}': "); // jsf-impl 1.1_02b
     }
@@ -137,7 +142,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     @Test
     public void should_show_original_class_without_cglib_suffix_in_property_fialure_report() throws Exception {
         elResolver.declareVariable("myObject", FakeValueFactory.fakeValueOfType(ValueHolder.class, "myObject"));
-        ValidationResult result = elResolver.validateValueElExpression("#{myObject.noSuchProperty}");
+        ValidationResult result = elResolver.validateElExpression("#{myObject.noSuchProperty}", attribute);
         assertThat("", result.toString()
                 , not(containsString("EnhancerByMockitoWithCGLIB")));
     }
@@ -145,7 +150,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     @Test
     public void should_fail_for_undefined_map_getter() throws Exception {
         elResolver.declareVariable("myObject", new Object());
-        ValidationResult result = elResolver.validateValueElExpression("#{myObject['noSuchKeyedProp']}");
+        ValidationResult result = elResolver.validateElExpression("#{myObject['noSuchKeyedProp']}", attribute);
         //assertFailureWithMessageContaining(result, "Property 'noSuchKeyedProp' not found"); // legacy jsf-impl 1.1
         assertFailureWithMessageContaining(result, "Invalid EL expression '#{myObject['noSuchKeyedProp']}': "); // jsf-impl 1.1_02b
     }
@@ -153,7 +158,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     @Test
     public void map_returns_object_by_default() throws Exception {
         elResolver.declareVariable("myMap", Collections.EMPTY_MAP);
-        ValidationResult result = elResolver.validateValueElExpression("#{myMap['dummyKey']}");
+        ValidationResult result = elResolver.validateElExpression("#{myMap['dummyKey']}", attribute);
         assertResultValueType(result, MockObjectOfUnknownType.class);
     }
 
@@ -161,7 +166,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     public void map_variable_returns_specified_type_if_set() throws Exception {
         elResolver.declareVariable("myMap", Collections.EMPTY_MAP);
         elResolver.definePropertyTypeOverride("myMap.*", String.class);
-        ValidationResult result = elResolver.validateValueElExpression("#{myMap['dummyKey']}");
+        ValidationResult result = elResolver.validateElExpression("#{myMap['dummyKey']}", attribute);
         assertResultValueType(result, String.class);
     }
 
@@ -169,13 +174,13 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     public void map_property_returns_specified_type_if_set() throws Exception {
         elResolver.declareVariable("myVariable", new BeanWithMapAndList());
         elResolver.definePropertyTypeOverride("myVariable.mapProperty.*", Integer.class);
-        ValidationResult result = elResolver.validateValueElExpression("#{myVariable.mapProperty['dummyKey']}");
+        ValidationResult result = elResolver.validateElExpression("#{myVariable.mapProperty['dummyKey']}", attribute);
         assertResultValueType(result, Integer.class);
     }
 
     @Test
     public void should_try_to_resolve_unknown_variables_via_registry() throws Exception {
-        elResolver.validateValueElExpression("#{unknownVariable}");
+        elResolver.validateElExpression("#{unknownVariable}", attribute);
         verify(mockUnknownVariableResolver).resolveVariable("unknownVariable");
     }
 
@@ -189,7 +194,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         elResolver.declareVariable("myVariable", new BeanWithMapAndList());
         elResolver.definePropertyTypeOverride("myVariable.arrayProperty.*", Integer.class);
         int index = Integer.MAX_VALUE;
-        ValidationResult result = elResolver.validateValueElExpression("#{myVariable.arrayProperty[" + index + "]}");
+        ValidationResult result = elResolver.validateElExpression("#{myVariable.arrayProperty[" + index + "]}", attribute);
         // if we are here it's already good - the resolver hasn't thrown OutOfBound or similar exception but
         // let's check the return value anyway
         assertThat("The resolution should have succeeded even though no element with the index " + index
@@ -202,7 +207,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     public void should_correctly_resolve_indexed_property_to_default_fake_value() throws Exception {
         elResolver.declareVariable("myVariable", new BeanWithMapAndList());
         // no override declared => a default value should be used so that no exception occurs
-        ValidationResult result = elResolver.validateValueElExpression("#{myVariable.arrayProperty[123]}");
+        ValidationResult result = elResolver.validateElExpression("#{myVariable.arrayProperty[123]}", attribute);
         // if we are here it's already good - the resolver hasn't thrown OutOfBound or similar exception but
         // let's check the return value anyway
         assertThat("The resolution should have succeeded even though no element with the index 123"
@@ -224,7 +229,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
         elResolver.declareVariable("validBean", new BeanWithMapAndList());
 
         for (String expression : expressions) {
-            ValidationResult result = elResolver.validateValueElExpression(expression);
+            ValidationResult result = elResolver.validateElExpression(expression, attribute);
             if (result instanceof SuccessfulValidationResult) {
                 SuccessfulValidationResult resultThasShoulHaveFailed = (SuccessfulValidationResult) result;
                 falsePositives.put(expression, resultThasShoulHaveFailed);
@@ -251,7 +256,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
                 return false;
             }});
 
-        ValidationResult result = elResolver.validateValueElExpression("#{myVariable}");
+        ValidationResult result = elResolver.validateElExpression("#{myVariable}", attribute);
         assertThat(result, is(instanceOf(ExpressionRejectedByFilterResult.class)));
     }
 
@@ -267,13 +272,13 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     @Test
     public void should_recognize_all_jsp_implicit_objects_as_variables() throws Exception {
 
-        assertResultValueType(elResolver.validateValueElExpression("#{pageContext}"), PageContext.class);
+        assertResultValueType(elResolver.validateElExpression("#{pageContext}", attribute), PageContext.class);
 
         String[] implicitMapObjects = new String[] {"pageScope", "requestScope", "sessionScope", "applicationScope", "param"
                 , "paramValues", "header", "headerValues", "cookie", "initParam" };
 
         for (String implicitObject : implicitMapObjects) {
-            assertResultValueType(elResolver.validateValueElExpression("#{" + implicitObject + "}"), Map.class);
+            assertResultValueType(elResolver.validateElExpression("#{" + implicitObject + "}", attribute), Map.class);
         }
     }
 
@@ -321,15 +326,20 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     /** Assert that the expression is valid and returns non-null value. */
     protected final void assertExpressionValid(final String elExpression) {
-        ValidationResult result = elResolver.validateValueElExpression(elExpression);
+        ValidationResult result = elResolver.validateElExpression(elExpression, attribute);
         assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
 
         assertNotNull("Shall return some Mock"
                 , ((SuccessfulValidationResult) result).getExpressionResult());
     }
 
+    /** Assert that the expression is valid and returns non-null value. */
+    protected final void assertResultValid(ValidationResult result) {
+        assertThat(result, is(instanceOf(SuccessfulValidationResult.class)));
+    }
+
     private void assertBoolResult(String elExpression) {
-        ValidationResult validationResult = elResolver.validateValueElExpression(elExpression);
+        ValidationResult validationResult = elResolver.validateElExpression(elExpression, attribute);
         assertThat("The expression '" + elExpression + "' should have succeeded to evaluate (to a boolean) but failed."
                 , validationResult
                 , is(instanceOf(SuccessfulValidationResult.class)));
@@ -341,7 +351,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     }
 
     protected final <T> void assertResultValue(String elExpression, T expectedValue) {
-        ValidationResult validationResult = elResolver.validateValueElExpression(elExpression);
+        ValidationResult validationResult = elResolver.validateElExpression(elExpression, attribute);
         assertThat("The expression '" + elExpression + "' should have succeeded to evaluate (to " + expectedValue
                 + ") but failed."
                 , validationResult

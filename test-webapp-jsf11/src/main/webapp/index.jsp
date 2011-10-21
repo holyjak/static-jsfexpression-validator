@@ -28,6 +28,8 @@
 
         <h:outputText value="The bean says: '#{mainBean.greeting}'" />
 
+        <h:commandButton action="#{mainBean.actionMethod}" />
+
     </f:view>
 
 </body>

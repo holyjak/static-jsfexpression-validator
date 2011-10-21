@@ -47,14 +47,12 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
             <!-- Needed for parsing of JSPs. Should be pushed down, 6 -> jsf 1.2, 7 -> jsf 2.x -->
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>jasper</artifactId>
 			<version>${jasper.jsf12.version}</version>
-			<scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <!-- replaced by my jasper-el-customized-jsf12 -->
@@ -74,27 +72,31 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>1.8.5</version>
-			<scope>compile</scope>
+             <!-- compile scope: Needed for faking values at compile and run time -->
 		</dependency>
 		<dependency>
 			<groupId>commons-digester</groupId>
 			<artifactId>commons-digester</artifactId>
 			<version>1.5</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
+
+        <!-- For net.jakubholy.jeeutils.jsfelcheck.util.BeanPropertyUtils; also used by commons-digester -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.6</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
 			<version>1.2</version>
-			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
 			<version>1.2</version>
-			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -102,7 +104,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>2.5.6</version>
-			<type>jar</type>
 			<scope>provided</scope> <!-- don't force it on users who don't use Spring -->
 		</dependency>
 
@@ -111,7 +112,6 @@
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
             <version>1.8.2</version>
-            <type>jar</type>
             <scope>runtime</scope>
         </dependency>
 

@@ -35,17 +35,26 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 public interface JsfElValidator {
 
     /**
-     * Validates that JSF EL is valid and returns its value, which is either a predefined
+     * Validates that JSF EL is a valid value or method binding expression and returns the
+     * validation result.
+     * Notice that value bindings are expected to provide a value while method bindings are
+     * expected to reference a method that can be called. (Used for action handlers, action listeners.)
+     * <p>
+     *     For a value binding expression the result contains its value, which is either a predefined
      * variable or a mock of the class expected to be returned by a property.
      * (So the value isn't really interesting as it isn't determined based on real objects,
      * it's only important to verify that it is not null or that it is an instance of
      * the expected type.)
-     * @param elExpression (required) Ex.: {@code #{aBean}, #{aBean.aProperty}, #{aBean['key'].property}}
+     * </p>
+     *  
+     *
+     * @param elExpression (required) Ex.: {@code #{aBean}, #{aBean.aProperty}, #{aBean['key'].property}, #{b.method}
+     * @param attributeInfo (required) the name of the attribute and the typ (MethodBinding or ValueBinding for JSF1.2+)
      * @return results of the validation, typically
      * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult} or
      * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult}, but may be other
      */
-    ValidationResult validateValueElExpression(final String elExpression);
+	ValidationResult validateElExpression(final String elExpression, AttributeInfo attributeInfo);
 
     /**
      * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
@@ -79,15 +88,4 @@ public interface JsfElValidator {
      * @return this
      */
     JsfElValidator definePropertyTypeOverride(final String mapJsfExpression, final Class<?> newType);
-
-    /**
-     * Similar to {@link #validateValueElExpression(String)} but verifies that the result is a method
-     * that can be called. (Used for action handlers, action listeners.)
-     * @param expression the method EL tp validate
-     * @return results of the validation, typically
-     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult} or
-     * {@link net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult}, but may be other
-     */
-    ValidationResult validateMethodElExpression(final String expression);
-
 }

@@ -45,4 +45,8 @@ public class MyCollectionBean {
     public String getGreeting() {
         return "Hi from " + getClass().getName() + "!";
     }
+
+	public String actionMethod() {
+		return null;
+	}
 }

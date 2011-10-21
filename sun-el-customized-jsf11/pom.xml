@@ -67,7 +67,6 @@
                         		<version>1.1_02</version>
                                 </artifactItem>
                             </artifactItems>
-                            <excludes>META-INF/**</excludes>
                             <outputDirectory>${jasperel.unpacked.directory}</outputDirectory>
                             <overWriteReleases>true</overWriteReleases>
                         </configuration>

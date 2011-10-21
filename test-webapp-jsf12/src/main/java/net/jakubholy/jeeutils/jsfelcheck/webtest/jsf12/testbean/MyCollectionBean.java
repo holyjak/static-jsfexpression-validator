@@ -41,4 +41,11 @@ public class MyCollectionBean {
     public Collection getList() {
         return Arrays.asList(val("item1"), val("item2"), val("item2"));
     }
+
+	/**
+	 * Example of a method invoked as an action, e.g. on a button click
+	 */
+	public String actionMethod() {
+		return null;
+	}
 }

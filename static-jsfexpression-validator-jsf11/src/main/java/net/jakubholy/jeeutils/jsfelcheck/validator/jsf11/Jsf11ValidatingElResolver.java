@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -36,6 +37,10 @@ import javax.faces.el.EvaluationException;
 import javax.faces.el.MethodBinding;
 import javax.faces.el.ValueBinding;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.mockito.Mockito.*;
 
 /**
@@ -44,6 +49,10 @@ import static org.mockito.Mockito.*;
  * JSF 1.1 implementation.
  */
 public class Jsf11ValidatingElResolver implements ValidatingElResolver {
+
+	private static final Set<String> METHOD_BINDING_ATTRIBUTES = new HashSet<String>(Arrays.asList(
+			"action", "actionListener", "validator", "valueChangeListener"
+	));
 
     private final ElBindingFactory elBindingFactory;
     private final MockingPropertyResolver propertyResolver;
@@ -73,8 +82,17 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         variableResolver.setUnknownVariableResolver(unknownVariableResolver);
     }
 
-    /** {@inheritDoc} */
-    public ValidationResult validateMethodElExpression(final String elExpression) {
+	@Override
+	/** {@inheritDoc} */
+	public ValidationResult validateElExpression(String elExpression, AttributeInfo attributeInfo) {
+		if (METHOD_BINDING_ATTRIBUTES.contains(attributeInfo.getAttributeName())) {
+			return validateMethodElExpression(elExpression);
+		} else {
+			return validateValueElExpression(elExpression);
+		}
+	}
+
+    private ValidationResult validateMethodElExpression(final String elExpression) {
         try {
             // Create binding - throws an exception if no matching method found
             final MethodBinding binding = elBindingFactory.createMethodBinding(elExpression);
@@ -86,8 +104,7 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         }
     }
 
-    /** {@inheritDoc} */
-    public ValidationResult validateValueElExpression(final String elExpression) {
+    private ValidationResult validateValueElExpression(final String elExpression) {
         final ValueBinding binding = elBindingFactory.createValueBinding(elExpression);
         try {
             final Object resolvedMockedValue = binding.getValue(mockFacesContext);

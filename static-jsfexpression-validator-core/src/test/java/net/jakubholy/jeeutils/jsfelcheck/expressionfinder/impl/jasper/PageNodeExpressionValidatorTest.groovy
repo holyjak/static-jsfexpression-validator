@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -25,16 +27,22 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.*
+import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 
 public class PageNodeExpressionValidatorTest {
+
+    private static final class MyMethodExpression {}
+    private static final class MyValueExpression {}
+
+    private static class FakeTagHandler {
+        MyValueExpression valueAttribute
+        MyMethodExpression methodAttribute
+    }
 
     private static final Map<String, String> EMPTY_ATTRIBUTES = Collections.emptyMap();
 
@@ -66,7 +74,7 @@ public class PageNodeExpressionValidatorTest {
     @Test
     public void should_return_empty_map_if_no_jsf_expression_attributes() throws Exception {
 
-        AttributesValidationResult resolvedExpressions = nodeValidator.validateJsfExpressions(EMPTY_ATTRIBUTES);
+        AttributesValidationResult resolvedExpressions = nodeValidator.validateJsfExpressions(FakeTagHandler, EMPTY_ATTRIBUTES);
         assertNotNull(resolvedExpressions);
     }
 
@@ -79,12 +87,12 @@ public class PageNodeExpressionValidatorTest {
         ValidationResult r1 = new SuccessfulValidationResult("#{valid1}", 1);
         ValidationResult r2 = new FailedValidationResult(null);
 
-        when(expressionValidator.validateValueElExpression(eq("#{valid1}")))
+        when(expressionValidator.validateElExpression(eq("#{valid1}"), any(Class.class)))
             .thenReturn(r1);
-        when(expressionValidator.validateValueElExpression(eq("#{2nd is a bad one}")))
+        when(expressionValidator.validateElExpression(eq("#{2nd is a bad one}"), any(Class.class)))
             .thenReturn(r2);
 
-        AttributesValidationResult results = nodeValidator.validateJsfExpressions(attributes);
+        AttributesValidationResult results = nodeValidator.validateJsfExpressions(FakeTagHandler, attributes);
 
         assertTrue(results.jsfExpressionsFound());
         assertEquals(r1, results.get("el1"));
@@ -93,38 +101,27 @@ public class PageNodeExpressionValidatorTest {
 
     @Test
     public void should_ignore_attributes_without_jsfexpressions() throws Exception {
-        AttributesValidationResult results = nodeValidator.validateJsfExpressions(
+        AttributesValidationResult results = nodeValidator.validateJsfExpressions(FakeTagHandler,
                 Attributes.with("id", "justATextValue"));
         assertFalse(results.jsfExpressionsFound());
     }
-
+    
     @Test
-    public void should_recognize_action_and_actionListener_as_method_bindings() throws Exception {
+    public void should_pass_correct_attribute_attribute_info_to_validator() throws Exception {
 
         Attributes attributes = Attributes
-            .with("action", "#{bean.method}")
-            .and("actionListener", "#{obj2.listen}");
+            .with("valueAttribute", "#{bean.getter}")
+            .and("methodAttribute", "#{bean.method}");
 
-        when(expressionValidator.validateMethodElExpression(anyString()))
+        when(expressionValidator.validateElExpression(anyString(), any(Class)))
             .thenReturn(new AttributesValidationResult());
 
-        nodeValidator.validateJsfExpressions(attributes);
+        nodeValidator.validateJsfExpressions(FakeTagHandler, attributes);
 
-        verify(expressionValidator, never()).validateValueElExpression(anyString());
-        verify(expressionValidator, times(2)).validateMethodElExpression(anyString());
-    }
-
-    @Test
-    public void should_default_to_value_binding() throws Exception {
-
-        when(expressionValidator.validateValueElExpression(anyString()))
-            .thenReturn(new AttributesValidationResult());
-
-        nodeValidator.validateJsfExpressions(
-                Attributes.with("myValueAttribute", "#{valid1}"));
-
-        verify(expressionValidator).validateValueElExpression(anyString());
-        verify(expressionValidator, never()).validateMethodElExpression(anyString());
+        verify(expressionValidator).validateElExpression("#{bean.getter}"
+                , new AttributeInfo("valueAttribute", MyValueExpression))
+        verify(expressionValidator).validateElExpression("#{bean.method}"
+                , new AttributeInfo("methodAttribute", MyMethodExpression))
     }
 
     /**
@@ -146,7 +143,7 @@ public class PageNodeExpressionValidatorTest {
     @Test
     public void should_reject_dollar_marked_ie_immediate_expressions() throws Exception {
         assertFalse("Should reject immediately evaluated UEL expressions, i.e. ${}"
-                , nodeValidator.containsElExpression("garbage before... ${jsf12+_expression} ...and after"));
+                , nodeValidator.containsElExpression("garbage before... \${jsf12+_expression} ...and after"));
     }
 
 
