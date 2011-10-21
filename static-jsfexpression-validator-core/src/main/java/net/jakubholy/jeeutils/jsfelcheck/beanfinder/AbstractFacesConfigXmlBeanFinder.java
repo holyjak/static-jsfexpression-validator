@@ -17,23 +17,28 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNull;
+
+/**
+ * Parent class of the Faces bean finder implementations specific
+ * to individual JSF versions, provides the common functionality.
+ */
 public abstract class AbstractFacesConfigXmlBeanFinder implements ManagedBeanFinder {
 
-    private Collection<InputStream> facesConfigStreams = new LinkedList<InputStream>();
+    private Collection<InputResource> facesConfigStreams = new LinkedList<InputResource>();
 
     @Override
     public final Collection<ManagedBeanDescriptor> findDefinedBackingBeans() {
         final Collection<ManagedBeanDescriptor> allBeans =
             new LinkedList<ManagedBeanDescriptor>();
 
-        for (InputStream facesConfigStream : getFacesConfigStreams()) {
+        for (InputResource facesConfigResource : getFacesConfigResources()) {
             allBeans.addAll(
-                parseFacesConfig(facesConfigStream));
+                parseFacesConfig(facesConfigResource.getStream()));
         }
 
         return allBeans;
@@ -41,26 +46,17 @@ public abstract class AbstractFacesConfigXmlBeanFinder implements ManagedBeanFin
 
     protected abstract Collection<ManagedBeanDescriptor> parseFacesConfig(InputStream facesConfigStream);
 
-    protected final Collection<InputStream> getFacesConfigStreams() {
+    protected final Collection<InputResource> getFacesConfigResources() {
         return facesConfigStreams;
-    }
-
-
-    protected final ManagedBeanFinder setFacesConfigFiles(final Collection<File> facesConfigFiles) {
-        final Collection<InputStream> inputStream = getFacesConfigStreams();
-        this.facesConfigStreams = FileUtils.filesToStream(facesConfigFiles);
-        return this;
     }
 
     /**
      * Set input streams to the faces-config XML files to read managed beans from.
-     * @param facesConfigStreams (required)
+     * @param facesConfigResources (required)
      */
-    protected final ManagedBeanFinder setFacesConfigStreams(final Collection<InputStream> facesConfigStreams) {
-        if (facesConfigStreams == null) {
-            throw new IllegalArgumentException("The facesConfigStreams: Collection<InputStream> can't be null");
-        }
-        getFacesConfigStreams().addAll(facesConfigStreams);
+    protected final ManagedBeanFinder setFacesConfigResources(final Collection<InputResource> facesConfigResources) {
+	    assertNotNull(facesConfigResources, "facesConfigResources", Collection.class);
+        getFacesConfigResources().addAll(facesConfigResources);
         return this;
     }
 }

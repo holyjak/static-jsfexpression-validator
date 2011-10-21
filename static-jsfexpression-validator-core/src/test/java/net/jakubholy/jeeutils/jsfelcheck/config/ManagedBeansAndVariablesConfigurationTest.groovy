@@ -19,8 +19,11 @@ package net.jakubholy.jeeutils.jsfelcheck.config
 
 import org.junit.Before
 import org.junit.Test
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource
 
 class ManagedBeansAndVariablesConfigurationTest {
+
+    private static final String RESOURCE_DIR = "src/test/resources";
 
     private ManagedBeansAndVariablesConfiguration config;
 
@@ -33,18 +36,18 @@ class ManagedBeansAndVariablesConfigurationTest {
 
     @Test
     public void andFromFacesConfigFiles_should_store_them() throws Exception {
-        Collection<File> facesConfigFiles = [new File("src/test/resources/test-text-file.txt")];
+        Collection<File> facesConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
         assert config.andFromFacesConfigFiles(facesConfigFiles).getFacesConfigStreams().size() == 1
-        def stream = config.getFacesConfigStreams().iterator().next()
+        def stream = firstStream(config.getFacesConfigStreams())
         assert stream.getText() == "from text file"
         assert config.getSpringConfigStreams().isEmpty()
     }
 
     @Test
     public void static_fromFacesConfigFiles_should_store_them_too() throws Exception {
-        Collection<File> facesConfigFiles = [new File("src/test/resources/test-text-file.txt")];
-        def stream = ManagedBeansAndVariablesConfiguration.fromFacesConfigFiles(facesConfigFiles)
-            .getFacesConfigStreams().iterator().next()
+        Collection<File> facesConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
+        def stream = firstStream(ManagedBeansAndVariablesConfiguration.fromFacesConfigFiles(facesConfigFiles)
+            .getFacesConfigStreams())
         assert stream.getText() == "from text file"
     }
 
@@ -53,7 +56,7 @@ class ManagedBeansAndVariablesConfigurationTest {
         def stream = new StringBufferInputStream("1234");
         Collection<InputStream> facesConfigStreams = [stream];
         assert config.andFromFacesConfigStreams(facesConfigStreams)
-            .getFacesConfigStreams().toArray() == [stream].toArray()
+            .getFacesConfigStreams().toArray() == asResourceArray(stream)
         assert config.getSpringConfigStreams().isEmpty()
     }
 
@@ -62,7 +65,7 @@ class ManagedBeansAndVariablesConfigurationTest {
         def stream = new StringBufferInputStream("1234");
         Collection<InputStream> facesConfigStreams = [stream];
         assert ManagedBeansAndVariablesConfiguration.fromFacesConfigStreams(facesConfigStreams)
-            .getFacesConfigStreams().toArray() == [stream].toArray()
+            .getFacesConfigStreams().toArray() == asResourceArray(stream)
     }
 
     @Test
@@ -79,18 +82,18 @@ class ManagedBeansAndVariablesConfigurationTest {
 
     @Test
     public void andFromSpringConfigFiles_should_store_them() throws Exception {
-        Collection<File> springConfigFiles = [new File("src/test/resources/test-text-file.txt")];
+        Collection<File> springConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
         assert config.andFromSpringConfigFiles(springConfigFiles).getSpringConfigStreams().size() == 1
-        def stream = config.getSpringConfigStreams().iterator().next()
+        def stream = firstStream(config.getSpringConfigStreams())
         assert stream.getText() == "from text file"
         assert config.getFacesConfigStreams().isEmpty()
     }
 
     @Test
     public void static_fromSpringConfigFiles_should_store_them_too() throws Exception {
-        Collection<File> springConfigFiles = [new File("src/test/resources/test-text-file.txt")];
-        def stream = ManagedBeansAndVariablesConfiguration.fromSpringConfigFiles(springConfigFiles)
-            .getSpringConfigStreams().iterator().next()
+        Collection<File> springConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
+        def stream = firstStream(ManagedBeansAndVariablesConfiguration.fromSpringConfigFiles(springConfigFiles)
+            .getSpringConfigStreams())
         assert stream.getText() == "from text file"
     }
 
@@ -99,7 +102,7 @@ class ManagedBeansAndVariablesConfigurationTest {
         def stream = new StringBufferInputStream("1234");
         Collection<InputStream> springConfigStreams = [stream];
         assert config.andFromSpringConfigStreams(springConfigStreams)
-            .getSpringConfigStreams().toArray() == [stream].toArray()
+            .getSpringConfigStreams().toArray() == asResourceArray(stream)
         assert config.getFacesConfigStreams().isEmpty()
     }
 
@@ -108,7 +111,7 @@ class ManagedBeansAndVariablesConfigurationTest {
         def stream = new StringBufferInputStream("1234");
         Collection<InputStream> springConfigStreams = [stream];
         assert ManagedBeansAndVariablesConfiguration.fromSpringConfigStreams(springConfigStreams)
-            .getSpringConfigStreams().toArray() == [stream].toArray()
+            .getSpringConfigStreams().toArray() == asResourceArray(stream)
     }
 
     @Test
@@ -153,5 +156,14 @@ class ManagedBeansAndVariablesConfigurationTest {
     @Test
     public void static_forExtraVariables_returns_empty_instance() throws Exception {
         assert ManagedBeansAndVariablesConfiguration.forExtraVariables() instanceof ManagedBeansAndVariablesConfiguration
+    }
+
+    // ----------------------------------------------------------------------------------------
+    def asResourceArray(stream) {
+        return [new InputResource(stream)].toArray()
+    }
+
+    def firstStream(configResources) {
+        return configResources.iterator().next().stream
     }
 }

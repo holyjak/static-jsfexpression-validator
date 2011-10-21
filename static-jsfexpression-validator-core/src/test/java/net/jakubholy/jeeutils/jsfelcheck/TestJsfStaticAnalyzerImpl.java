@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
@@ -26,7 +27,6 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionEx
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
@@ -94,7 +94,7 @@ public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer<TestJsf
     }
 
     @Override
-    protected ManagedBeanFinder createManagedBeanFinder(Collection<InputStream> facesConfigFilesToRead) {
+    protected ManagedBeanFinder createManagedBeanFinder(Collection<InputResource> facesConfigFilesToRead) {
         return null;
     }
 

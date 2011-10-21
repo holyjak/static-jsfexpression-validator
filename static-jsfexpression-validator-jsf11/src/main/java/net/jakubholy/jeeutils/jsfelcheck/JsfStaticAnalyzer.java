@@ -18,12 +18,12 @@
 package net.jakubholy.jeeutils.jsfelcheck;
 
 import com.sun.faces.el.impl.AndOperator;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
 
-import java.io.InputStream;
 import java.util.Collection;
 
 /**
@@ -45,10 +45,9 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyz
         return new Jsf11ValidatingElResolver();
     }
 
-    @Override
-    protected ManagedBeanFinder createManagedBeanFinder(
-            Collection<InputStream> facesConfigFilesToRead) {
-        return Jsf11FacesConfigXmlBeanFinder.forStreams(facesConfigFilesToRead);
+	@Override
+	protected ManagedBeanFinder createManagedBeanFinder(Collection<InputResource> facesConfigFilesToRead) {
+        return Jsf11FacesConfigXmlBeanFinder.forResources(facesConfigFilesToRead);
     }
 
 }

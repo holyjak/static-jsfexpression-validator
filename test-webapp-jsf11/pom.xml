@@ -32,7 +32,6 @@
     <description>Exemplifies JSF 1.1 which should be supported by the JSF EL validator for JSF 1.1 (using JSP)
     </description>
 
-
     <dependencies>
 
         <dependency>

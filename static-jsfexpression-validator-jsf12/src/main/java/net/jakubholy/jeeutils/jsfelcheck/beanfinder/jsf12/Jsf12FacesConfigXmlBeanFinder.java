@@ -17,15 +17,9 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12;
 
-import java.io.*;
-import java.util.Collection;
-import java.util.LinkedList;
-
-import javax.faces.context.ExternalContext;
-
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.AbstractFacesConfigXmlBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
-
 import org.apache.myfaces.config.FacesConfigUnmarshaller;
 import org.apache.myfaces.config.impl.digester.DigesterFacesConfigUnmarshallerImpl;
 import org.apache.myfaces.config.impl.digester.elements.Application;
@@ -34,6 +28,12 @@ import org.apache.myfaces.config.impl.digester.elements.ManagedBean;
 import org.apache.myfaces.config.impl.digester.elements.ResourceBundle;
 import org.mockito.Mockito;
 import org.xml.sax.SAXException;
+
+import javax.faces.context.ExternalContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Find managed bean defined in (a) faces-config file(s).
@@ -46,8 +46,8 @@ public class Jsf12FacesConfigXmlBeanFinder extends AbstractFacesConfigXmlBeanFin
     /**
      * Finder reading from the supplied faces-config files.
      */
-    public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
-        return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigStreams(facesConfigStreams);
+    public static ManagedBeanFinder forResources(final Collection<InputResource> facesConfigResources) {
+        return new Jsf12FacesConfigXmlBeanFinder().setFacesConfigResources(facesConfigResources);
     }
 
     Jsf12FacesConfigXmlBeanFinder() {}

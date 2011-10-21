@@ -21,12 +21,12 @@ import com.sun.faces.config.beans.FacesConfigBean;
 import com.sun.faces.config.beans.ManagedBeanBean;
 import com.sun.faces.config.rules.FacesConfigRuleSet;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.AbstractFacesConfigXmlBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import org.apache.commons.digester.Digester;
 import org.xml.sax.InputSource;
 
 import javax.faces.FacesException;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
@@ -48,8 +48,8 @@ public class Jsf11FacesConfigXmlBeanFinder extends AbstractFacesConfigXmlBeanFin
     /**
      * Finder reading from the supplied faces-config files.
      */
-    public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
-        return new Jsf11FacesConfigXmlBeanFinder().setFacesConfigStreams(facesConfigStreams);
+    public static ManagedBeanFinder forResources(final Collection<InputResource> facesConfigResources) {
+        return new Jsf11FacesConfigXmlBeanFinder().setFacesConfigResources(facesConfigResources);
     }
 
     Jsf11FacesConfigXmlBeanFinder() {}

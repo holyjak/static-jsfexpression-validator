@@ -18,7 +18,6 @@
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,13 +27,13 @@ public class FileUtils {
     private FileUtils() {/* hide */}
 
     /**
-     * Convert list of Files into list of InputStreams.
+     * Convert list of Files into list of InputResources.
      * @param files (required) must be non-null, non-empty
-     * @return streams for the files
+     * @return resources for the files
      * @throws  IllegalArgumentException If null/empty list, if a file cannot be read or a stream opened for it
      */
-    public static Collection<InputStream> filesToStream(final Collection<File> files) {
-        final Collection<InputStream> inputStream = new ArrayList<InputStream>(files.size());
+    private static Collection<InputResource> filesToResources(final Collection<File> files) {
+        final Collection<InputResource> inputResources = new ArrayList<InputResource>(files.size());
 
         if (files == null || files.isEmpty()) {
             throw new IllegalArgumentException("filesToStream: Collection<File> cannot be null/empty, is: " + files);
@@ -43,18 +42,34 @@ public class FileUtils {
         for (File inputFile : files) {
             if (!inputFile.canRead()) {
                 throw new IllegalArgumentException("The supplied input file "
-                        + "cannot be opened for reading: " + inputFile + "(absolute path: "
+                        + "cannot be opened for reading: " + inputFile + " (absolute path: "
                         + inputFile.getAbsolutePath() + ")");
             }
 
-            try {
-                inputStream.add(new NamedInputStream(inputFile));
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException("Failed to create an input stream for the file "
-                		+ inputFile, e);
-            }
+            inputResources.add(new InputResource(inputFile));
         }
 
-        return inputStream;
+        return inputResources;
     }
+
+    /**
+     * Convert list of Files into list of InputResources, this variation accepts null.
+     * @param files (optional) must non-empty or null
+     * @return resources for the files or null if the files are null
+     * @throws  IllegalArgumentException If empty list, if a file cannot be read or a stream opened for it
+     */
+    public static Collection<InputResource> filesToResourcesNullSafe(final Collection<File> files) {
+	    if (files == null) return null;
+	    return filesToResources(files);
+    }
+
+	public static Collection<InputResource> streamsToResourcesNullSafe(final Collection<InputStream> streams) {
+		if (streams == null) return null;
+
+		final Collection<InputResource> inputResources = new ArrayList<InputResource>(streams.size());
+		for (InputStream stream : streams) {
+			inputResources.add(new InputResource(stream));
+		}
+		return inputResources;
+	}
 }

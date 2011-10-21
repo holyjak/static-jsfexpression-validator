@@ -17,7 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.config;
 
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 
 import java.io.File;
@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
+import static net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils.filesToResourcesNullSafe;
+import static net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils.streamsToResourcesNullSafe;
 import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNull;
 
 /**
@@ -51,8 +53,21 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
  */
 public class ManagedBeansAndVariablesConfiguration {
 
+	private enum Type {SPRING, FACES}
+
     private Collection<InputStream> facesConfigStreams = Collections.emptyList();
     private Collection<InputStream> springConfigStreams = Collections.emptyList();
+
+	private final Map<Type, Collection<InputResource>> resourcesMap;
+
+	{
+		resourcesMap = new Hashtable<Type, Collection<InputResource>>();
+		Collection<InputResource> empty = Collections.emptyList();
+		for (Type resourceType : Type.values()) {
+			resourcesMap.put(resourceType, empty);
+		}
+	}
+
     private final Map<String, Object> extraVariables = new Hashtable<String, Object>();
 
     /**
@@ -128,8 +143,7 @@ public class ManagedBeansAndVariablesConfiguration {
      * Non-static version of {@link #fromFacesConfigFiles(java.util.Collection)}.
      */
     public ManagedBeansAndVariablesConfiguration andFromFacesConfigFiles(Collection<File> facesConfigFiles) {
-        Collection<InputStream> streams = (facesConfigFiles == null) ? null : FileUtils.filesToStream(facesConfigFiles);
-        return andFromFacesConfigStreams(streams);
+        return withResourcesFor(Type.FACES, filesToResourcesNullSafe(facesConfigFiles));
     }
     /**
      * Non-static version of {@link #fromFacesConfigFiles(java.io.File...)}.
@@ -142,17 +156,12 @@ public class ManagedBeansAndVariablesConfiguration {
      * Non-static version of {@link #fromFacesConfigStreams(java.util.Collection)}}.
      */
     public ManagedBeansAndVariablesConfiguration andFromFacesConfigStreams(Collection<InputStream> facesConfigStreams) {
-        if (facesConfigStreams == null || facesConfigStreams.isEmpty()) {
-            this.facesConfigStreams = Collections.emptyList();
-        } else {
-            this.facesConfigStreams = facesConfigStreams;
-        }
-        return this;
+        return withResourcesFor(Type.FACES, streamsToResourcesNullSafe(facesConfigStreams));
     }
 
     /** internal use only */
-    public Collection<InputStream> getFacesConfigStreams() {
-        return Collections.unmodifiableCollection(facesConfigStreams);
+    public Collection<InputResource> getFacesConfigStreams() {
+        return Collections.unmodifiableCollection(resourcesMap.get(Type.FACES));
     }
 
     // -------------------------------------------------------------------------------------------------- Spring
@@ -168,27 +177,37 @@ public class ManagedBeansAndVariablesConfiguration {
      * Non-static version of {@link #fromSpringConfigFiles(java.io.File...)}.
      */
     public ManagedBeansAndVariablesConfiguration andFromSpringConfigFiles(Collection<File> springConfigFiles) {
-        Collection<InputStream> streams = (springConfigFiles == null) ? null : FileUtils.filesToStream(springConfigFiles);
-        return andFromSpringConfigStreams(streams);
+        return withResourcesFor(Type.SPRING, filesToResourcesNullSafe(springConfigFiles));
     }
 
     /**
      * Non-static version of {@link #fromSpringConfigStreams(java.util.Collection)}.
      */
     public ManagedBeansAndVariablesConfiguration andFromSpringConfigStreams(Collection<InputStream> springConfigStreams) {
-        if (springConfigStreams == null || springConfigStreams.isEmpty()) {
-            this.springConfigStreams = Collections.emptyList();
-        } else {
-            this.springConfigStreams = springConfigStreams;
-        }
-        return this;
+        return withResourcesFor(Type.SPRING, streamsToResourcesNullSafe(springConfigStreams));
     }
 
     /**
      * internal use only
      */
-    public Collection<InputStream> getSpringConfigStreams() {
-        return Collections.unmodifiableCollection(springConfigStreams);
+    public Collection<InputResource> getSpringConfigStreams() {
+        return Collections.unmodifiableCollection(resourcesMap.get(Type.SPRING));
+    }
+
+    // ------------------------------------------------------------------------------------------------- Private
+
+
+    private ManagedBeansAndVariablesConfiguration withResourcesFor(Type type, Collection<InputResource> resources) {
+        Collection<InputResource> nullSafeResources;
+	    if (resources == null || resources.isEmpty()) {
+            nullSafeResources = Collections.emptyList();
+        } else {
+            nullSafeResources = resources;
+        }
+
+	    this.resourcesMap.put(type, nullSafeResources);
+
+        return this;
     }
 
     // ------------------------------------------------------------------------------------------------- Extra variables

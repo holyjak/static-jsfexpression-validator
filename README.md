@@ -32,7 +32,6 @@ TODO - FURTHER DEVELOPMENT
 --------------------------
 
 ADD TEST FOR v0.9.6 FIXES
-- support imported Spring subconfigx and multiple/... faces configs via a Resource abstraction over files/streams
 -  static-jsfexpression-validator-jsf*.jar: Add integration test verifying JSP parsing -> ... => no missing dependencies etc.
 - make sure all -jsf* modules have correct dependencies on jasper and the *jasper-el it needs to be able to parse JSPs
 - how is it possible we now can get ReferenceSyntaxException: ${notesParsedXml} (not #{}) which we hadn't before?

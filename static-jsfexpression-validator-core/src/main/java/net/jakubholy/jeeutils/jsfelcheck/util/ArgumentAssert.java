@@ -19,10 +19,11 @@ package net.jakubholy.jeeutils.jsfelcheck.util;
 
 public class ArgumentAssert {
 
-    public static void assertNotNull(Object value, String name, Class<?> type) throws IllegalArgumentException {
+    public static <T> T assertNotNull(T value, String name, Class<T> type) throws IllegalArgumentException {
         if (value == null) {
             throw new IllegalArgumentException("The argument " + name + ": " + type.getSimpleName()
                     + " cannot be null");
         }
+	    return value;
     }
 }

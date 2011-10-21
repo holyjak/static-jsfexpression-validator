@@ -25,8 +25,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -40,18 +38,18 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
 
     private static final Logger LOG = Logger.getLogger(SpringContextBeanFinder.class.getName());
 
-    private Collection<InputStream> springContextFiles;
+    private Collection<InputResource> springContextFiles;
 
     /**
      * Finder reading from the supplied Spring applicationContext XML files accessed via streams.
      */
-    public static ManagedBeanFinder forStreams(final Collection<InputStream> facesConfigStreams) {
+    public static ManagedBeanFinder forStreams(final Collection<InputResource> facesConfigStreams) {
         return new SpringContextBeanFinder().setSpringConfigStreams(facesConfigStreams);
     }
 
     SpringContextBeanFinder() {}
 
-    private SpringContextBeanFinder setSpringConfigStreams(final Collection<InputStream> springContextFiles) {
+    private SpringContextBeanFinder setSpringConfigStreams(final Collection<InputResource> springContextFiles) {
         this.springContextFiles = springContextFiles;
         return this;
     }
@@ -103,17 +101,15 @@ public class SpringContextBeanFinder implements ManagedBeanFinder {
         }
     }
 
-    private Resource[] toResources(Collection<InputStream> resourceFiles) {
+    private Resource[] toResources(Collection<InputResource> resourceFiles) {
         Resource[] locations = new Resource[resourceFiles.size()];
 
         int index = 0;
-        for (InputStream configFile : resourceFiles) {
-            if ((configFile instanceof NamedInputStream)) {
-                // Quick hack to support relative subcontext imports before proper fix
-                File configFileFile = ((NamedInputStream) configFile).getFile();
-                locations[index++] = new FileSystemResource(configFileFile);
+        for (InputResource configFile : resourceFiles) {
+            if (configFile.getFileIfAvailable() != null) {
+                locations[index++] = new FileSystemResource(configFile.getFileIfAvailable());
             } else {
-                locations[index++] = new InputStreamResource(configFile);
+                locations[index++] = new InputStreamResource(configFile.getStream());
             }
         }
 

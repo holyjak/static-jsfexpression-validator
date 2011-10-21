@@ -16,16 +16,15 @@
  */
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12
 
-import org.junit.Test
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.ExpectedException
+import static org.hamcrest.Matchers.allOf
+import static org.hamcrest.Matchers.containsString
+import static org.junit.Assert.fail
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
 public class Jsf12FacesConfigXmlBeanFinderTest {
 
     private Jsf12FacesConfigXmlBeanFinder beanFinder;
@@ -62,14 +61,14 @@ public class Jsf12FacesConfigXmlBeanFinderTest {
      public void should_fail_for_closed_stream() throws Exception {
          def stream = getClass().getResourceAsStream("/faces-config-no_beans.xml")
          stream.close()
-         beanFinder.setFacesConfigStreams([stream]).findDefinedBackingBeans()
+         beanFinder.setFacesConfigResources([stream]).findDefinedBackingBeans()
          fail("Should have failed because of a closed stream")
      }
 
      @Test
      public void should_close_supplied_stream() throws Exception {
          def stream = getClass().getResourceAsStream("/faces-config-no_beans.xml")
-         beanFinder.setFacesConfigStreams([stream]).findDefinedBackingBeans()
+         beanFinder.setFacesConfigResources([new InputResource(stream)]).findDefinedBackingBeans()
          try {
             stream.read()
             fail("should have failed because of the stream being closed")
@@ -93,13 +92,13 @@ public class Jsf12FacesConfigXmlBeanFinderTest {
      }
 
      def finderForFile(fileName) {
-         beanFinder.setFacesConfigFiles([new File("src/test/resources/" + fileName)])
-         return beanFinder
+         return beanFinder.setFacesConfigResources([new InputResource(
+                 new File("src/test/resources/" + fileName))])
      }
 
      def finderForStream(fileName) {
-         beanFinder.setFacesConfigStreams([getClass().getResourceAsStream("/$fileName")])
-         return beanFinder
+         return beanFinder.setFacesConfigResources([new InputResource(
+                 getClass().getResourceAsStream("/$fileName"))])
      }
 
 

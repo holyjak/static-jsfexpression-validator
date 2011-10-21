@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBeanDescriptor;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
@@ -35,7 +36,6 @@ import org.apache.jasper.compiler.JsfElCheckingVisitor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -296,7 +296,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     }
 
     private Collection<ManagedBeanDescriptor> findFacesManagedBeans() {
-        Collection<InputStream> configStreams = managedBeansConfiguration.getFacesConfigStreams();
+        Collection<InputResource> configStreams = managedBeansConfiguration.getFacesConfigStreams();
         if (configStreams.isEmpty()) {
             return Collections.emptyList();
         }
@@ -310,10 +310,10 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     }
 
     protected abstract ManagedBeanFinder createManagedBeanFinder(
-            Collection<InputStream> facesConfigFilesToRead);
+            Collection<InputResource> facesConfigFilesToRead);
 
     Collection<ManagedBeanDescriptor> findSpringManagedBeans() {
-        Collection<InputStream> configStreams = managedBeansConfiguration.getSpringConfigStreams();
+        Collection<InputResource> configStreams = managedBeansConfiguration.getSpringConfigStreams();
         if (configStreams.isEmpty()) {
             return Collections.emptyList();
         }

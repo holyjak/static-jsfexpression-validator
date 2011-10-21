@@ -18,12 +18,10 @@
 package net.jakubholy.jeeutils.jsfelcheck.beanfinder;
 
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-
-import static org.hamcrest.CoreMatchers.*;
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.ExpectedException
+import static net.jakubholy.jeeutils.jsfelcheck.beanfinder.FileUtils.streamsToResourcesNullSafe
 
 public class SpringContextBeanFinderTest {
 
@@ -48,11 +46,10 @@ public class SpringContextBeanFinderTest {
     }
 
     def finderForFile(String fileName) {
-        return SpringContextBeanFinder.forStreams(
-                [new FileInputStream("src/test/resources/" + fileName)])
+        return finderForStream(new FileInputStream("src/test/resources/" + fileName))
     }
 
     def finderForStream(InputStream stream) {
-        return SpringContextBeanFinder.forStreams([stream])
+        return SpringContextBeanFinder.forStreams(streamsToResourcesNullSafe([stream]))
     }
 }
