@@ -40,14 +40,13 @@ TODO - FURTHER DEVELOPMENT
 --------------------------
 
 - finishing touches:
-    - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper
+    - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper - useful?  wait til the bus-based architecture?
 
-- report all functions found (and of course not validated (SUPPORT PARTLY IMPLEMENTED))
-
-- better support for view file filtrering (includes/excludes)
+- better support for view file filtrering (includes/excludes) - perhaps wait for the bus-based architecture
 
 - JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
     - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
+    - likely wait for the bus-based architecture
 
 ---
 
@@ -183,6 +182,7 @@ NOTES
 ### Version 0.9.7
 
 - Autodetection of method bindingin JSF 1.2+ (based on the tag attribute's type being javax.el.MethodExpression; before we decided what it it just based on the attribute name)
+- Report all functions found (for they are not really validated); see net.jakubholy.jeeutils.jsfelcheck.ResultsReporter.printWarningAboutUncheckedFunctions
 
 ### Version 0.9.6
 

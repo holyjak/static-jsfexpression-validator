@@ -20,11 +20,13 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 /**
@@ -79,9 +81,26 @@ public class ResultsReporter {
         printFailures(results);
         printExpressionsFilteredOut(results);
         printValidExpressionsIfAllowed(results);
+	    printWarningAboutUncheckedFunctions(results);
     }
 
-    private void printValidExpressionsIfAllowed(
+	/**
+	 * So far we don't really validate, just tolerate functions.
+	 * @param results
+	 */
+	private void printWarningAboutUncheckedFunctions(CollectedValidationResults results) {
+
+		Set<String> allFunctions = new TreeSet<String>();
+
+		for (SuccessfulValidationResult result: results.goodResults()) {
+			allFunctions.addAll(result.getFunctionsInExpression());
+		}
+
+		printOut("\n>>> WE CURRENTLY DON'T VERIFY FUNCTIONS; FOUND: "
+                    + allFunctions);
+	}
+
+	private void printValidExpressionsIfAllowed(
             CollectedValidationResults results) {
         if (printCorrectExpressions) {
             printOut("\n>>> CORRECT EXPRESSIONS ["
