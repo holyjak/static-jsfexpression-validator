@@ -1,109 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-	<artifactId>jsfelcheck-parent</artifactId>
-	<version>0.9.7-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<description>Parent POM with common settings.</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
+    <artifactId>jsfelcheck-parent</artifactId>
+    <version>0.9.7-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>Parent POM with common settings.</description>
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
-	<modules>
-		<module>static-jsfexpression-validator-core</module>
-		<module>static-jsfexpression-validator-core-abstracttests</module>
-		<module>static-jsfexpression-validator-jsf11</module>
-		<module>static-jsfexpression-validator-jsf12</module>
-		<module>static-jsfexpression-validator-jsf20</module>
-		<module>test-webapp-jsf12</module>
-		<module>test-webapp-jsf12-facelets</module>
-		<module>test-webapp-jsf20-facelets_owb</module>
-		<module>test-webapp-jsf20-jsp</module>
-		<module>sun-el-customized-jsf11</module>
-		<module>jasper-el-customized-jsf12</module>
-		<module>jasper-el-customized-jsf20</module>
-		<module>test-webapp-jsf11</module>
+    <modules>
+        <module>static-jsfexpression-validator-core</module>
+        <module>static-jsfexpression-validator-core-abstracttests</module>
+        <module>static-jsfexpression-validator-jsf11</module>
+        <module>static-jsfexpression-validator-jsf12</module>
+        <module>static-jsfexpression-validator-jsf20</module>
+        <module>test-webapp-jsf12</module>
+        <module>test-webapp-jsf12-facelets</module>
+        <module>test-webapp-jsf20-facelets_owb</module>
+        <module>test-webapp-jsf20-jsp</module>
+        <module>sun-el-customized-jsf11</module>
+        <module>jasper-el-customized-jsf12</module>
+        <module>jasper-el-customized-jsf20</module>
+        <module>test-webapp-jsf11</module>
     </modules>
 
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
 
-	<contributors>
-		<contributor>
-			<name>Jakub Holy</name>
-			<email>malyvelky@users.sf.net</email>
-			<timezone>GMT+1</timezone>
-			<roles />
-		</contributor>
-	</contributors>
+    <contributors>
+        <contributor>
+            <name>Jakub Holy</name>
+            <email>malyvelky@users.sf.net</email>
+            <timezone>GMT+1</timezone>
+            <roles/>
+        </contributor>
+    </contributors>
 
-	<scm>
-		<connection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
-		<developerConnection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git</developerConnection>
-		<url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
-	</scm>
-	<dependencies>
+    <scm>
+        <connection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git</connection>
+        <developerConnection>scm:git:git@github.com:jakubholynet/static-jsfexpression-validator.git
+        </developerConnection>
+        <url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
+    </scm>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>1.8.5</version>
-			<scope>compile</scope>
-		</dependency>
-        
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit-dep</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<version>1.2</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
-			<version>1.2</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
+    <dependencies>
 
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy-all</artifactId>
-			<version>1.8.2</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-        
-	</dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.5</version>
+            <scope>compile</scope>
+        </dependency>
 
-	<build>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>1.2</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>1.2</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
 
-	   <pluginManagement>
-	       <plugins>
-	           <plugin>
-	               <groupId>org.codehause.mojo</groupId>
-	               <artifactId>findbugs-maven-plugin</artifactId>
-	               <version>2.3.2</version>
-	           </plugin>
-	           <plugin>
-	               <groupId>org.apache.maven.plugins</groupId>
-	               <artifactId>maven-checkstyle-plugin</artifactId>
-	               <version>2.6</version>
-	           </plugin>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.2</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehause.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>2.3.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
 
                 <!-- For test webapps -->
                 <plugin>
@@ -124,186 +127,206 @@
                         </connectors>
                     </configuration>
                 </plugin>
-	       </plugins>
-           
-	   </pluginManagement>
+            </plugins>
 
-		<plugins>
+        </pluginManagement>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
+        <plugins>
 
-			<plugin>
-			     <!--
-			     Releasing:
-			         mvn release:prepare -DautoVersionSubmodules=true
-			         mvn release:perform
-			      -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<releaseProfiles>release-sign-artifacts</releaseProfiles>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
 
-			<plugin>
+            <plugin>
+                <!--
+                                 Releasing:
+                                     mvn release:prepare -DautoVersionSubmodules=true
+                                     mvn release:perform
+                                  -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release-sign-artifacts</releaseProfiles>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
-				<version>1.3</version>
-			    <dependencies>
-			        <dependency>
-			            <groupId>org.codehaus.gmaven.runtime</groupId>
-			            <artifactId>gmaven-runtime-1.7</artifactId>
-			            <version>1.3</version>
-		                 <exclusions>
-		                     <exclusion>
-		                         <groupId>org.codehaus.groovy</groupId>
-		                         <artifactId>groovy-all</artifactId>
-		                     </exclusion>
-		                 </exclusions>
-			        </dependency>
+                <version>1.3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.gmaven.runtime</groupId>
+                        <artifactId>gmaven-runtime-1.7</artifactId>
+                        <version>1.3</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.codehaus.groovy</groupId>
+                                <artifactId>groovy-all</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
                         <version>1.8.2</version>
                     </dependency>
-			    </dependencies>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-						<configuration>
+                </dependencies>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
                             <providerSelection>1.7</providerSelection>
-							<sources>
-								<fileset>
-									<directory>${pom.basedir}/src/test/java</directory>
-									<includes>
-										<include>**/*.groovy</include>
-									</includes>
-								</fileset>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                            <sources>
+                                <fileset>
+                                    <directory>${pom.basedir}/src/test/java</directory>
+                                    <includes>
+                                        <include>**/*.groovy</include>
+                                    </includes>
+                                </fileset>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <reportPlugins>
+                        <!--plugin>
+                                       <groupId>org.codehause.mojo</groupId>
+                                       <artifactId>findbugs-maven-plugin</artifactId>
+                                   </plugin-->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <version>2.7</version>
+                            <configuration>
+                                <configLocation>jh-sun-eclipse-checkstyle.xml</configLocation>
+                                <!-- For proper multi-module config see http://maven.apache.org/plugins/maven-checkstyle-plugin/examples/multi-module-config.html -->
+                                <propertyExpansion>config_loc=${toBeDone}</propertyExpansion>
+                                <!--failsOnError>false</failsOnError-->
+                                <!--suppressionsLocation></suppressionsLocation-->
+                            </configuration>
+                        </plugin>
+                        
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>jdepend-maven-plugin</artifactId>
+                            <configuration>
+                                <targetJdk>1.6</targetJdk>
+                                <outputDirectory>build/maven/${pom.artifactId}/target/jdepend-reports</outputDirectory>
+                            </configuration>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-		</plugins>
-	</build>
+    <distributionManagement>
+        <!-- My project's Sonatype repository to be used by the release plugin -->
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>My Nexus Snapshots Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/jakubholy-snapshots</url>
+        </snapshotRepository>
 
-	<reporting>
-	   <plugins>
-	       <plugin>
-	           <groupId>org.codehause.mojo</groupId>
-	           <artifactId>findbugs-maven-plugin</artifactId>
-               <version>2.3.2</version>
-	       </plugin>
-           <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-checkstyle-plugin</artifactId>
-               <version>2.6</version>
-               <configuration>
-                    <configLocation>jh-sun-eclipse-checkstyle.xml</configLocation>
-                    <!--failsOnError>false</failsOnError-->
-                    <!--suppressionsLocation></suppressionsLocation-->
-               </configuration>
-           </plugin>
-	   </plugins>
-	</reporting>
+        <site>
+            <id>fake.local</id>
+            <url>file:///tmp/maven-site</url>
+        </site>
+        
+    </distributionManagement>
 
-	<distributionManagement>
-		<!-- My project's Sonatype repository to be used by the release plugin -->
-		<repository>
-			<id>nexus-releases</id>
-			<name>Nexus Release Repository</name>
-			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus-snapshots</id>
-			<name>My Nexus Snapshots Repository</name>
-			<url>http://oss.sonatype.org/content/repositories/jakubholy-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <profiles>
 
-	<profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
 
-		<profile>
-			<id>release-sign-artifacts</id>
+            <properties>
+                <gpg.keyname>8A7E15EF</gpg.keyname>
+                <!-- GPG Key ID to use for signing -->
+            </properties>
 
-			<properties>
-				<gpg.keyname>8A7E15EF</gpg.keyname> <!-- GPG Key ID to use for signing -->
-			</properties>
+            <build>
+                <plugins>
+                    <!-- Build, sign and deploy: mvn -DperformRelease=true deploy -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.3</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
 
-			<build>
-				<plugins>
-					<!-- Build, sign and deploy: mvn -DperformRelease=true deploy -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.3</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
+                    <!-- Publish also javadocs when releasing - required by Sonatype -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
 
-					<!-- Publish also javadocs when releasing - required by Sonatype -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
+                    <!-- Publish also sources when releasing - required by Sonatype -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
 
-					<!-- Publish also sources when releasing - required by Sonatype -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-sources</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
+                </plugins>
+            </build>
 
-				</plugins>
-			</build>
+        </profile>
 
-		</profile>
+    </profiles>
 
-	</profiles>
-
-	<properties>
-	   <myfaces.jsf12.version>1.2.10</myfaces.jsf12.version>
-	   <myfaces.jsf20.version>2.1.1</myfaces.jsf20.version>
-       <javassist.version>3.15.0-GA</javassist.version>
-       <jasper.jsf12.version>6.0.29</jasper.jsf12.version>
-       <jasper.jsf20.version>7.0.21</jasper.jsf20.version>
+    <properties>
+        <myfaces.jsf12.version>1.2.10</myfaces.jsf12.version>
+        <myfaces.jsf20.version>2.1.1</myfaces.jsf20.version>
+        <javassist.version>3.15.0-GA</javassist.version>
+        <jasper.jsf12.version>6.0.29</jasper.jsf12.version>
+        <jasper.jsf20.version>7.0.21</jasper.jsf20.version>
         <maven.jetty.plugin.version>6.1.22</maven.jetty.plugin.version>
-	</properties>
+    </properties>
 
 </project>

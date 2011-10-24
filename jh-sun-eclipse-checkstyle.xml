@@ -12,6 +12,7 @@ JH - slightly modified version of Sun Checks that better matches the default cod
 <module name="Checker">
   <property name="severity" value="warning"/>
   <module name="TreeWalker">
+  <property name="cacheFile" value=""/><!-- optional but maven plugin 2.7 requires it anyway :( -->
     <property name="tabWidth" value="4"/>
     <module name="FileContentsHolder"/>
     <module name="JavadocMethod">
