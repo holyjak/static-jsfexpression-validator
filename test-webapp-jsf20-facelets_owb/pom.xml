@@ -60,8 +60,22 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>el-api</artifactId>
 			<version>6.0.29</version>
-			<scope>provided</scope>
+			<!-- NEEDED FOR FACELETS EXPERIMENTS scope>provided</scope-->
 		</dependency>
+
+        <!-- NEEDED FOR FACELETS EXPERIMENTS-->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>1.2</version>
+            <type>jar</type>
+        </dependency>
+        <dependency> <!-- javax.servlet.ServletOutputStream for ApplicationFactoryImpl.createAndLogNewApplication -->
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <type>jar</type>
+        </dependency>
 
         <!-- ### webapp dependencies ################################### -->
         <dependency>
