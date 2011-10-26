@@ -55,13 +55,18 @@
             <version>${myfaces.jsf20.version}</version>
         </dependency>
 
-		<dependency>
-		      <!-- needed to compile getElContext() -->
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>el-api</artifactId>
-			<version>6.0.29</version>
-			<!-- NEEDED FOR FACELETS EXPERIMENTS scope>provided</scope-->
-		</dependency>
+        <dependency>
+            <!-- Webbeans need org/apache/el/ExpressionFactoryImpl, also req. for compilation -->
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jasper-el</artifactId>
+            <version>${jasper.jsf20.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-el-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- NEEDED FOR FACELETS EXPERIMENTS-->
         <dependency>
@@ -158,7 +163,6 @@
 
     <properties>
         <!--jsf-myfaces.version>2.0.5</jsf-myfaces.version-->
-        <jsf-mojarra.version>2.0.5-b02</jsf-mojarra.version>
         <openwebbeans.version>1.1.0</openwebbeans.version>
     </properties>
 

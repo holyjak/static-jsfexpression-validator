@@ -108,25 +108,6 @@
                     <version>2.6</version>
                 </plugin>
 
-                <!-- For test webapps -->
-                <plugin>
-                    <!--This plugin allows to run the example using
-                                mvn jetty:run [-Djetty.port=9999]
-                        Then go to
-                                http://localhost:9999/<project name>
-                     -->
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>maven-jetty-plugin</artifactId>
-                    <version>${maven.jetty.plugin.version}</version>
-                    <configuration>
-                        <scanIntervalSeconds>10</scanIntervalSeconds>
-                        <connectors>
-                            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-                                <port>9999</port>
-                            </connector>
-                        </connectors>
-                    </configuration>
-                </plugin>
             </plugins>
 
         </pluginManagement>
@@ -318,6 +299,67 @@
 
         </profile>
 
+        <!--
+        Note: Jetty 7/8 don't work, throws strange exc. like IllegalStateException: STREAM
+        Config: 8.0.4..., connector org.eclipse.jetty.server.nio.SelectChannelConnector
+        -->
+
+        <!--profile>
+            <id>jetty7</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.mortbay.jetty</groupId>
+                            <artifactId>jetty-maven-plugin</artifactId>
+                            <version>7.4.4.v20110707</version>
+                            <configuration>
+                                <scanIntervalSeconds>10</scanIntervalSeconds>
+                                <connectors>
+                                    <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                                        <port>9999</port>
+                                    </connector>
+                                </connectors>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile-->
+
+        <profile>
+            <!-- For test webapps -->
+            <id>jetty6</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <!--This plugin allows to run the example using
+                                        mvn -Pjetty6 jetty:run
+                                Then go to
+                                        http://localhost:9999/<project name>
+                             -->
+                            <groupId>org.mortbay.jetty</groupId>
+                            <!-- BEWARE: The plugin has been renamed to jetty-maven-plugin from v7 on -->
+                            <artifactId>maven-jetty-plugin</artifactId>
+                            <version>6.1.22</version>
+                            <configuration>
+                                <scanIntervalSeconds>10</scanIntervalSeconds>
+                                <connectors>
+                                    <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                                        <port>9999</port>
+                                    </connector>
+                                </connectors>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+
     </profiles>
 
     <properties>
@@ -326,7 +368,6 @@
         <javassist.version>3.15.0-GA</javassist.version>
         <jasper.jsf12.version>6.0.29</jasper.jsf12.version>
         <jasper.jsf20.version>7.0.21</jasper.jsf20.version>
-        <maven.jetty.plugin.version>6.1.22</maven.jetty.plugin.version>
     </properties>
 
 </project>

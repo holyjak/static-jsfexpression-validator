@@ -26,8 +26,8 @@
         <ui:param name="paramFromTemplatedPage" value="Parameter from the templated page" />
 
         <ui:define name="content">
-            <h2>This is pageWithTemplate's content</h2>
-             <h:outputText value="EL in templated page: #{myActionBean.value}"/>
+            <pre>pageWithTemplate.xhtml</pre>
+            <p><h:outputText value="EL in templated page: #{myActionBean.map.valueInTemplatedPage}"/></p>
         </ui:define>
 
     </ui:composition>

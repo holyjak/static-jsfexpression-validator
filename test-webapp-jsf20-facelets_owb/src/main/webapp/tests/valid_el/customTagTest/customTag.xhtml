@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one or more
   ~ contributor license agreements.  See the NOTICE file distributed with
@@ -15,14 +16,22 @@
   ~ limitations under the License.
   -->
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html">
 <body>
+
+    <!-- Custom JSF Facelets tag -->
+    
     <ui:composition>
-        <pre>commonHeader.xhtml</pre>
-        <p>Param set in the including page: #{paramFromIncludingPage}</p>
-        <p><h:outputText value="EL in template/insert: #{myActionBean.value}"/></p>
+
+        <div style="background-color: #dda0dd; border: 1px solid black">
+            <h2>Hi, I'm a custom tag</h2>
+            <p>Value from a poperty of a bean passed in as a tag attribute value:
+                <h:outputText value="#{myTagAttribute.map.valueForCustomTag}"/></p>
+        </div>
+
     </ui:composition>
 </body>
 </html>

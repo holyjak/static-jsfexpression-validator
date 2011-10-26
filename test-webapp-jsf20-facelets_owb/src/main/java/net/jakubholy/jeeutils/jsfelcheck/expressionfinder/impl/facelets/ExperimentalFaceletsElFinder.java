@@ -70,17 +70,16 @@ import static org.mockito.Mockito.when;
 
 /**
  * TODO
- * - try with INFO: MyFaces Unified EL support ENabled
+ * - try with UEL: INFO: MyFaces Unified EL support disabled - Likely conflict between Jetty's and our EL impl.
+ *  (JSF cant's srr tomcat-jasper-el's javax.el.ValueReference), I tried Jetty 8 that impl. JSP 2.2 but failed to run it
  * - try with JSF 1.2, 2.0 pages - is it compatible with them?
- * - try a more complex page
- * - try a page with a composed tag
  *
  * FIXME
  * - EL in f:attribute and f:setPropertyActionListener not verified - perhaps these f: tags are processed differently?
  * - handle verification of in-text ELs such as {@code <h:column>#{bean.value}</h:column>} - turned into a
  *  org.apache.myfaces.view.facelets.compiler.UIInstructions (with instr=TextInstruction) - not sure how to get its
  *  ELText :-(
- * - Shall we check ui:param used to pass values to templates via ui:insert, ui:composition?
+ * - Shall we check ui:param used to pass values to templates via ui:insert, ui:composition? And composite:attribute?
  */
 public class ExperimentalFaceletsElFinder {
 
@@ -106,7 +105,7 @@ public class ExperimentalFaceletsElFinder {
 				"test-webapp-jsf20-facelets_owb/src/main/webapp/tests/valid_el"));
 
 		//String view = "/faceletsParsingFullTest.xhtml";
-		String view = "/templateTest/pageWithTemplate.xhtml";
+		String view = "/templateTest/customTag.xhtml";
 		finder.verifyExpressionsIn(view);
 
 		// Simple page time: DONE IN 1.6s (parsing: 1.4s, component tree: 0.2s)
@@ -137,7 +136,7 @@ public class ExperimentalFaceletsElFinder {
 		configureFaces(externalContextMock); // see ApplicationFactory.getapplication()
 	}
 
-	private void verifyExpressionsIn(String view) throws Exception {
+	public void verifyExpressionsIn(String view) throws Exception {
 		Compiler compiler = createCompiler();
 
 		// Needed to avoid NPE - used to check attribtue types etc.

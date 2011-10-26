@@ -19,25 +19,33 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html">
 <head>
-    <title>Layout</title>
+    <title>Layout Test</title>
 </head>
-<body>
-    <ui:insert name="header">
-        <div>
-            Common header:
-            <ui:include src="commonHeader.xhtml">
-                <ui:param name="paramFromIncludingPage" value="Parameter from the including page" />
-            </ui:include>
+<body style="background-color: #90ee90;">
 
-        </div>
-    </ui:insert>
+    <pre>layout.xhtml</pre>
 
-    <ui:insert name="content">
-        <p>this should be replaced by the user page's content...</p>
-    </ui:insert>
+    <h1>Facelets page with a template</h1>
 
+    <h2>Included header</h2>
+    <div style="background-color: #dda0dd;">
+        <ui:include src="commonHeader.xhtml">
+            <ui:param name="paramFromIncludingPage" value="Parameter from the including page" />
+        </ui:include>
+    </div>
+
+
+    <h2>Inserted content</h2>
+    <div style="background-color: #02AAFC;">
+        <ui:insert name="content">
+            <p>this should be replaced by the user page's content...</p>
+        </ui:insert>
+    </div>
+
+    <h2>Rest of content in the template</h2>
     <p>Param set in the tmplated page: #{paramFromTemplatedPage}</p>
     <h:outputText value="EL in template directly: #{myActionBean.value}"/>
 
+    <p style="font-size: small; font-style: italic; text-align: center">Thanks mostly to <a href="http://www.mkyong.com/tutorials/jsf-2-0-tutorials/">mkyong.com</a></p>
 </body>
 </html>

@@ -31,46 +31,72 @@
         <h1>faceletsParsingFullTest</h1>
         <h:form id="mainForm">
 
-                <div>
-                    <h2>Basic elements</h2>
+            <div>
+                <h2>Basic elements</h2>
 
-                    <h:outputText value="Example EL #{myActionBean.value} within a literal"/>
-                    <!-- writable value binding -->
-                    <h:inputText id="name" value="#{myActionBean.value}">
-                        <f:attribute name="strangelyIgnoredAttr" value="#{myActionBean.noSuchAttributeValue}" />
-                    </h:inputText>
+                <p><h:outputText value="Example EL #{myActionBean.map.outputValue} within a literal"/></p>
 
-                    <h:commandButton value="Old style"
-                                     action="#{myActionBean.doAction}"
-                                     actionListener="#{myActionBean.doActionListening}">
+
+                <p><!-- writable value binding -->
+                <h:inputText id="input" value="#{myActionBean.map.inputValue}">
+                    <f:attribute name="strangelyIgnoredAttr" value="#{myActionBean.map.attributeValue}" />
+                </h:inputText></p>
+
+                <p>
+                    <h:commandButton value="Submit All" id="commandButton"
+                                 action="#{myActionBean.doAction}"
+                                 actionListener="#{myActionBean.doActionListening}">
                     <!-- Note: We cant't test binding="#{myActionBean.componentBinding}" w/o actually making the bean visible to JSF -->
-                        <f:param name="dummyParam" value="#{myActionBean.noSuchParamValue}" />
-                        <f:setPropertyActionListener target="#{myActionBean.noSuchField}" value="#{myActionBean.noSuchPALValue}" />
+                        <f:param name="dummyParam" value="#{myActionBean.map.fParamValue}" />
+                        <f:setPropertyActionListener target="#{myActionBean.map.palTarget}" value="#{myActionBean.map.palValue}" />
                     </h:commandButton>
-                </div>
+                </p>
+            </div>
 
-                <div>
-                    <h2>Tables and repetition</h2>
+            <div>
+                <h2>Tables and repetition</h2>
 
-                    <h:dataTable value="#{myActionBean.books}" var="book">
-                        <h:column>
-                            <f:facet name="header">Name</f:facet>
-                            #{book.name}
-                        </h:column>
-                    </h:dataTable>
+                <h3>h:dataTable</h3>
+                <h:dataTable value="#{myActionBean.books}" var="book">
+                    <h:column>
+                        <f:facet name="header">Name</f:facet>
+                        #{book.name}
+                    </h:column>
+                </h:dataTable>
 
-                    <ui:repeat value="#{myActionBean.books}" var="book" varStatus="status">
-                        <p>#{book.name}</p>
-                    </ui:repeat>
+                <h3>ui:repeat</h3>
+                <ui:repeat value="#{myActionBean.books}" var="book" varStatus="status">
+                    <p>#{book.name}</p>
+                </ui:repeat>
 
-                </div>
+            </div>
 
+            <div>
+                <h2>Special stuff</h2>
+                <h3>Method bindings for validator, ...</h3>
+                <p><h:inputText id="methodBindingsInput"
+                        value="#{myActionBean.map.methodBindingsInputValue}"
+                        validator="#{myActionBean.doValidating}"
+                        valueChangeListener="#{myActionBean.doValueChangeListening}" />
+                </p>
 
+                <h3>f:converter, f:validator etc.</h3>
+                <h:inputText id="inputWithConverterAndValidator" value="#{myActionBean.map.inputWithConverterAndValidator}">
+                    <f:converter binding="#{myActionBean.converter}" />
+                    <f:validator binding="#{myActionBean.validator}" />
+                </h:inputText>
+            </div>
 
+            <div style="border: 1px solid #ffa07a; background-color: #d3d3d3;">
+                <h2>All actions invoked on the myActionBean so far</h2>
+                <code>#{myActionBean.actionsInvokedSummary}</code>
+            </div>
                 
 
 
         </h:form>
     </div>
+
+    <p style="font-size: small; font-style: italic; text-align: center">Thanks mostly to <a href="http://www.mkyong.com/tutorials/jsf-2-0-tutorials/">mkyong.com</a></p>
 </h:body>
 </html>
