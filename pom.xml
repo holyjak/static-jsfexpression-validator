@@ -190,7 +190,7 @@
                             <providerSelection>1.7</providerSelection>
                             <sources>
                                 <fileset>
-                                    <directory>${pom.basedir}/src/test/java</directory>
+                                    <directory>${project.basedir}/src/test/java</directory>
                                     <includes>
                                         <include>**/*.groovy</include>
                                     </includes>
@@ -228,7 +228,7 @@
                             <artifactId>jdepend-maven-plugin</artifactId>
                             <configuration>
                                 <targetJdk>1.6</targetJdk>
-                                <outputDirectory>build/maven/${pom.artifactId}/target/jdepend-reports</outputDirectory>
+                                <outputDirectory>build/maven/${project.artifactId}/target/jdepend-reports</outputDirectory>
                             </configuration>
                         </plugin>
                     </reportPlugins>

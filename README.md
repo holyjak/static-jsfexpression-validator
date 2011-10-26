@@ -52,7 +52,7 @@ TODO - FURTHER DEVELOPMENT
 
 - full JSF 1.2+ support:
     - Facelets (the Facelets page says it has compile-type EL validation?!)
-    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...])
+    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...]) (or http://scannotation.sourceforge.net/?)
     - support EL functions (not just 'function tolerance' as implemented now)
 
 - run Sonar & Findbugs ???
