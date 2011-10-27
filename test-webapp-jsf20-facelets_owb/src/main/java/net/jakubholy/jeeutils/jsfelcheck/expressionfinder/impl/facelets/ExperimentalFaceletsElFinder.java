@@ -40,7 +40,6 @@ import javax.el.ValueExpression;
 import javax.faces.application.ProjectStage;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -57,21 +56,23 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
- 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * TODO
- * - try with UEL: INFO: MyFaces Unified EL support disabled - Likely conflict between Jetty's and our EL impl.
- *  (JSF cant's srr tomcat-jasper-el's javax.el.ValueReference), I tried Jetty 8 that impl. JSP 2.2 but failed to run it
+ * - try with UEL 2.2?: INFO: MyFaces Unified EL support disabled - Likely conflict between Jetty's and our EL impl.
+ *  (see http://web.archiveorange.com/archive/v/PhdPRE9VfOysfTldAsTr)
  * - try with JSF 1.2, 2.0 pages - is it compatible with them?
  *
  * FIXME
@@ -80,6 +81,16 @@ import static org.mockito.Mockito.when;
  *  org.apache.myfaces.view.facelets.compiler.UIInstructions (with instr=TextInstruction) - not sure how to get its
  *  ELText :-(
  * - Shall we check ui:param used to pass values to templates via ui:insert, ui:composition? And composite:attribute?
+ *
+ * OTHER
+ * - Apply requires a converterId on a converter though the app in Jettyn works w/o it (binding issue?):
+ * {@code TagException: /faceletsParsingFullTest.xhtml at line 85 and column 72 <f:converter> Default behavior invoked of requiring a converter-id passed in the constructor, must override ConvertHandler(ConverterConfig)
+	at org.apache.myfaces.view.facelets.tag.jsf.ConverterTagHandlerDelegate.createConverter(ConverterTagHandlerDelegate.java:115)}
+ * - the same for f:validator (providing the id => tries to find a v/c registered under that id, ignores binding - maybe
+ * because it cannot see the bean used in the binding?!)
+ *
+ * BEWARE
+ *  - to be able to handle composites we must make sure that {@code <webdir>/resources/</webdir>} is on the resolution path!!!
  */
 public class ExperimentalFaceletsElFinder {
 
@@ -88,6 +99,7 @@ public class ExperimentalFaceletsElFinder {
 	private long compilationDoneMs;
 	private long componentTreeConstructionDoneMs;
 	private final File viewsRootFolder;
+	private final Set<String> expressionsFound = new HashSet<String>();
 
 	private abstract static class FacesContextHack extends FacesContext {
 
@@ -99,14 +111,19 @@ public class ExperimentalFaceletsElFinder {
 	//private FaceletContext mockFaceletContext;
 	private FacesContext facesContext;
 
+	/**
+	 * MAIN
+	 */
 	public static void main(String[] a) throws Exception {
 		long start = System.currentTimeMillis();
-		ExperimentalFaceletsElFinder finder = new ExperimentalFaceletsElFinder(new File(
-				"test-webapp-jsf20-facelets_owb/src/main/webapp/tests/valid_el"));
+		File webRoot = new File("test-webapp-jsf20-facelets_owb/src/main/webapp");
+		String viewRootRelative = "tests/valid_el";
+		ExperimentalFaceletsElFinder finder = new ExperimentalFaceletsElFinder(
+				webRoot, viewRootRelative);
 
-		//String view = "/faceletsParsingFullTest.xhtml";
-		String view = "/templateTest/customTag.xhtml";
-		finder.verifyExpressionsIn(view);
+		String view = "/faceletsParsingFullTest.xhtml";
+
+		finder.verifyExpressionsViaCompiler(view);
 
 		// Simple page time: DONE IN 1.6s (parsing: 1.4s, component tree: 0.2s)
 		System.out.format("\n##### DONE IN %2.1fs (parsing: %2.1fs, component tree: %2.1fs)"
@@ -116,18 +133,19 @@ public class ExperimentalFaceletsElFinder {
 		);
 	}
 
-	public ExperimentalFaceletsElFinder(File viewsRoot) {
-		this.viewsRootFolder = viewsRoot;
-		// Copied from Jsf12ValidatingElResolver constructor
-		final Map<String, Object> emptyMap = Collections.emptyMap();
-		externalContextMock = mock(ExternalContext.class);
-        when(externalContextMock.getApplicationMap()).thenReturn(new Hashtable<String, Object>());
-        when(externalContextMock.getRequestMap()).thenReturn(new Hashtable<String, Object>());
-        when(externalContextMock.getSessionMap()).thenReturn(emptyMap);
-		// Enable the Development mode so that location info is attached to tags
+	/**
+	 * CONSTRUCTOR
+	 */
+	public ExperimentalFaceletsElFinder(File webRoot, String viewRootRelative) {
+		this.viewsRootFolder = new File(webRoot, viewRootRelative);
+
+		// - We need a "real" context to be able to f.ex. locate resources such as
+		// facelet composites
+		// - Enable the Development mode so that location info is attached to tags
 		// when compiling a view page
-		when(externalContextMock.getInitParameter(ProjectStage.PROJECT_STAGE_PARAM_NAME))
-				.thenReturn(ProjectStage.Development.name());
+		externalContextMock = new StandaloneExternalContext(webRoot, new Hashtable<String, String>() {{
+			put(ProjectStage.PROJECT_STAGE_PARAM_NAME, ProjectStage.Development.name());
+		}});
 
 		// Also sets FacesContext.getCurrentInstance()
 		facesContext = new StartupFacesContextImpl(externalContextMock, null, null, true);
@@ -136,7 +154,22 @@ public class ExperimentalFaceletsElFinder {
 		configureFaces(externalContextMock); // see ApplicationFactory.getapplication()
 	}
 
-	public void verifyExpressionsIn(String view) throws Exception {
+	/**
+	 * VERIFY EXPRESSIONS
+	 */
+	public Set<String> verifyExpressionsViaCompiler(String view) throws Exception {
+		expressionsFound.clear();
+		Compiler compiler = createCompiler();
+		compiler.compile(new File(viewsRootFolder + view).toURI().toURL(), view);
+		return new HashSet<String>(expressionsFound);
+	}
+
+	/**
+	 * VERIFY EXPRESSIONS
+	 */
+	public Set<String> verifyExpressionsViaComponentTree(String view) throws Exception {
+		final String viewId = view.replaceAll("^*/", "");
+		expressionsFound.clear();
 		Compiler compiler = createCompiler();
 
 		// Needed to avoid NPE - used to check attribtue types etc.
@@ -150,9 +183,11 @@ public class ExperimentalFaceletsElFinder {
 		compilationDoneMs = System.currentTimeMillis();
 
 		UIViewRoot viewRoot = new UIViewRoot();
-		viewRoot.setRenderKitId(RenderKitFactory.HTML_BASIC_RENDER_KIT);
 		// apply(..) tries to instinatiate the render factory
 		// TODO Is tits creation expensive? Y => use custom stub kit & implem.
+		viewRoot.setRenderKitId(RenderKitFactory.HTML_BASIC_RENDER_KIT);
+		// It seems the id ending is used to determine whether to use JSP or Facelets
+		viewRoot.setViewId(viewId);
 
 		facesContext.setViewRoot(viewRoot);
 
@@ -163,7 +198,10 @@ public class ExperimentalFaceletsElFinder {
 		componentTreeConstructionDoneMs = System.currentTimeMillis();
 		
 		verifyExpressionsIn(viewRoot);
+		return new HashSet<String>(expressionsFound);
 	}
+
+	// #################################################################
 
 	private void verifyExpressionsIn(UIComponent viewRoot) {
 		printComponent(viewRoot, "");
@@ -229,6 +267,7 @@ public class ExperimentalFaceletsElFinder {
 						// Value expr. is e.g. UIInput's value (whose value would be null now)
 						if (valueExpression != null) {
 							attributes.put(attrName, valueExpression.getExpressionString() + "/VE");
+							expressionsFound.addAll(extractEl(valueExpression.getExpressionString()));
 						} else {
 							final Object v = m.invoke(component, (Object[]) null);
 							if (v != null) {
@@ -239,11 +278,17 @@ public class ExperimentalFaceletsElFinder {
 								if (v instanceof Expression) {
 									String type = (v instanceof MethodExpression)? "ME"
 											: (v instanceof ValueExpression)? "VE2" : v.getClass().getSimpleName();
-									str = ((Expression) v).getExpressionString() + "/" + type;
+									str = ((Expression) v).getExpressionString();
+									expressionsFound.addAll(extractEl(str));
+									str += "/" + type;
 								} else if (v instanceof javax.faces.el.ValueBinding) {
-									str = ((javax.faces.el.ValueBinding) v).getExpressionString() + "/VB";
+									str = ((javax.faces.el.ValueBinding) v).getExpressionString();
+									expressionsFound.addAll(extractEl(str));
+									str += "/VB";
 								} else if (v instanceof javax.faces.el.MethodBinding) {
-									str = ((javax.faces.el.MethodBinding) v).getExpressionString() + "/MB";
+									str = ((javax.faces.el.MethodBinding) v).getExpressionString();
+									expressionsFound.addAll(extractEl(str));
+									str += "/MB";
 								} else {
 									str = null; //*/v.toString();
 								}
@@ -277,6 +322,19 @@ public class ExperimentalFaceletsElFinder {
 		return attributes;
 	}
 
+	private Collection<String> extractEl(String text) {
+		Collection<String> result = new LinkedList<String>();
+		// Suboptimal - won't handle #{map['}'].property}
+		Pattern elPattern = Pattern.compile("#\\{[^}]+\\}");
+		Matcher matcher = elPattern.matcher(text);
+		while(matcher.find()) {
+			result.add(text.substring(
+					matcher.start() + 2, matcher.end() - 1
+			));
+		}
+		return result;
+	}
+
 	private FaceletHandler parseFaceletsViewFile(File view, Compiler compiler) {
 		try {
 			return compiler.compile(view.toURI().toURL(), "jhDummyAlias");
@@ -286,7 +344,7 @@ public class ExperimentalFaceletsElFinder {
 	}
 
 	private Compiler createCompiler() {
-		SAXCompiler compiler = new SAXCompiler();
+		Compiler compiler = new JhSAXCompiler();
 
 		// From org.apache.myfaces.view.facelets.FaceletViewDeclarationLanguage.createCompiler()
         compiler.addTagLibrary(new CoreLibrary());
@@ -305,10 +363,7 @@ public class ExperimentalFaceletsElFinder {
 	}
 
 	private void configureFaces(ExternalContext externalContext) {
-		//RuntimeConfig runtimeConfig = RuntimeConfig.getCurrentInstance(externalContext);
-        //runtimeConfig.setExpressionFactory(expressionFactory);
-
-		// Configures default factories, component types (so that Application can instantiate them) etc.
+		// Configures default factories, component types (so that Application can instantiate them when compiling) etc.
 		new FacesConfigurator(externalContext).configure();
 	}
 

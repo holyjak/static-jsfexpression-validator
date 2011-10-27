@@ -20,7 +20,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:jht="http://jakubholy.net/jsfelcheck/facelets"
-      xmlns:jhc="http://java.sun.com/jsf/composite/jsfelcheck/"
+      xmlns:jhc="http://java.sun.com/jsf/composite/jsfelcheck"
       xmlns:h="http://java.sun.com/jsf/html" >
     <!-- FYI: The namespace is autom. mapped to folder <web root>/resources/jsfelcheck/ -->
 
@@ -37,11 +37,12 @@
     <h:form id="formForComposite">
         <jhc:customComposite compositeAttributeValueBean="#{myActionBean}">
 
-            <f:valueChangeListener for="compositeInputFields" type="net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.AnythingListener" />
+            <f:valueChangeListener for="compositesInputField" type="net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.AnythingListener" />
             <f:actionListener for="compositeLinkClicked" type="net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.AnythingListener" />
 
             <h:outputText value="#{myActionBean.map.compositeChildren}" />
         </jhc:customComposite>
+        
         <p><em>(Using composite:insertChildren, :editableValueHolder, :actionSource.)</em></p>
 
         <p>Note: The current value of the used property of the passed-in bean is: #{myActionBean.map.valueForComposite}</p>

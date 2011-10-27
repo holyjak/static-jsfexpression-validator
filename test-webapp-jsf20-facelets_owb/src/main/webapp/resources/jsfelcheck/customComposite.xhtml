@@ -29,10 +29,10 @@
     <!-- Custom JSF Facelets composite element -->
     
 
-    <composite:interface>
+    <composite:interface name="customComposite">
         <composite:attribute name="compositeAttributeValueBean" required="true"/>
         <!-- Make it possible to attach a f:valueChangeListener: -->
-        <composite:editableValueHolder name="compositeInputFields" targets="myInputText" />
+        <composite:editableValueHolder name="compositesInputField" />
         <!-- Make it possible to attach a f:actionListener: -->
         <composite:actionSource name="compositeLinkClicked" targets="commandLink" />
     </composite:interface>
@@ -44,7 +44,7 @@
 
             <h2>Hi, I'm a facelets composite</h2>
             <p>Value from a poperty of a bean passed in as a composite attribute value:
-                <h:inputText id="myInputText" value="#{cc.attrs.compositeAttributeValueBean.map.valueForComposite}" />
+                <h:inputText id="compositesInputField" value="#{cc.attrs.compositeAttributeValueBean.map.valueForComposite}" />
             </p>
             <p>Value derived from the input: #{derivedVar}</p>
 

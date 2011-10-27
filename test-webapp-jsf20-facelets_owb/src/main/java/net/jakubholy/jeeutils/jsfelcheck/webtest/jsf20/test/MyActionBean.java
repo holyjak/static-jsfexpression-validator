@@ -87,12 +87,16 @@ public class MyActionBean implements ActionListener {
 	private MyConverter converter = new MyConverter();
 
 	private UIComponent binded;
-	private Map<String, String> map = new SymetricMap(Arrays.asList(
+	private static Map<String, String> map = new SymetricMap(Arrays.asList(
 			"valueInTemplatedPage", "outputValue", "inputValue", "attributeValue", "fParamValue"
 			, "palTarget", "palValue", "valueForCustomTag", "valueForComposite"
 			, "compositeChildren"
 	));
 	private final Collection<String> actionsInvoked = new LinkedList<String>();
+
+	public static Set<String> allMapValues() {
+		return map.keySet();
+	}
 
 	/** To be invoked via {@code action="#{myActionBean.doAction}"}. */
 	public String doAction() {
