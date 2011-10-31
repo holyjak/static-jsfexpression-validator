@@ -39,6 +39,8 @@ import java.util.Set;
 /**
  * Simple JSF managed bean that can be used to test
  * all the possible method expressions.
+ *
+ * TODO Make sure that each property is used EXACTLY ONCE so that we can test each occurence
  */
 public class MyActionBean implements ActionListener {
 
@@ -84,18 +86,39 @@ public class MyActionBean implements ActionListener {
 		}
 	}
 
-	private MyConverter converter = new MyConverter();
+	private static class SelfMap extends Hashtable<String, MyActionBean> {
+		public SelfMap(Collection<String> keys, MyActionBean value) {
+			for (String key : keys) {
+				put(key, value);
+			}
+		}
+	}
 
-	private UIComponent binded;
 	private static Map<String, String> map = new SymetricMap(Arrays.asList(
 			"valueInTemplatedPage", "outputValue", "inputValue", "attributeValue", "fParamValue"
+			, "iAmRendered"
 			, "palTarget", "palValue", "valueForCustomTag", "valueForComposite"
 			, "compositeChildren"
+			, "varFromIncludingPage"
+			, "trickyExprKey}", "trickyExprTwo"
 	));
+
+	private static Set<String> selfmapKeys = new HashSet<String>(Arrays.asList(
+			"myTagAttribute", "compositeAttributeValueBean"));
+	private static Map<String,MyActionBean> selfmap;
+
+	private MyConverter converter = new MyConverter();
+	private UIComponent binded;
 	private final Collection<String> actionsInvoked = new LinkedList<String>();
 
-	public static Set<String> allMapValues() {
+	/** Used in a test only */
+	public static Set<String> allMapKeys() {
 		return map.keySet();
+	}
+
+	/** Used in a test only */
+	public static Set<String> allSelfmapKeys() {
+		return selfmapKeys;
 	}
 
 	/** To be invoked via {@code action="#{myActionBean.doAction}"}. */
@@ -140,6 +163,14 @@ public class MyActionBean implements ActionListener {
 	public Map<String, String> getMap() {
 		return map;
 	}
+
+	public Map<String, MyActionBean> getSelfmap() {
+		if (selfmap == null) {
+			selfmap = new SelfMap(selfmapKeys, this);
+		}
+		return selfmap;
+	}
+
 
 	public Book[] getBooks() {
 		return new Book[] {new Book("Hitchiker's Guide to the Galaxy")};

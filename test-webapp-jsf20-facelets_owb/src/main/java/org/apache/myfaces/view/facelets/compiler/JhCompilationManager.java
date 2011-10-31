@@ -33,6 +33,8 @@ import javax.faces.view.facelets.TagAttributeException;
 import javax.faces.view.facelets.TagDecorator;
 import javax.faces.view.facelets.TagException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -193,10 +195,6 @@ public class JhCompilationManager {
 
     public void pushTag(Tag orig)
     {
-	    String indent = "";
-	    for(int i = units.size(); --i >= 0; indent+="  "){}
-	    System.out.println(indent + "JH:pushTag: " + orig + " attr: " + orig.getAttributes());
-
         if (this.finished)
         {
             return;
@@ -289,6 +287,28 @@ public class JhCompilationManager {
             }
             unit.startTag(t);
         }
+
+	    /* JHOLY:LOG */ { // TODO delete me #############################
+	        String indent = "";
+			for(int i = units.size(); --i >= 0; indent+="  "){}
+			if (currentUnit() instanceof TagUnit) {
+
+				Collection<String> elAttrs = new LinkedList<String>();
+				TagAttribute[] attrs = t.getAttributes().getAll();
+				for (TagAttribute attr : attrs) {
+					if (!attr.isLiteral()) {
+						elAttrs.add(attr.getLocalName() + "=" + attr.getValue());
+					}
+				}
+
+				System.out.println(indent + "JH:pushTag["+units.size()+"]: " + t + " attr: " + elAttrs);
+
+			} else if (currentUnit() instanceof TextUnit) {
+				System.out.print(".");
+			} else {
+				System.out.println(indent + "JH:pushTag["+units.size()+"]: neither tag nor text");
+			}
+	    }
     }
 
     public void popTag()

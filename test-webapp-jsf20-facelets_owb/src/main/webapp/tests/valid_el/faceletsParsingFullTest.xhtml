@@ -24,15 +24,34 @@
       xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
     <title>Hello World</title>
+    <style type="text/css">
+      .section {
+          border-left: 3px solid #999999;
+          /*border-top: 1px solid #999999;*/
+          margin: 3px;
+          margin-bottom: 8px;
+          padding: 2px;
+      }
+    </style>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <h:outputScript name="diQuery-collapsiblePanel.js" library="js" />
+    <h:outputStylesheet name="diQuery-collapsiblePanel.css" library="css" />
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".section").collapsiblePanel();
+        });
+    </script>
 </h:head>
 <h:body>
     <h:outputStylesheet name="style.css" library="css"/>
-    <div id="container">
+
+    <div id="container" style="border-style: none">
         <h1>faceletsParsingFullTest</h1>
         <h:form id="mainForm">
 
-            <div>
-                <h2>Basic elements</h2>
+            <div class="section" title="Basic elements">
 
                 <p><h:outputText value="Example EL #{myActionBean.map.outputValue} within a literal"/></p>
 
@@ -53,8 +72,7 @@
                 </p>
             </div>
 
-            <div>
-                <h2>Tables and repetition</h2>
+            <div class="section" title="Tables and repetition">
 
                 <h3>h:dataTable</h3>
                 <h:dataTable value="#{myActionBean.books}" var="book">
@@ -71,8 +89,7 @@
 
             </div>
 
-            <div>
-                <h2>Special stuff</h2>
+            <div class="section" title="Special stuff">
                 <h3>Method bindings for validator, ...</h3>
                 <p><h:inputText id="methodBindingsInput"
                         value="#{myActionBean.map.methodBindingsInputValue}"
@@ -82,13 +99,26 @@
 
                 <h3>f:converter, f:validator etc.</h3>
                 <h:inputText id="inputWithConverterAndValidator" value="#{myActionBean.map.inputWithConverterAndValidator}">
-                    <!--f:converter binding="#{myActionBean.converter}" /-->
-                    <!--f:validator binding="#{myActionBean.validator}" /-->
+                    <f:converter binding="#{myActionBean.converter}" />
+                    <f:validator binding="#{myActionBean.validator}" />
                 </h:inputText>
+
+                <div class="section" title="An element with rendered=false; is the content rendered?">
+                    <ui:fragment rendered="false">
+                        <h:outputText value="#{myActionBean.map.iAmRendered}" />
+                    </ui:fragment>
+                </div>
+
+                <div class="section" title="Tricky and multiple ELs (should detect each)">
+                    #{myActionBean.map["trickyExprKey}"]} and #{myActionBean.map.trickyExprTwo}
+                </div>
             </div>
 
+
+            <hr />
+
             <div style="border: 1px solid #ffa07a; background-color: #d3d3d3;">
-                <h2>All actions invoked on the myActionBean so far</h2>
+                <h2>All actions invoked on the myActionBean so far:</h2>
                 <code>#{myActionBean.actionsInvokedSummary}</code>
             </div>
                 

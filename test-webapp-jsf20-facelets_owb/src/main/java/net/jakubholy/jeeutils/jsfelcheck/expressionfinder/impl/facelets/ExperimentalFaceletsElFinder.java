@@ -26,6 +26,7 @@ import org.apache.myfaces.view.facelets.FaceletFactory;
 import org.apache.myfaces.view.facelets.compiler.*;
 import org.apache.myfaces.view.facelets.compiler.Compiler;
 import org.apache.myfaces.view.facelets.impl.DefaultFaceletFactory;
+import org.apache.myfaces.view.facelets.tag.TagLibrary;
 import org.apache.myfaces.view.facelets.tag.composite.CompositeLibrary;
 import org.apache.myfaces.view.facelets.tag.composite.CompositeResourceLibrary;
 import org.apache.myfaces.view.facelets.tag.jsf.core.CoreLibrary;
@@ -75,7 +76,36 @@ import static org.mockito.Mockito.mock;
  *  (see http://web.archiveorange.com/archive/v/PhdPRE9VfOysfTldAsTr)
  * - try with JSF 1.2, 2.0 pages - is it compatible with them?
  *
- * FIXME
+ * <h3>Note: Tag handlers vs. componets (Facelets for JSF 1.2?)</h3>
+ * <p>
+ *     Ref: http://www.ninthavenue.com.au/blog/c:foreach-vs-ui:repeat-in-facelets
+ *     and http://balusc.blogspot.com/2011/09/communication-in-jsf-20.html#ViewScopedFailsInTagHandlers
+ *     (this one proposes component-aware alternatives to buildtime-only tags)
+ * </p>
+ * Some tags produce components (render-time tags) while other ones
+ * only influence how the component tree is build (build-time tags)
+ * and cease to be once it's built (they've just corresponding tag handlers).
+ * Notice that during a postback the component tree is just restored, build-time
+ * tags do not exist and thus have no effect here.
+ * <p>
+ *     Build-time only tags (tag handlers):
+ *     f:facet, f:actionListener, f:valueChangeListener,
+ *     ui:include, ui:decorate, ui:composition,
+ *     any custom tag file,
+ *     c:forEach, c:choose, c:set, c:if
+ * </p>
+ * <p>
+ *     True component tags re-evaluated at render time:
+ *     ui:repeat, ui:fragment, ui:component,
+ *     f:view, f:verbatim, f:selectItems,
+ *     h:inputText, h:datatable, ...,
+ *     any custom UIComponent
+ * </p>
+ * <p>
+ *     Special: f:converter, f:validator
+ * </p>
+ *
+ * <h3>FIXME</h3>
  * - EL in f:attribute and f:setPropertyActionListener not verified - perhaps these f: tags are processed differently?
  * - handle verification of in-text ELs such as {@code <h:column>#{bean.value}</h:column>} - turned into a
  *  org.apache.myfaces.view.facelets.compiler.UIInstructions (with instr=TextInstruction) - not sure how to get its
@@ -354,6 +384,14 @@ public class ExperimentalFaceletsElFinder {
         compiler.addTagLibrary(new JstlFnLibrary());
         compiler.addTagLibrary(new CompositeLibrary());
         compiler.addTagLibrary(new CompositeResourceLibrary());
+
+		try {
+			URL taglibUrl = new File("src/main/webapp/WEB-INF/jsfelcheck.taglib.xml").toURI().toURL();
+			TagLibrary tagLib = TagLibraryConfig.create(taglibUrl);
+			compiler.addTagLibrary(tagLib);
+		} catch (IOException e) {
+			throw new RuntimeException("Taglib parsing failed", e);
+		}
 
 		RuntimeConfig runtimeConfig = RuntimeConfig.getCurrentInstance(externalContextMock);
 		compiler.setFaceletsProcessingConfigurations(

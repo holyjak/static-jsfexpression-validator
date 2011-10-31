@@ -31,11 +31,11 @@
     <h1>pageWithCustomTag and a composite</h1>
 
     <h2>Custom tag</h2>
-    <jht:customTag myTagAttribute="#{myActionBean}" />
+    <jht:customTag myTagAttribute="#{myActionBean.selfmap.myTagAttribute}" />
 
     <h2>Composite</h2>
     <h:form id="formForComposite">
-        <jhc:customComposite compositeAttributeValueBean="#{myActionBean}">
+        <jhc:customComposite compositeAttributeValueBean="#{myActionBean.selfmap.compositeAttributeValueBean}">
 
             <f:valueChangeListener for="compositesInputField" type="net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.AnythingListener" />
             <f:actionListener for="compositeLinkClicked" type="net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.AnythingListener" />

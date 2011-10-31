@@ -17,7 +17,10 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html">
 <head>
     <title>Layout Test</title>
 </head>
@@ -29,6 +32,7 @@
 
     <h2>Included header</h2>
     <div style="background-color: #dda0dd;">
+        <c:set var="varFromIncludingPage" value="I was set in the includer!" />
         <ui:include src="commonHeader.xhtml">
             <ui:param name="paramFromIncludingPage" value="Parameter from the including page" />
         </ui:include>

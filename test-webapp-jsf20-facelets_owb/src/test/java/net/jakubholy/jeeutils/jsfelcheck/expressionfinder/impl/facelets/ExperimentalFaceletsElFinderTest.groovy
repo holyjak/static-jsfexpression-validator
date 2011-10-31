@@ -24,20 +24,24 @@ import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.MyActionBean
 
 class ExperimentalFaceletsElFinderTest {
 
-    private static final Set ALL_EL_EXPRESSIONS = new HashSet(allEls())
+    private static final Set ALL_EL_EXPRESSIONS = new HashSet(allExpectedEls())
 
-    def private static allEls() {
-        def allMapValues = MyActionBean.allMapValues()
-        allMapValues.removeAll(["valueForCustomTag", "valueForComposite"])
-        return allMapValues.collect { "myActionBean.map.$it" }
-            + ["doAction", "doActionListening", "doValueChangeListening"
-                    , "doValidating", "value", "books", "book.name"
-                    , "converter", "validator", "actionsInvokedSummary"
-                    , "paramFromTemplatedPage", "paramFromIncludingPage"
-                    , "myTagAttribute.map.valueForCustomTag"
-                    , "cc.attrs.compositeAttributeValueBean.map.valueForComposite"
-                    , "derivedVar"
+    def private static allExpectedEls() {
+        def allMapKeys = MyActionBean
+            .allMapKeys() - ["valueForCustomTag", "valueForComposite"]
+        allMapKeys = allMapKeys.collect { "myActionBean.map.$it" }
+        def beanPropsAndMethods = ["doAction"
+                , "doActionListening", "doValueChangeListening"
+                , "doValidating", "value", "books"
+                , "converter", "validator", "actionsInvokedSummary"
+                , "paramFromTemplatedPage", "paramFromIncludingPage"
+                , "myTagAttribute.map.valueForCustomTag"
+                , "cc.attrs.compositeAttributeValueBean.map.valueForComposite"
+                , "derivedVar"
             ].collect { "myActionBean.$it" }
+        def localVars = ["book.name"]
+        def selfmapKeys = MyActionBean.allSelfmapKeys().collect { "myActionBean.selfmap.$it" }
+        return allMapKeys + selfmapKeys + beanPropsAndMethods + localVars
     }
 
     private ExperimentalFaceletsElFinder finder;
@@ -48,14 +52,34 @@ class ExperimentalFaceletsElFinderTest {
 
     }
 
+    /**
+     * Undetected so far:
+     *
+     * myActionBean.doValidating,
+     * myActionBean.validator, myActionBean.converter,
+     * myActionBean.myTagAttribute.map.valueForCustomTag,
+     * myActionBean.paramFromTemplatedPage,
+     * myActionBean.map.attributeValue,
+     * myActionBean.cc.attrs.compositeAttributeValueBean.map.valueForComposite,
+     * book.name,
+     * myActionBean.map.varFromIncludingPage,
+     * myActionBean.map.palValue, myActionBean.map.palTarget
+     * myActionBean.actionsInvokedSummary,
+     * myActionBean.derivedVar,
+     * myActionBean.doActionListening,
+     * myActionBean.paramFromIncludingPage,
+     * myActionBean.doValueChangeListening
+     * ??? myActionBean.selfmap.*
+     */
     @Test
     public void compile_to_component_tree_and_walk_it() throws Exception {
-        def elsFound = finder.verifyExpressionsViaComponentTree("/faceletsParsingFullTest.xhtml") +
-            finder.verifyExpressionsViaComponentTree("/templateTest/pageWithTemplate.xhtml")
+        def elsFound = [] //+ finder.verifyExpressionsViaComponentTree("/faceletsParsingFullTest.xhtml") +
+            //finder.verifyExpressionsViaComponentTree("/templateTest/pageWithTemplate.xhtml")
         // Can't get Composites working - UnsupportedOperationException in
         // JspViewDeclarationLanguageBase.getComponentMetadata
         elsFound.addAll finder.verifyExpressionsViaComponentTree("/customTagTest/pageWithCustomTagAndComposite.xhtml")
 
+        println "elsFound: $elsFound"
         def undetected = ALL_EL_EXPRESSIONS - elsFound
         assert undetected.isEmpty()
         // Undetected = myActionBean.map.palValue, myActionBean.map.attributeValue, myActionBean.map.palTarget

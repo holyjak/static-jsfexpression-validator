@@ -74,6 +74,9 @@ TODO - FURTHER DEVELOPMENT
     1) possibility to exclude pages from processing (the non-standalone ones)
     2) whenever dynamic jsp include encountered, switch to processing of that page, passing local variables in
 
+- consider extending the Facelets compiler to be able to actually render the
+views into html (see stackoverflow.com/questions/6625258/how-do-i-build-a-facelets-site-at-build-time/7928541)
+
 ---
 Architecture refactoring: Stateless objects and message passing through a central delegator with support
 for plugging-in filters. Key components:
@@ -172,7 +175,8 @@ Expression Language, referred to as EL, was first introduced in JSTL 1.0, and la
 
 Interesting Links
 -----------------
-- http://stackoverflow.com/questions/4441713/migrating-from-jsf-1-2-to-jsf-2-0
+- [SO: migrating-from-jsf-1-2-to-jsf-2-0](http://stackoverflow.com/questions/4441713/migrating-from-jsf-1-2-to-jsf-2-0)
+- [SO: main-disadvantages-of JSF 2.0](http://stackoverflow.com/questions/3623911/what-are-the-main-disadvantages-of-java-server-faces-2-0/3646940#3646940) - nice review of 1.2 too
 
 ---------
 

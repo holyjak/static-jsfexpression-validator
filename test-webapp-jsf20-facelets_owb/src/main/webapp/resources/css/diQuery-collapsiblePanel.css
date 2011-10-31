@@ -1,0 +1,22 @@
+﻿.collapsibleContainer
+{
+}
+
+.collapsibleContainerTitle
+{
+    cursor:pointer;
+    font-style: oblique;
+    font-size: large;
+    background-color: #EFEFEF;
+}
+
+.collapsibleContainerTitle div
+{
+    padding-top:5px;
+    padding-left:10px;
+}
+
+.collapsibleContainerContent
+{
+    padding: 10px;
+}

@@ -23,6 +23,11 @@
         <pre>commonHeader.xhtml</pre>
         <p>Param set in the including page: #{paramFromIncludingPage}</p>
         <p><h:outputText value="EL in template/insert: #{myActionBean.value}"/></p>
+        <p>Var set in the including page: #{varFromIncludingPage}</p>
+        <p>
+            Var set in the page using the template that includes this page: #{paramFromTemplatedPage}
+            (this is likely evil, we should only pass values explicitely via ui:param)
+        </p>
     </ui:composition>
 </body>
 </html>
