@@ -37,7 +37,11 @@ import java.util.Map;
  */
 public class TestJsfStaticAnalyzerImpl extends AbstractJsfStaticAnalyzer<TestJsfStaticAnalyzerImpl> {
 
-    /** BEWARE: Only partly implemented, i.e. doesn't record all. */
+	public TestJsfStaticAnalyzerImpl() {
+		super(ViewType.JSP);
+	}
+
+	/** BEWARE: Only partly implemented, i.e. doesn't record all. */
     public static class RecordingDummyElResolver implements ValidatingElResolver {
 
         private Map<String, Object> extraVariables = new Hashtable<String, Object>();

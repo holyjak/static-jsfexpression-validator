@@ -304,6 +304,8 @@ public class JhCompilationManager {
 				System.out.println(indent + "JH:pushTag["+units.size()+"]: " + t + " attr: " + elAttrs);
 
 			} else if (currentUnit() instanceof TextUnit) {
+				// TODO Warn if it's a tag with namespace => likely it should be a real tag but
+				// it's taglib hasn't been registered
 				System.out.print(".");
 			} else {
 				System.out.println(indent + "JH:pushTag["+units.size()+"]: neither tag nor text");

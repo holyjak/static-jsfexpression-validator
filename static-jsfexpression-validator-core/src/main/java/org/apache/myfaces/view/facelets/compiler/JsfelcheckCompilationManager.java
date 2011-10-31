@@ -41,18 +41,23 @@ import org.apache.myfaces.view.facelets.tag.ui.CompositionHandler;
 import org.apache.myfaces.view.facelets.tag.ui.UILibrary;
 
 /**
- * Compilation unit for managing the creation of a single FaceletHandler based on events from an XML parser.
+ * Copy of MyFaces CompilationManager with slight adjustments, from MyFaces v2.1.1.
  * 
- * @see org.apache.myfaces.view.facelets.compiler.Compiler
- * 
- * @author Jacob Hookom
- * @version $Id: CompilationManager.java,v 1.15 2008/07/13 19:01:34 rlubke Exp $
+ * The difference is that I made it non-final and abstract and increased the visibility of
+ * currentUnit() and determineQName(..) to protected.
+ *
+ * <p>
+ *     Notice we must be in the myfaces package to be able to see package-private classes that the
+ *     compiler and c. manager use.
+ * </p>
+ *
+ * @version Id: CompilationManager.java,v 1.15 2008/07/13 19:01:34 rlubke Exp
  */
-final class CompilationManager
+abstract class JsfelcheckCompilationManager
 {
 
     //private final static Logger log = Logger.getLogger("facelets.compiler");
-    private final static Logger log = Logger.getLogger(CompilationManager.class.getName());
+    private final static Logger log = Logger.getLogger(JsfelcheckCompilationManager.class.getName());
 
     private final Compiler compiler;
 
@@ -74,7 +79,7 @@ final class CompilationManager
     
     private final FaceletsProcessingInstructions faceletsProcessingInstructions;
 
-    public CompilationManager(String alias, Compiler compiler, FaceletsProcessingInstructions instructions)
+    public JsfelcheckCompilationManager(String alias, Compiler compiler, FaceletsProcessingInstructions instructions)
     {
 
         // this is our alias
@@ -374,7 +379,7 @@ final class CompilationManager
         return ((CompilationUnit) this.units.get(0)).createFaceletHandler();
     }
 
-    private CompilationUnit currentUnit()
+    protected CompilationUnit currentUnit()
     {
         if (!this.units.isEmpty())
         {
@@ -433,7 +438,7 @@ final class CompilationManager
         return CompositeLibrary.NAMESPACE.equals(ns) && ImplementationHandler.NAME.equals(name);
     }
 
-    private String[] determineQName(Tag tag)
+    protected String[] determineQName(Tag tag)
     {
         TagAttribute attr = tag.getAttributes().get("jsfc");
         if (attr != null)

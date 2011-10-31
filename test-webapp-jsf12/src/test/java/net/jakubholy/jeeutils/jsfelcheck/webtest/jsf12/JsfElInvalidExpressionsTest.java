@@ -45,7 +45,7 @@ public class JsfElInvalidExpressionsTest {
     }
 
     private JsfStaticAnalyzer createConfiguredAnalyzer() {
-        JsfStaticAnalyzer jsfStaticAnalyzer = new JsfStaticAnalyzer();
+        JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forJsp();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
         jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
                 fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml")));

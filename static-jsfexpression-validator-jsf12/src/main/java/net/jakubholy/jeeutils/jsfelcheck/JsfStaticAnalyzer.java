@@ -33,7 +33,23 @@ import java.util.Collection;
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyzer> {
 
-    public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no javadoc)
+	public static JsfStaticAnalyzer forJsp() {
+		return new JsfStaticAnalyzer(ViewType.JSP);
+	}
+
+	public static JsfStaticAnalyzer forFacelets() {
+		return new JsfStaticAnalyzer(ViewType.FACELETS);
+	}
+
+	JsfStaticAnalyzer() {
+		super(ViewType.JSP);
+	}
+
+	private JsfStaticAnalyzer(ViewType viewType) {
+		super(viewType);
+	}
+
+	public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no javadoc)
         AbstractJsfStaticAnalyzer.main(new JsfStaticAnalyzer(), args);
     }
 

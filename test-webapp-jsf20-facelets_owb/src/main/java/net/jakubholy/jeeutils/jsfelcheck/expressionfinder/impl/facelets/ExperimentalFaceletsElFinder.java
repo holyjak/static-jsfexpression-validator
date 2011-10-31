@@ -131,13 +131,6 @@ public class ExperimentalFaceletsElFinder {
 	private final File viewsRootFolder;
 	private final Set<String> expressionsFound = new HashSet<String>();
 
-	private abstract static class FacesContextHack extends FacesContext {
-
-		public static void setFacesContextSingleton(FacesContext ctx) {
-			FacesContext.setCurrentInstance(ctx);
-		}
-	}
-
 	//private FaceletContext mockFaceletContext;
 	private FacesContext facesContext;
 
@@ -181,7 +174,8 @@ public class ExperimentalFaceletsElFinder {
 		facesContext = new StartupFacesContextImpl(externalContextMock, null, null, true);
 
 		// Note: Application creation requires FacesContext.currentInstance
-		configureFaces(externalContextMock); // see ApplicationFactory.getapplication()
+		// Configures default factories, component types (so that Application can instantiate them when compiling) etc.
+		new FacesConfigurator(externalContextMock).configure();
 	}
 
 	/**
@@ -398,11 +392,6 @@ public class ExperimentalFaceletsElFinder {
 				runtimeConfig.getFaceletProcessingConfigurations());
 
 		return compiler;
-	}
-
-	private void configureFaces(ExternalContext externalContext) {
-		// Configures default factories, component types (so that Application can instantiate them when compiling) etc.
-		new FacesConfigurator(externalContext).configure();
 	}
 
 	private FaceletFactory initializeFactory(Compiler c) {

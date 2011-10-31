@@ -40,7 +40,7 @@ public class JsfElExpressionValidityTest {
     }
 
     private JsfStaticAnalyzer createConfiguredAnalyzer() {
-        JsfStaticAnalyzer jsfStaticAnalyzer = new JsfStaticAnalyzer();
+        JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forJsp();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
         return jsfStaticAnalyzer;
     }

@@ -39,6 +39,18 @@ CURRENT LIMITATIONS
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
+Facelets parsing
+- teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
+- add Facelets local var declaring tags (ui:repeat, st. else?)
+- enable filtering of views to process at least as done for JSPs now
+- add support for declaring custom taglibs (File/InputStream? - what with taglibs in framework jars?)
+- see TODOs in NotifyingCompilationManager
+- move PageNodeListener to shared compiler/parser package
+
+- consider enabling in-container testing (- slower, + complete & correct env. setup, no need to search for m.beans)
+
+---
+
 - finishing touches:
     - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper - useful?  wait til the bus-based architecture?
 

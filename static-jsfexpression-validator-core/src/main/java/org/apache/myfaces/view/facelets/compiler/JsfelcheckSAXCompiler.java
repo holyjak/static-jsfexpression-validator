@@ -22,13 +22,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.el.ELException;
 import javax.faces.FacesException;
-import javax.faces.context.FacesContext;
 import javax.faces.view.Location;
 import javax.faces.view.facelets.FaceletException;
 import javax.faces.view.facelets.FaceletHandler;
@@ -39,7 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.myfaces.config.RuntimeConfig;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
 import org.apache.myfaces.config.element.FaceletsProcessing;
 import org.apache.myfaces.shared_impl.util.ClassUtils;
 import org.apache.myfaces.view.facelets.tag.TagAttributeImpl;
@@ -58,15 +56,24 @@ import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Compiler implementation that uses SAX
- * 
- * @see org.apache.myfaces.view.facelets.compiler.Compiler
- * 
- * @author Jacob Hookom
- * @version $Id: SAXCompiler.java,v 1.14 2008/07/13 19:01:33 rlubke Exp $
+ * Copy of MyFaces SAXCompiler with slight adjustments, from MyFaces v2.1.1.
+ *
+ * The differences are: 1) it uses {@link JsfelcheckCompilationManager}/
+ * {@link NotifyingCompilationManager} instead of the original {@link CompilationManager},
+ * 2) It has a tagListener: PageNodeListener (shared w/ the C.M.) and uses it
+ * to notify about page entering.
+ *
+ * <p>
+ *     Notice we must be in the myfaces package to be able to see package-private classes that the
+ *     compiler and c. manager use.
+ * </p>
+ *
+ * @version Id: SAXCompiler.java,v 1.14 2008/07/13 19:01:33 rlubke Exp
  */
-public final class SAXCompiler extends Compiler
+public final class JsfelcheckSAXCompiler extends Compiler
 {
+
+	private final PageNodeListener tagListener;
 
     private final static Pattern XmlDeclaration = Pattern
             .compile("^<\\?xml.+?version=['\"](.+?)['\"](.+?encoding=['\"]((.+?))['\"])?.*?\\?>");
@@ -80,11 +87,11 @@ public final class SAXCompiler extends Compiler
 
         private Locator locator;
 
-        private final CompilationManager unit;
+        private final JsfelcheckCompilationManager unit;
         
         private boolean consumingCDATA = false;
 
-        public CompilationHandler(CompilationManager unit, String alias)
+        public CompilationHandler(JsfelcheckCompilationManager unit, String alias)
         {
             this.unit = unit;
             this.alias = alias;
@@ -281,13 +288,13 @@ public final class SAXCompiler extends Compiler
 
         private Locator locator;
 
-        private final CompilationManager unit;
+        private final JsfelcheckCompilationManager unit;
         
         private boolean inMetadata = false;
         
         private boolean consumingCDATA = false;
 
-        public ViewMetadataHandler(CompilationManager unit, String alias)
+        public ViewMetadataHandler(JsfelcheckCompilationManager unit, String alias)
         {
             this.unit = unit;
             this.alias = alias;
@@ -483,7 +490,7 @@ public final class SAXCompiler extends Compiler
 
         private Locator locator;
 
-        private final CompilationManager unit;
+        private final JsfelcheckCompilationManager unit;
         
         private boolean inCompositeInterface = false;
         
@@ -491,7 +498,7 @@ public final class SAXCompiler extends Compiler
 
         private boolean consumingCDATA = false;
 
-        public CompositeComponentMetadataHandler(CompilationManager unit, String alias)
+        public CompositeComponentMetadataHandler(JsfelcheckCompilationManager unit, String alias)
         {
             this.unit = unit;
             this.alias = alias;
@@ -706,21 +713,22 @@ public final class SAXCompiler extends Compiler
         }        
     }
 
-    public SAXCompiler()
+    public JsfelcheckSAXCompiler(PageNodeListener tagListener)
     {
-        super();
+	    this.tagListener = tagListener;
     }
 
     public FaceletHandler doCompile(URL src, String alias) throws IOException, FaceletException, ELException,
             FacesException
     {
-        CompilationManager mngr = null;
+	    tagListener.fileEntered(alias); // Alias is normally web-root relative file name
+        JsfelcheckCompilationManager mngr = null;
         InputStream is = null;
         String encoding = null;
         try
         {
             is = new BufferedInputStream(src.openStream(), 1024);
-            mngr = new CompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias));
+            mngr = new NotifyingCompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias), tagListener);
             encoding = writeXmlDecl(is, mngr);
             CompilationHandler handler = new CompilationHandler(mngr, alias);
             SAXParser parser = this.createSAXParser(handler);
@@ -751,13 +759,13 @@ public final class SAXCompiler extends Compiler
     protected FaceletHandler doCompileViewMetadata(URL src, String alias)
             throws IOException, FaceletException, ELException, FacesException
     {
-        CompilationManager mngr = null;
+        JsfelcheckCompilationManager mngr = null;
         InputStream is = null;
         String encoding = null;
         try
         {
             is = new BufferedInputStream(src.openStream(), 1024);
-            mngr = new CompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias));
+            mngr = new NotifyingCompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias), tagListener);
             encoding = getXmlDecl(is, mngr);
             ViewMetadataHandler handler = new ViewMetadataHandler(mngr, alias);
             SAXParser parser = this.createSAXParser(handler);
@@ -788,13 +796,13 @@ public final class SAXCompiler extends Compiler
     protected FaceletHandler doCompileCompositeComponentMetadata(URL src, String alias)
             throws IOException, FaceletException, ELException, FacesException
     {
-        CompilationManager mngr = null;
+        JsfelcheckCompilationManager mngr = null;
         InputStream is = null;
         String encoding = null;
         try
         {
             is = new BufferedInputStream(src.openStream(), 1024);
-            mngr = new CompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias));
+            mngr = new NotifyingCompilationManager(alias, this, getFaceletsProcessingInstructions(src, alias), tagListener);
             encoding = getXmlDecl(is, mngr);
             CompositeComponentMetadataHandler handler = new CompositeComponentMetadataHandler(mngr, alias);
             SAXParser parser = this.createSAXParser(handler);
@@ -832,7 +840,7 @@ public final class SAXCompiler extends Compiler
         return FaceletsProcessingInstructions.getProcessingInstructions(processAs);
     }
 
-    protected static final String writeXmlDecl(InputStream is, CompilationManager mngr) throws IOException
+    protected static final String writeXmlDecl(InputStream is, JsfelcheckCompilationManager mngr) throws IOException
     {
         is.mark(128);
         String encoding = null;
@@ -863,7 +871,7 @@ public final class SAXCompiler extends Compiler
         return encoding;
     }
     
-    protected static final String getXmlDecl(InputStream is, CompilationManager mngr) throws IOException
+    protected static final String getXmlDecl(InputStream is, JsfelcheckCompilationManager mngr) throws IOException
     {
         is.mark(128);
         String encoding = null;

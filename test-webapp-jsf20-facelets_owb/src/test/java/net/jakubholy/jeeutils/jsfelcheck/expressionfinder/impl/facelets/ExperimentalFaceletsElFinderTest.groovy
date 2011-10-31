@@ -20,6 +20,7 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets
 import org.junit.Test
 import org.junit.Before
 import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.MyActionBean
+import org.junit.Ignore
 
 
 class ExperimentalFaceletsElFinderTest {
@@ -71,6 +72,7 @@ class ExperimentalFaceletsElFinderTest {
      * myActionBean.doValueChangeListening
      * ??? myActionBean.selfmap.*
      */
+    @Ignore("To be used only during development")
     @Test
     public void compile_to_component_tree_and_walk_it() throws Exception {
         def elsFound = [] //+ finder.verifyExpressionsViaComponentTree("/faceletsParsingFullTest.xhtml") +
@@ -86,6 +88,7 @@ class ExperimentalFaceletsElFinderTest {
         assert elsFound == ALL_EL_EXPRESSIONS
     }
 
+    @Ignore("To be used only during development")
     @Test
     public void compile_and_listen_for_compiler_events() throws Exception {
         def elsFound = finder.verifyExpressionsViaCompiler("/faceletsParsingFullTest.xhtml")

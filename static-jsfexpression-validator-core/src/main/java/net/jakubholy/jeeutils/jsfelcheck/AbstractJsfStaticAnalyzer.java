@@ -23,6 +23,7 @@ import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder.ManagedBea
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.JsfElValidatingFaceletsParser;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
@@ -101,7 +102,10 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 
     private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class.getName());
 
+	protected static enum ViewType {JSP, FACELETS };
+
     private final T self;
+	private final ViewType viewType;
 
     private final ValidatingElResolver elValidator;
     private final ResultsReporter resultsReporter = new ResultsReporter();
@@ -111,13 +115,15 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     private LocalVariableConfiguration localVariableConfiguration = new LocalVariableConfiguration();
     private ManagedBeansAndVariablesConfiguration managedBeansConfiguration = new ManagedBeansAndVariablesConfiguration();
 
-    /** New, unconfigured analyzer. */
-    public AbstractJsfStaticAnalyzer() {
+    /** New, unconfigured analyzer.
+     * @param viewType*/
+    public AbstractJsfStaticAnalyzer(ViewType viewType) {
         elValidator = createValidatingElResolver();
         if (elValidator == null) {
             throw new IllegalStateException("Implementation returned null elValidator: ValidatingElResolver");
         }
         self = (T) this;
+	    this.viewType = assertNotNull(viewType, "viewType", ViewType.class);
     }
 
     /** Create the JSF-implementation specific valiator to use. */
@@ -149,14 +155,18 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 
         applyConfigurationFromSystemProperties();
 
-        // Run it
-        JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(viewFilesRoot.getPath(),
-                pageNodeValidator);
-        try {
-            jspc.execute();
-        } catch (JasperException e) {
-            throw new RuntimeException("Jasper failed to parse your JSP files", e);
-        }
+	    if (viewType.equals(ViewType.JSP)) {
+			// Run it
+			JspCParsingToNodesOnly jspc = createJsfElValidatingJspParser(viewFilesRoot.getPath(),
+					pageNodeValidator);
+			try {
+				jspc.execute();
+			} catch (JasperException e) {
+				throw new RuntimeException("Jasper failed to parse your JSP files", e);
+			}
+	    } else {
+		    new JsfElValidatingFaceletsParser(viewFilesRoot, viewFilesRoot, pageNodeValidator).execute();
+	    }
 
         // Handle results
         CollectedValidationResultsImpl results = pageNodeValidator.getValidationResults();
