@@ -60,7 +60,7 @@ public class BeanPropertyUtils {
 			}
 		}
 
-		LOG.warning("No property '" + propertyName + "' found on the class " + type.getName());
+		LOG.fine("No property '" + propertyName + "' found on the class " + type.getName());
 
 		return null;
 	}

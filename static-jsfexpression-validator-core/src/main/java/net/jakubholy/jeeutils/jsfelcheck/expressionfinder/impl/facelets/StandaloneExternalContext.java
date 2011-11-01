@@ -101,7 +101,11 @@ public class StandaloneExternalContext extends ExternalContext {
 	private final Map<String,Object> requestMap = new Hashtable<String, Object>();
 	private final ResourceLocator resourceLocator;
 
-
+	/**
+	 * A context that locates resources via the given locator.
+	 * @param resourceLocator (required) locator for resources that users of this context may try to access
+	 * @param initParams (optional) fake servlet init parameters to pass on to the users via the initParameterMap
+	 */
 	public StandaloneExternalContext(ResourceLocator resourceLocator, Map<String, String> initParams) {
 		this.resourceLocator = assertNotNull(resourceLocator, "resourceLocator", ResourceLocator.class);
 		if (initParams != null) {

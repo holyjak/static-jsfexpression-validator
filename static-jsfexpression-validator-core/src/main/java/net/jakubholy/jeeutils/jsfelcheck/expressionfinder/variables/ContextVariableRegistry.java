@@ -116,6 +116,9 @@ public class ContextVariableRegistry implements ElVariableResolver {
                 storeNewContextVariable(jspTag, new VariableInfo(
                         e.getVariableName(), Error_YouMustDelcareTypeForThisVariable.class));
                 throw e;
+            } catch (RuntimeException e) {
+	            throw new RuntimeException("Failed to extract local variables from " + jspTag + ":" + e
+			            , e);
             }
         }
     }

@@ -69,7 +69,8 @@ public class PageNodeExpressionValidator {
      * Validate all JSF EL expressions in the tag's attributes and return
      * the resolved values of those expressions, do nothing of no expressions.
      *
-     * @param tagHandlerClass (required) the tag's handler - to extract attribute classes
+     * @param tagHandlerClass (required) the tag's handler - to extract the types of attributes if defined on
+     *  the handler (generally true for JSP but not for Facelets)
      * @param attributes (required) attributes of the tag
      * @return attribute name -> EL expression evaluation result or empty
      */
@@ -77,12 +78,12 @@ public class PageNodeExpressionValidator {
 
         Map<String, String> jsfExpressions = extractJsfExpressions(attributes);
         AttributesValidationResult resolvedExpressions = new AttributesValidationResult();
-	    BeanPropertyUtils properties = BeanPropertyUtils.forType(tagHandlerClass);
+	    BeanPropertyUtils tagHandlerAttributes = BeanPropertyUtils.forType(tagHandlerClass);
 
         for (Entry<String, String> jsfElAttribute : jsfExpressions.entrySet()) {
 
 	        String attributeName = jsfElAttribute.getKey();
-	        Class<?> attributeType = properties.getPropertyTypeOf(attributeName);
+	        Class<?> attributeType = determineAttributeType(attributeName, tagHandlerAttributes);
 	        AttributeInfo attributeInfo = new AttributeInfo(attributeName, attributeType);
 
             String elExpression = jsfElAttribute.getValue();
@@ -98,5 +99,11 @@ public class PageNodeExpressionValidator {
         return resolvedExpressions;
 
     }
+
+	private Class<?> determineAttributeType(String attributeName, BeanPropertyUtils tagHandlerAttributes) {
+		final Class<?> defaultType = String.class;
+		final Class<?> typeFromAttributes = tagHandlerAttributes.getPropertyTypeOf(attributeName);
+		return (typeFromAttributes == null)? defaultType : typeFromAttributes;
+	}
 
 }

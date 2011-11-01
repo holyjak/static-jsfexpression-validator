@@ -17,14 +17,16 @@
 
 package net.jakubholy.jeeutils.jsfelcheck;
 
-import com.sun.faces.el.impl.AndOperator;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
-import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf11.Jsf11FacesConfigXmlBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.JsfElValidatingFaceletsParser;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.jsf12.MyFaces12ValidatingFaceletsParser;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.jsf20.MyFaces21ValidatingFaceletsParser;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
-import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.Jsf11ValidatingElResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12ValidatingElResolver;
+import org.apache.el.parser.AstAnd;
 
 import java.io.File;
 import java.util.Collection;
@@ -32,7 +34,7 @@ import java.util.Collection;
 /**
  * {@inheritDoc}
  *
- * Implementation based on JSF 1.1.
+ * Implementation based on JSF 2.x.
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyzer> {
 
@@ -40,37 +42,40 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyz
 		return new JsfStaticAnalyzer(ViewType.JSP);
 	}
 
-	/** @deprecated use the static factory method {@link #forJsp()}  */
-	public JsfStaticAnalyzer() {
-		this(ViewType.JSP);
+	public static JsfStaticAnalyzer forFacelets() {
+		return new JsfStaticAnalyzer(ViewType.FACELETS);
 	}
 
-	JsfStaticAnalyzer(ViewType viewType) {
+	/** For tests only */
+	JsfStaticAnalyzer() {
 		super(ViewType.JSP);
-		LOG.info("Created JSF 1.1 JsfStaticAnalyzer");
+		LOG.info("Created JSF 2.x JsfStaticAnalyzer");
 	}
 
-	public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no JavaDoc)
+	private JsfStaticAnalyzer(ViewType viewType) {
+		super(viewType);
+	}
+
+	public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no javadoc)
         AbstractJsfStaticAnalyzer.main(new JsfStaticAnalyzer(), args);
     }
 
     @Override
     protected ValidatingElResolver createValidatingElResolver() {
-        if (!new AndOperator().toString().startsWith("HACKED BY JSFELCHECK ")) {
-            handleUnhackedElImplementationLoaded("jsf-impl");
+        if (! new AstAnd(0).toString().startsWith("HACKED BY JSFELCHECK ")) {
+            handleUnhackedElImplementationLoaded("jasper-el");  // JSF 2.0: tomcat-jasper-el
         }
-        return new Jsf11ValidatingElResolver();
+        return new Jsf12ValidatingElResolver();
     }
 
 	@Override
 	protected JsfElValidatingFaceletsParser createValidatingFaceletsParser(File webappRoot, PageNodeListener pageNodeValidator) {
-		throw new UnsupportedOperationException("Sorry, we haven't implemented support for Facelets in the JSF 1.1 "
-				+ "validator, consider trying it with the JSF 1.2 version (should be mostly backwards-compatible),");
+		return new MyFaces21ValidatingFaceletsParser(webappRoot, pageNodeValidator);
 	}
 
 	@Override
-	protected ManagedBeanFinder createManagedBeanFinder(Collection<InputResource> facesConfigFilesToRead) {
-        return Jsf11FacesConfigXmlBeanFinder.forResources(facesConfigFilesToRead);
+    protected ManagedBeanFinder createManagedBeanFinder(
+            Collection<InputResource> facesConfigFilesToRead) {
+        return Jsf12FacesConfigXmlBeanFinder.forResources(facesConfigFilesToRead);
     }
-
 }

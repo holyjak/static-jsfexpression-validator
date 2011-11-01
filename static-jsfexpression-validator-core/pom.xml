@@ -35,19 +35,11 @@
 	</scm>
 
 	<dependencies>
-
         <dependency>
             <groupId>org.apache.myfaces.core</groupId>
             <artifactId>myfaces-api</artifactId>
             <version>${myfaces.jsf20.version}</version>
             <!-- Needed by the JSP/Facelets parsers/compilers; don't propagate to dependants -->
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.myfaces.core</groupId>
-            <artifactId>myfaces-impl</artifactId>
-            <version>${myfaces.jsf20.version}</version>
-            <!-- Needed by the Facelets parsers/compilers; don't propagate to dependants -->
             <scope>provided</scope>
         </dependency>
 

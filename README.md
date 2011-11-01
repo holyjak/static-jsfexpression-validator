@@ -49,6 +49,8 @@ Facelets parsing
 
 - consider enabling in-container testing (- slower, + complete & correct env. setup, no need to search for m.beans)
 
+- fixme: -jsf20 impl. currently reuses jsf12 and re-impl. some of its classes => it might happen that the original jsf12 is loaded (based on classloader impl and jar order) - too brittle!
+
 ---
 
 - finishing touches:

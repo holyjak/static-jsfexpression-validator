@@ -20,10 +20,14 @@ package net.jakubholy.jeeutils.jsfelcheck;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.ManagedBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.jsf12.Jsf12FacesConfigXmlBeanFinder;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.JsfElValidatingFaceletsParser;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.jsf12.MyFaces12ValidatingFaceletsParser;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf12.Jsf12ValidatingElResolver;
 import org.apache.el.parser.AstAnd;
 
+import java.io.File;
 import java.util.Collection;
 
 /**
@@ -41,12 +45,14 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyz
 		return new JsfStaticAnalyzer(ViewType.FACELETS);
 	}
 
+	/** For tests only */
 	JsfStaticAnalyzer() {
-		super(ViewType.JSP);
+		this(ViewType.JSP);
 	}
 
 	private JsfStaticAnalyzer(ViewType viewType) {
 		super(viewType);
+		LOG.info("Created JSF 1.2 JsfStaticAnalyzer");
 	}
 
 	public static void main(String[] args) throws Exception { // SUPPRESS CHECKSTYLE (no javadoc)
@@ -61,7 +67,12 @@ public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyz
         return new Jsf12ValidatingElResolver();
     }
 
-    @Override
+	@Override
+	protected JsfElValidatingFaceletsParser createValidatingFaceletsParser(File webappRoot, PageNodeListener pageNodeValidator) {
+		return new MyFaces12ValidatingFaceletsParser(webappRoot, pageNodeValidator);
+	}
+
+	@Override
     protected ManagedBeanFinder createManagedBeanFinder(
             Collection<InputResource> facesConfigFilesToRead) {
         return Jsf12FacesConfigXmlBeanFinder.forResources(facesConfigFilesToRead);

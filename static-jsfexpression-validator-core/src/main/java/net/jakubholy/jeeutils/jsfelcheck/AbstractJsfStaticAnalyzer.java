@@ -24,9 +24,11 @@ import net.jakubholy.jeeutils.jsfelcheck.beanfinder.SpringContextBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.JsfElValidatingFaceletsParser;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.ValidatingFaceletsParserExecutor;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.CollectedValidationResultsImpl;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JsfElValidatingPageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.JspCParsingToNodesOnly;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
@@ -100,7 +102,7 @@ import static org.mockito.Mockito.*;
  */
 public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnalyzer> {
 
-    private static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class.getName());
+    protected static final Logger LOG = Logger.getLogger(AbstractJsfStaticAnalyzer.class.getName());
 
 	protected static enum ViewType {JSP, FACELETS };
 
@@ -165,7 +167,9 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 				throw new RuntimeException("Jasper failed to parse your JSP files", e);
 			}
 	    } else {
-		    new JsfElValidatingFaceletsParser(viewFilesRoot, viewFilesRoot, pageNodeValidator).execute();
+		    final File webappRoot = viewFilesRoot;
+		    JsfElValidatingFaceletsParser faceletsParser = createValidatingFaceletsParser(webappRoot, pageNodeValidator);
+		    new ValidatingFaceletsParserExecutor(viewFilesRoot, webappRoot, faceletsParser).execute();
 	    }
 
         // Handle results
@@ -188,6 +192,8 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 
         return results;
     }
+
+	abstract protected JsfElValidatingFaceletsParser createValidatingFaceletsParser(File webappRoot, PageNodeListener pageNodeValidator);
 
     private void applyConfigurationFromSystemProperties() {
         setPrintCorrectExpressions(

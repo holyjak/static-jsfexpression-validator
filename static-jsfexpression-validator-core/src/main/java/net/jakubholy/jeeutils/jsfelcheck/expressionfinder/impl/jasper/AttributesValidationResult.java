@@ -18,6 +18,7 @@
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -68,6 +69,10 @@ public class AttributesValidationResult extends ValidationResult {
 
     public Collection<ValidationResult> getAllResults() {
         return results.values();
+    }
+
+    public Map<String, ValidationResult> getAllResultsMap() {
+        return Collections.unmodifiableMap(results);
     }
 
 }

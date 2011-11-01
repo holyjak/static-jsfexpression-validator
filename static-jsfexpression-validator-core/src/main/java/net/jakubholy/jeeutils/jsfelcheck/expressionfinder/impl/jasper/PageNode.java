@@ -36,6 +36,7 @@ public class PageNode {
      *  qualified name of the tag, ex.: h:dataTable
      * @param tagHandlerClass (required)
      *  the handler used for the tag, ex.: org.apache.myfaces.taglib.html.HtmlDataTableTag
+     *  (only meaningful for JSP - there it can be used to find out the type of an EL expression)
      * @param lineNumber (required)
      *  the line where the tag starts in the page source code
      * @param attributeMap (required)
