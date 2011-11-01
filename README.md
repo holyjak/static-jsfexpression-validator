@@ -39,6 +39,8 @@ CURRENT LIMITATIONS
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
+Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
+
 Facelets parsing
 - teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
 - add Facelets local var declaring tags (ui:repeat, st. else?)
