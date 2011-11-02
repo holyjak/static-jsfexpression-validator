@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 /**
  * Helper for extracting JSF EL expressions from a tag's attributes and validating them via a validator.
  */
-public class PageNodeExpressionValidator {
+public class PageNodeAttributesElValidator {
 
     private static final String DEFERRED_EVALUATION_EL_START_MARKER = "#{";
     private static final String IMMEDIATE_EVALUATION_EL_START_MARKER = "${";
@@ -41,7 +41,7 @@ public class PageNodeExpressionValidator {
      * New node helper using the given EL validator.
      * @param expressionValidator (required)
      */
-    public PageNodeExpressionValidator(JsfElValidator expressionValidator) {
+    public PageNodeAttributesElValidator(JsfElValidator expressionValidator) {
         this.expressionValidator = expressionValidator;
     }
 

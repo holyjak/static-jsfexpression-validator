@@ -19,8 +19,15 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html">
     <body>
-        <h:form>
-            <div id="htmlTagInsideJsf" />
-        </h:form>
+        <div>
+            #{multiInHtmlTagBeforeJsfTag}
+            <h:panelGrid>
+                <div class="#{nestedBlockAttribute}">
+                    #{nestedBlockContent}
+                    <p>#{doubleNestedBlockContent}</p>
+                </div>
+            </h:panelGrid>
+            #{multiInHtmlTagAfterJsfTag}
+        </div>
     </body>
 </html>

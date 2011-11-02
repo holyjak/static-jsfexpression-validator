@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.AttributesValidationResult;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNode;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
 
 /**

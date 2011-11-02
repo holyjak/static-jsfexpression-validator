@@ -29,10 +29,9 @@ import com.sun.facelets.tag.ui.UILibrary;
 
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.AbstractValidatingFaceletsParser;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.StandaloneExternalContext;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener;
 import org.apache.myfaces.config.FacesConfigurator;
 import org.apache.myfaces.context.ReleaseableExternalContext;
-import org.apache.myfaces.context.servlet.FacesContextImpl;
 import org.apache.myfaces.context.servlet.StartupFacesContextImpl;
 
 import javax.faces.context.ExternalContext;
@@ -40,7 +39,6 @@ import javax.faces.context.FacesContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Map;
 
 /**

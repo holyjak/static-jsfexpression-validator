@@ -17,16 +17,16 @@
 
 package org.apache.myfaces.view.facelets.compiler
 
-import org.junit.Before
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNode
-import org.junit.Test
+import groovy.transform.Canonical
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.JsfElValidatingFaceletsParser
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.jsf20.MyFaces21ValidatingFaceletsParser
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-import groovy.transform.Canonical
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener
+import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Test
+
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode
+import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 
 class NotifyingCompilationManagerTest {
 
@@ -46,18 +46,8 @@ class NotifyingCompilationManagerTest {
 
     @BeforeClass
     public static void setUpForAll() {
-
         collectedCalls = []
-
         PageNodeListener listener = createListenerLoggingCallsInto(collectedCalls)
-        /* The following works when a method called from Groovy but not from Java:
-        listener = {} as PageNodeListener
-        listener.metaClass.invokeMethod = { name, args ->
-            collectedCalls << new Call(name, args)
-            println "invokeMethod: $name($args)"
-        }
-        */
-
         parser = new MyFaces21ValidatingFaceletsParser(TEST_WEBROOT, listener)
     }
 
@@ -73,12 +63,55 @@ class NotifyingCompilationManagerTest {
     }
 
     @Test
-    public void should_notify_about_file_entered2() throws Exception {
+    public void should_notify_about_pair_jsf_tag_entered_and_left() throws Exception {
         compile("oneJsfTag.xhtml")
         assert collectedCalls.find { it.method == "nodeEntered" && it.args[0].QName == "h:form" }
         assert collectedCalls.find { it.method == "nodeLeft" && it.args[0].QName == "h:form" }
-        println "All calls: $collectedCalls"
     }
+
+    @Test
+    public void should_notify_about_nonpair_jsf_tag_entered_and_left() throws Exception {
+        compile("oneNonpairJsfTag.xhtml")
+        assert collectedCalls.find { it.method == "nodeEntered" && it.args[0].QName == "h:outputLabel" }
+        assert collectedCalls.find { it.method == "nodeLeft" && it.args[0].QName == "h:outputLabel" }
+    }
+
+    @Test
+    public void "should not report HTML tags without ELs"() throws Exception {
+        compile("el/htmlTagWithoutEls.xhtml")
+        assert ! collectedCalls.find { it.method == "nodeEntered" && it.args[0].QName == "TEXT_CONTENT" }
+    }
+
+    @Test
+    public void "should report all ELs in the body of an HTML tag"() throws Exception {
+        compile("el/insideHtmlTagBody.xhtml")
+        def textNode = assertTagReported("TEXT_CONTENT", ["content" : "before#{insideHtmlTagBody1}in#{insideHtmlTagBody2}after"])
+        def parentNodeLine = 22 // the parent <p> starts here
+        assert textNode.lineNumber == parentNodeLine
+    }
+
+    @Test
+    public void "should report EL in in the body of a JSF tag"() throws Exception {
+        compile("el/insideJsfTagBodyAsTextContent.xhtml")
+        assertTagReported("TEXT_CONTENT", ["content" : "#{insideJsfTagBodyAsTextContent}"])
+    }
+
+    @Test
+    public void "should report EL in a HTML tag's attribute"() throws Exception {
+        compile("el/inSingleHtmlTagAttribute.xhtml")
+        assertTagReported("img", ["src" : "#{inSingleHtmlTagAttribute}"])
+    }
+
+    @Test
+    public void "should report all ELs in a complex page mixing HTML and JSF tags"() throws Exception {
+        compile("el/combinedHtmlAndJsfTags.xhtml")
+        assertTagReported("TEXT_CONTENT", ["content" : "#{multiInHtmlTagBeforeJsfTag}"])
+        assertTagReported("div", ["class" : "#{nestedBlockAttribute}"])
+        assertTagReported("TEXT_CONTENT", ["content" : "#{doubleNestedBlockContent}"])
+        assertTagReported("TEXT_CONTENT", ["content" : "#{multiInHtmlTagAfterJsfTag}"])
+    }
+
+    // TODO Verify behavior of custom tag and composite and template parsing
 
     // ###############################################################################################
 
@@ -88,6 +121,23 @@ class NotifyingCompilationManagerTest {
 
     def toUrl(fileName) {
         return new File(TEST_WEBROOT, "$fileName").toURI().toURL()
+    }
+
+    PageNode assertTagReported(expectedQName, expectedAttributes) {
+        def qnamedNodeEntered
+        def pageNode
+        try {
+            assert (qnamedNodeEntered = collectedCalls.findResults {
+                def firstArgument = it.args[0]
+                (it.method == "nodeEntered" && firstArgument.QName == expectedQName)? firstArgument: null }
+            )
+            // Verify all the expected attributes were present
+            assert (pageNode = qnamedNodeEntered.find { (expectedAttributes - it.attributes).isEmpty() })
+        } catch (PowerAssertionError e) {
+            throw new PowerAssertionError(e.getMessage()
+                    + "\nWHERE expectedQName=$expectedQName, expectedAttributes=$expectedAttributes");
+        }
+        return pageNode
     }
 
     private static PageNodeListener createListenerLoggingCallsInto(collectedCalls) {

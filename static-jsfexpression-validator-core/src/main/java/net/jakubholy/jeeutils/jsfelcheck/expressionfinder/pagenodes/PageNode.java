@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes;
 
 import java.util.Map;
 

@@ -19,22 +19,20 @@
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
-import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
+
+
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*
+
+
 import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 
-public class PageNodeExpressionValidatorTest {
+public class PageNodeAttributesElValidatorTest {
 
     private static final class MyMethodExpression {}
     private static final class MyValueExpression {}
@@ -78,12 +76,12 @@ public class PageNodeExpressionValidatorTest {
     }
 
     private MemorizingElValidatorStub expressionValidator;
-    private PageNodeExpressionValidator nodeValidator;
+    private PageNodeAttributesElValidator nodeValidator;
 
     @Before
     public void setUp() throws Exception {
         expressionValidator = new MemorizingElValidatorStub()
-        nodeValidator = new PageNodeExpressionValidator(expressionValidator);
+        nodeValidator = new PageNodeAttributesElValidator(expressionValidator);
     }
 
     @Test

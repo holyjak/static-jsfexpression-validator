@@ -27,6 +27,7 @@ import org.junit.Test
 import static org.mockito.Mockito.*
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult
 import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode
 
 /**
  * BEWARE This test verifies currently only a very small part of the class

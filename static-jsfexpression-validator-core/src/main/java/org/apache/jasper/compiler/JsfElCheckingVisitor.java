@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNode;
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.compiler.Node.CustomTag;

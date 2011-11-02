@@ -20,6 +20,8 @@ package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
 import java.util.Stack;
 import java.util.logging.Logger;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.ContextVariableRegistry;
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.MissingLocalVariableTypeDeclarationException; // SUPPRESS CHECKSTYLE
 import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
@@ -35,7 +37,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
     private static final Logger LOG = Logger.getLogger(JsfElValidatingPageNodeListener.class.getName());
 
     private final ContextVariableRegistry contextVarRegistry;
-    private final PageNodeExpressionValidator nodeValidator;
+    private final PageNodeAttributesElValidator nodeValidator;
     private final CollectedValidationResultsImpl validationResults = new CollectedValidationResultsImpl();
 
     private Stack<String> jspFileInclusionStack = new Stack<String>();
@@ -49,7 +51,7 @@ public class JsfElValidatingPageNodeListener implements PageNodeListener {
     public JsfElValidatingPageNodeListener(
             JsfElValidator expressionValidator, ContextVariableRegistry contextVarRegistry) {
         this.contextVarRegistry = contextVarRegistry;
-        this.nodeValidator = new PageNodeExpressionValidator(expressionValidator);
+        this.nodeValidator = new PageNodeAttributesElValidator(expressionValidator);
     }
 
     /** {@inheritDoc} */

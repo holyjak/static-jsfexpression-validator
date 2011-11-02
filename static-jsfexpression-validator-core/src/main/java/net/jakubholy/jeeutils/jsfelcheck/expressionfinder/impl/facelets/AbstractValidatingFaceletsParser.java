@@ -17,7 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets;
 
-import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeListener;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener;
 
 import java.io.File;
 import java.util.Collection;

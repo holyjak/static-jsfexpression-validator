@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes;
 
 /**
  * Get informed about nodes in a JSP pages being processed by the
