@@ -53,6 +53,8 @@ Facelets parsing
 
 - fixme: -jsf20 impl. currently reuses jsf12 and re-impl. some of its classes => it might happen that the original jsf12 is loaded (based on classloader impl and jar order) - too brittle!
 
+-- Current limitation in Facelets: No way to detect what is value or Method expression => we try value first and method next, should autodetect somehow, min. for the standard tags and let users delcare it
+
 ---
 
 - finishing touches:

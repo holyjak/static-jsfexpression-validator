@@ -105,11 +105,27 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 		if (javax.el.MethodExpression.class.isAssignableFrom(attributeInfo.getAttributeType())) {
 			return validateMethodElExpression(elExpression);
 		} else {
-			return validateValueElExpression(elExpression);
+			// No autodetection of value x method for Facelets => try both
+			ValidationResult validationResult = validateValueElExpression(elExpression);
+			if (validationResult.hasErrors()) {
+				return tryValidateAsMethod(elExpression, validationResult);
+			}
+			return validationResult;
 		}
 	}
 
-    private ValidationResult validateValueElExpression(String elExpression) {
+	private ValidationResult tryValidateAsMethod(String elExpression, ValidationResult validationResult) {
+		try {
+			ValidationResult methodResult = validateMethodElExpression(elExpression);
+			if (!methodResult.hasErrors()) {
+				return methodResult;
+			}
+		} catch (RuntimeException e) {}
+
+		return validationResult;
+	}
+
+	private ValidationResult validateValueElExpression(String elExpression) {
         functionMapper.setCurrentExpression(elExpression);
         final ValueExpression valueExpression = expressionFactory.createValueExpression(
                 elContext, elExpression, Object.class);
