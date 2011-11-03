@@ -21,10 +21,10 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockObjectOfUnknownType;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ParsedElExpression;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.PropertyNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.faces.el.PropertyNotFoundException;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.*;

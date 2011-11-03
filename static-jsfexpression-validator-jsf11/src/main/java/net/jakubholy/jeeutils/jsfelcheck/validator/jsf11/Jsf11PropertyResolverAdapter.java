@@ -25,6 +25,7 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
 
 import com.sun.faces.el.PropertyResolverImpl;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.GenericElEvaluationException;
 
 /**
  * Adapt {@link MockingPropertyResolver} to behave as JSF 1.1 {@link PropertyResolver}.
@@ -41,14 +42,23 @@ public final class Jsf11PropertyResolverAdapter extends PropertyResolver {
         /** {@inheritDoc} */
         public Class<?> getType(Object target, Object property) {
 
-            if (property instanceof Integer) {
-                Class<?> type = realResolver.getType(target, ((Integer) property).intValue());
-                if (type != null) {
-                    return type;
-                }
-            }
+	        try {
 
-            return realResolver.getType(target, property);
+				if (property instanceof Integer) {
+					Class<?> type = realResolver.getType(target, ((Integer) property).intValue());
+					if (type != null) {
+						return type;
+					}
+				}
+
+				return realResolver.getType(target, property);
+
+	        } catch (PropertyNotFoundException e) {
+		        throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.PropertyNotFoundException(
+				        e);
+	        } catch (EvaluationException e) {
+				throw new GenericElEvaluationException(e.getMessage(), e);
+	        }
         }
     }
 

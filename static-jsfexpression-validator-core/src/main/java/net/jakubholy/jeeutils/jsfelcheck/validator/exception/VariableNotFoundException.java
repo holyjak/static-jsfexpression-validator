@@ -31,5 +31,4 @@ public class VariableNotFoundException extends BaseEvaluationException {
     public VariableNotFoundException(String message) {
         super(message);
     }
-
 }

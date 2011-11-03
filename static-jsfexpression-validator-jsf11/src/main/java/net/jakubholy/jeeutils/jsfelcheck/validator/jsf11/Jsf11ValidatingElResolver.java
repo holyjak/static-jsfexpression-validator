@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11;
 
+import com.sun.faces.el.MethodBindingImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.AttributeInfo;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElExpressionFilter;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ElVariableResolver;
@@ -25,10 +26,15 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidationResultHelper;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.ElBindingFactory;
 import net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl.Sun11_02ElBindingFactoryImpl;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import javax.faces.application.Application;
 import javax.faces.context.ExternalContext;
@@ -36,10 +42,12 @@ import javax.faces.context.FacesContext;
 import javax.faces.el.EvaluationException;
 import javax.faces.el.MethodBinding;
 import javax.faces.el.ValueBinding;
-
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import static org.mockito.Mockito.*;
 
@@ -49,6 +57,8 @@ import static org.mockito.Mockito.*;
  * JSF 1.1 implementation.
  */
 public class Jsf11ValidatingElResolver implements ValidatingElResolver {
+
+	private static final Logger LOG = Logger.getLogger(Jsf11ValidatingElResolver.class.getName());
 
 	private static final Set<String> METHOD_BINDING_ATTRIBUTES = new HashSet<String>(Arrays.asList(
 			"action", "actionListener", "validator", "valueChangeListener"
@@ -74,6 +84,16 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         when(application.getPropertyResolver()).thenReturn(new Jsf11PropertyResolverAdapter(propertyResolver));
 
         elBindingFactory = new Sun11_02ElBindingFactoryImpl(application);
+
+	    // JSF 1.1 MethodBindingImpl relies on application.createValueBinding to
+	    // get the bean whose method to access
+	    when(application.createValueBinding(anyString())).thenAnswer(new Answer<Object>() {
+		    @Override
+		    public Object answer(InvocationOnMock invocation) throws Throwable {
+			    String elExpression = (String) invocation.getArguments()[0];
+			    return elBindingFactory.createValueBinding(elExpression);
+		    }
+	    });
     }
 
 
@@ -96,7 +116,10 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         try {
             // Create binding - throws an exception if no matching method found
             final MethodBinding binding = elBindingFactory.createMethodBinding(elExpression);
-            return new SuccessfulValidationResult(elExpression, binding);
+	        assertMethodExists(elExpression, binding);
+	        return new SuccessfulValidationResult(elExpression, binding);
+        } catch (BaseEvaluationException e) {
+	        return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (EvaluationException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {
@@ -104,12 +127,86 @@ public class Jsf11ValidatingElResolver implements ValidatingElResolver {
         }
     }
 
-    private ValidationResult validateValueElExpression(final String elExpression) {
+	private void assertMethodExists(String elExpression, MethodBinding binding) {
+		try {
+			tryAssertMethodExists(binding);
+		} catch (MethodNotFoundException e) {
+			throw e;
+		} catch (RuntimeException e) {
+			throw new InternalValidatorFailureException(
+					"Validation of method existence for '" + elExpression
+						+ "' via " + binding + " failed for unexpected reasons: "
+						+ e.getMessage()
+					, e);
+		}
+	}
+
+	/**
+	 * Assert that the method actually exists.
+	 * We cannot use {@link javax.faces.el.MethodBinding#getType(javax.faces.context.FacesContext)}
+	 * to verify that because it also checks that the method has the same parameters
+	 * as supplied to the {@link com.sun.faces.el.MethodBindingImpl} constructor, which
+	 * won't work for us for we always pretend that there are no arguments.
+	 * (Because there is no way for us to find out the actual expected arguments.)
+	 * Thus this method only checks the target method name and not its arguments.
+	 */
+	@SuppressWarnings("unchecked")
+	private void tryAssertMethodExists(MethodBinding binding) {
+		Class<MethodBindingImpl> bindingClass = (Class<MethodBindingImpl>) binding.getClass();
+		try {
+			final Field methodNameField = bindingClass.getDeclaredField("name");
+			methodNameField.setAccessible(true);
+			final String methodName = (String) methodNameField.get(binding);
+
+			final Field targetBindingField = bindingClass.getDeclaredField("vb");
+			targetBindingField.setAccessible(true);
+			final ValueBinding targetBinding = (ValueBinding) targetBindingField.get(binding);
+
+			tryAssertMethodExists(targetBinding, methodName);
+
+		} catch (NoSuchFieldException e) {
+			throw new IllegalStateException(
+					"Failed to access MethodBindingImpl's private fields", e);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(
+					"Failed to access MethodBindingImpl's private fields", e);
+		}
+	}
+
+	private void tryAssertMethodExists(ValueBinding targetBinding, String methodName) throws net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException {
+		final Object targetObject = getBindingValueOrFail(targetBinding);
+		final Class<? extends Object> targetClass = targetObject.getClass();
+		Method[] allMethods = targetClass.getMethods();
+		for (Method method : allMethods) {
+			if (method.getName().equals(methodName)) {
+				return;
+			}
+		}
+
+		throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException(
+				"No method " + methodName + " found in " + targetClass
+		);
+	}
+
+	private Object getBindingValueOrFail(ValueBinding targetBinding) throws EvaluationException, IllegalStateException {
+		final Object value = targetBinding.getValue(mockFacesContext);
+		if (value == null) {
+			throw new IllegalStateException("The value binding " + targetBinding
+				+ " returned null as its value");
+		}
+
+		return value;
+
+	}
+
+	private ValidationResult validateValueElExpression(final String elExpression) {
         final ValueBinding binding = elBindingFactory.createValueBinding(elExpression);
         try {
             final Object resolvedMockedValue = binding.getValue(mockFacesContext);
             // if (resolvedMockedValue == null ) - do somethin? is it possible at all?
             return new SuccessfulValidationResult(elExpression, resolvedMockedValue);
+        } catch (BaseEvaluationException e) {
+	        return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (EvaluationException e) {
             return ValidationResultHelper.produceFailureResult(elExpression, e);
         } catch (RuntimeException e) {

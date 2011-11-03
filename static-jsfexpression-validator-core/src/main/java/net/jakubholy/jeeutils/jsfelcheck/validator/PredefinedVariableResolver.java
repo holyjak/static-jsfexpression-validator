@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.faces.el.EvaluationException;
 import javax.servlet.jsp.PageContext;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException;
@@ -85,12 +84,12 @@ public final class PredefinedVariableResolver {
      * information.
      * @param variableName (required)
      * @return an instance of the variable's type
-     * @throws EvaluationException if something fails, e.g. no such variable is known
+     * @throws VariableNotFoundException if something fails, e.g. no such variable is known
      *
      * @see #declareVariable(String, Object)
      */
     public Object resolveVariable(String variableName)
-            throws EvaluationException {
+            throws VariableNotFoundException {
 
         final Object resolvedValue = tryResolveVariable(variableName);
 
@@ -106,8 +105,7 @@ public final class PredefinedVariableResolver {
         return resolvedValue;
     }
 
-    private Object tryResolveVariable(String variableName)
-    throws EvaluationException {
+    private Object tryResolveVariable(String variableName) {
 
         if (knownVariables.containsKey(variableName)) {
             return knownVariables.get(variableName);

@@ -19,10 +19,10 @@ package net.jakubholy.jeeutils.jsfelcheck.validator;
 
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory.UnableToCreateFakeValueException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.GenericElEvaluationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.PropertyNotFoundException;
 
-import javax.faces.el.EvaluationException;
-import javax.faces.el.PropertyNotFoundException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -50,8 +50,10 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
     	 * actually is a variable)
     	 * @param property (required) the property name such as 'property' in the EL #{bean.property}
     	 * @return the class of the property or null if it cannot be resolved
+	     * @throws PropertyNotFoundException Wraps JSF version specific "PropertyNotFound" exception
+	     * @throws GenericElEvaluationException Wraps JSF version specific evaluation exception (other than prop. not found)
     	 */
-        Class<?> getType(Object target, Object property);
+        Class<?> getType(Object target, Object property) throws PropertyNotFoundException, GenericElEvaluationException;
     }
 
     private final Logger log = Logger.getLogger(getClass().getName());
@@ -114,10 +116,10 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
      * @param property (required) the property name such as 'property' in the EL #{bean.property}
      * @return the type of the property or null if it cannot be detected
      * @throws PropertyNotFoundException there is no such property on the target object
-     * @throws EvaluationException other problem
+     * @throws GenericElEvaluationException other problem
      */
     public Class<?> getTypeOfCollectionOrBean(Object target, Object property)
-        throws PropertyNotFoundException, EvaluationException {
+        throws PropertyNotFoundException, GenericElEvaluationException {
 
         // Would normally throw an exception for empty arrays/list not having the given index
         if (target.getClass().isArray()) {
@@ -126,7 +128,7 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
             return this.determineFinalTypeOfCurrentExpressionAnd(property, null);
         }
 
-        // Throws PropertyNotFoundException if there is no such property on the bean
+        // May throw PropertyNotFoundException if there is no such property on the bean or GenericElEvaluationException
         return getTypeResolver().getType(target, property);
     }
 
@@ -137,11 +139,11 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
      * actually is a variable)
      * @param property (required) the property name such as 'property' in the EL #{bean.property}
      * @return an instance of the class of the property
-     * @throws EvaluationException generic evaluation failure
-     * @throws PropertyNotFoundException there is no such property on the target
+     * @throws GenericElEvaluationException - see {@link #getTypeOfCollectionOrBean(Object, Object)}
+     * @throws PropertyNotFoundException - see {@link #getTypeOfCollectionOrBean(Object, Object)}
      */
     public Object getValue(Object target, Object property)
-            throws EvaluationException, PropertyNotFoundException {
+            throws GenericElEvaluationException, PropertyNotFoundException {
         return this.getValue(target, property, getTypeOfCollectionOrBean(target, property));
     }
 
@@ -154,12 +156,12 @@ public final class MockingPropertyResolver implements PredefinedVariableResolver
      * @param originalType (optional) the type of the property
      *
      * @return an instance of the class of the property
-     * @throws EvaluationException generic evaluation failure
-     * @throws PropertyNotFoundException there is no such property on the target
+     * @throws GenericElEvaluationException - see {@link #getTypeOfCollectionOrBean(Object, Object)}
+     * @throws PropertyNotFoundException - see {@link #getTypeOfCollectionOrBean(Object, Object)}
      */
     @SuppressWarnings("rawtypes")
     public Object getValue(final Object target, final Object property, final Class originalType)
-            throws EvaluationException, PropertyNotFoundException {
+            throws GenericElEvaluationException, PropertyNotFoundException {
 
         final Class type = determineFinalTypeOfCurrentExpressionAnd(property, originalType);
         // Append property only after type has been determined !!!!

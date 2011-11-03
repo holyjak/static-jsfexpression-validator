@@ -36,6 +36,13 @@ public interface ElBindingFactory {
 
     /**
      * Create a method binding.
+     * <p>
+     *     BEWARE: The binding won't trully correspond to the correct method because
+     *     we don't pass in the correct number and types of arguments.
+     *     (We don't know what the arguments are - only the tag handler that
+     *     uses the method binding attribute knows that.)
+     * </p>
+     *
      * @param ref (required) ex.: #{bean.actionMethod}
      * @return the binding, never null
      */

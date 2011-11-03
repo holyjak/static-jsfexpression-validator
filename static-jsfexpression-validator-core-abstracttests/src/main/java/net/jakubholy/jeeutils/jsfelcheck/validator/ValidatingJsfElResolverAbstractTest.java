@@ -17,6 +17,8 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ExpressionRejectedByFilterResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
@@ -28,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import javax.servlet.jsp.PageContext;
+import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
@@ -45,6 +48,10 @@ import static org.mockito.Mockito.*;
  * The actual implementation is plugged in by implementing {@link #setUpResolver()}.
  */
 public abstract class ValidatingJsfElResolverAbstractTest {
+
+	private static class ActionBean {
+		public void multiparamAction(Object o1, Object o2) {}
+	}
 	
 	/** Temporary solution not to pass null to validation & not to depend on concrete class */
 	private static class FakeValueBinding {}
@@ -249,7 +256,7 @@ public abstract class ValidatingJsfElResolverAbstractTest {
     }
 
     @Test
-    public void should_return_expresseion_rejected_by_filter_result_for_filtered_out_expr() throws Exception {
+    public void should_return_expression_rejected_by_filter_result_for_filtered_out_expr() throws Exception {
         elResolver.declareVariable("myVariable", "my value");
         elResolver.addElExpressionFilter(new ElExpressionFilter() {
             public boolean accept(ParsedElExpression expression) {
@@ -308,6 +315,29 @@ public abstract class ValidatingJsfElResolverAbstractTest {
 
     }
 
+	/**
+	 * Make sure that method binding validation works also for other than
+	 * no-argument methods. (As was originally the case.)
+	 */
+	@Test
+	public void should_accept_method_binding_for_method_with_some_parameters() throws Exception {
+	    elResolver.declareVariable("myActionBean", new ActionBean());
+		// Note: Call the attribute "action" so that JSF 1.1 will recongize it as an action attribute
+		assertResultValid(elResolver.validateElExpression(
+				"#{myActionBean.multiparamAction}", new AttributeInfo("action", String.class)));
+	}
+
+	@Test
+	public void should_fail_for_method_binding_if_no_such_method() throws Exception {
+	    elResolver.declareVariable("myActionBean", new Object());
+		// Note: Call the attribute "action" so that JSF 1.1 will recongize it as an action attribute
+		ValidationResult result = elResolver.validateElExpression(
+				"#{myActionBean.noSuchMethodHere}", new AttributeInfo("action", String.class));
+		// Notice that JSF 1.2will throw NoSuchPropertyExc. as it cannot know that this is supposed to be
+		// a method binding and thus will try value first, method second, preferring the 1st failed result
+		assertFailureWithCause(result, BaseEvaluationException.class);
+	}
+
     // CHECKSTYLE:ON
 
     // #################################################################################### HELPER FUNCTIONS ###########
@@ -318,10 +348,16 @@ public abstract class ValidatingJsfElResolverAbstractTest {
                 , is(instanceOf(type)));
     }
 
-    private void assertFailureWithMessageContaining(ValidationResult result, String errorSubstring) {
-        assertTrue(result instanceof FailedValidationResult);
+    protected void assertFailureWithMessageContaining(ValidationResult result, String errorSubstring) {
+        assertTrue("Should have failed but hasn't: " + result, result instanceof FailedValidationResult);
         FailedValidationResult failure = (FailedValidationResult) result;
         assertThat(failure.getFailure().getMessage(), is(containsString(errorSubstring)));
+    }
+
+    protected void assertFailureWithCause(ValidationResult result, Class<? extends Throwable> causeType) {
+        assertTrue("Should have failed but hasn't: " + result, result instanceof FailedValidationResult);
+        FailedValidationResult failure = (FailedValidationResult) result;
+        assertThat(failure.getFailure().getCause(), is(instanceOf(causeType)));
     }
 
     /** Assert that the expression is valid and returns non-null value. */

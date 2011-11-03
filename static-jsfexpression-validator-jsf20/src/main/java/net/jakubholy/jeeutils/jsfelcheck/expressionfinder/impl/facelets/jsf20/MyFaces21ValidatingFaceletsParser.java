@@ -35,8 +35,11 @@ import org.apache.myfaces.view.facelets.tag.jstl.fn.JstlFnLibrary;
 import org.apache.myfaces.view.facelets.tag.ui.UILibrary;
 
 import javax.faces.application.ProjectStage;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.render.RenderKitFactory;
+import javax.faces.view.facelets.FaceletHandler;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +67,8 @@ public class MyFaces21ValidatingFaceletsParser extends AbstractValidatingFacelet
 
 	@Override
 	public void validateExpressionsInView(URL xhtmlUrl, String shortName) throws IOException {
-		getCompiler().compile(xhtmlUrl, shortName);
+		final FaceletHandler handler = getCompiler().compile(xhtmlUrl, shortName);
+		// If desired, we could actually render the pages - for example to generate a static view of our site
 	}
 
 	/**
@@ -127,7 +131,7 @@ public class MyFaces21ValidatingFaceletsParser extends AbstractValidatingFacelet
 		}
 	}
 
-	private Compiler getCompiler() {
+	Compiler getCompiler() {
 		if (compiler == null) {
 			compiler = createCompiler();
 		}

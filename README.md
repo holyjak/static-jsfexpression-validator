@@ -42,12 +42,12 @@ TODO - FURTHER DEVELOPMENT
 Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
 
 Facelets parsing
-- teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
+- Check non-detected ELs in net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.ValidateAllExpressionsInFaceletsTest
 - add Facelets local var declaring tags (ui:repeat, st. else?)
+- ???{isn't heuristics enoug now} teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
 - enable filtering of views to process at least as done for JSPs now
 - add support for declaring custom taglibs (File/InputStream? - what with taglibs in framework jars?)
 - see TODOs in NotifyingCompilationManager
-- move PageNodeListener to shared compiler/parser package
 
 - consider enabling in-container testing (- slower, + complete & correct env. setup, no need to search for m.beans)
 
@@ -200,6 +200,12 @@ Interesting Links
 
 NOTES
 -----
+
+### Version 0.9.8
+
+- Fix: Do actually check EL for a method binding (before the check succeeded even if the method didn't exist)
+    (however we check only the name of the method, not the type and number of parameters)
+- New: Support for Facelets (stil somehow limited)
 
 ### Version 0.9.7
 

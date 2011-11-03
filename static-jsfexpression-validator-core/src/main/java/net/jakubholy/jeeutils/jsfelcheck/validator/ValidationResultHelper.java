@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator;
 
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.ExpressionRejectedByFilterException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InternalValidatorFailureException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
@@ -70,8 +71,11 @@ public final class ValidationResultHelper {
         if (unwrappedCause instanceof ExpressionRejectedByFilterException) {
             return new ExpressionRejectedByFilterResult((ExpressionRejectedByFilterException) unwrappedCause);
         } else {
+	        // Don't unwrap our exceptions that wrap JSF impl.-specific ones such as PropertyNotFoundEx.
+	        Throwable publishedCause = (evaluationException instanceof BaseEvaluationException)?
+			        evaluationException : unwrappedCause;
             return new FailedValidationResult(
-                new InvalidExpressionException(elExpression, null, unwrappedCause));
+	            new InvalidExpressionException(elExpression, null, publishedCause));
         }
     }
 

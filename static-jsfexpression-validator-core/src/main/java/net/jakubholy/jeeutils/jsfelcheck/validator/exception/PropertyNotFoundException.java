@@ -18,20 +18,13 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 /**
- * Exception during JSF EL evaluation.
+ * The property used in an EL expression is unknown.
+ * Ex.: #{bean.noSuchProperty}, #{bean.existingProperty.noSuchProperty}
  */
 @SuppressWarnings("serial")
-public class BaseEvaluationException extends RuntimeException {
+public class PropertyNotFoundException extends BaseEvaluationException {
 
-    /**
-     * Constructor.
-     * @param message (required) the problem
-     */
-    public BaseEvaluationException(String message) {
-        super(message);
-    }
-
-	public BaseEvaluationException(String message, Throwable throwable) {
-		super(message, throwable);
+	public PropertyNotFoundException(Throwable cause) {
+		super(cause.getMessage(), cause);
 	}
 }

@@ -18,20 +18,12 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 /**
- * Exception during JSF EL evaluation.
+ * Generic JSF EL evaluation failer.
+ * Normally you should use a more specific class such as {@link VariableNotFoundException}.
  */
-@SuppressWarnings("serial")
-public class BaseEvaluationException extends RuntimeException {
+public class GenericElEvaluationException extends BaseEvaluationException {
 
-    /**
-     * Constructor.
-     * @param message (required) the problem
-     */
-    public BaseEvaluationException(String message) {
-        super(message);
-    }
-
-	public BaseEvaluationException(String message, Throwable throwable) {
+	public GenericElEvaluationException(String message, Throwable throwable) {
 		super(message, throwable);
 	}
 }

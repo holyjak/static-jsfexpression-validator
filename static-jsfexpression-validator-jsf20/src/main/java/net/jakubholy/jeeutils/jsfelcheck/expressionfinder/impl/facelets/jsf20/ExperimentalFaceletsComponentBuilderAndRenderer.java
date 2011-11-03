@@ -15,38 +15,26 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets;
+package net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.jsf20;
 
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode;
+import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNodeListener;
 import org.apache.el.ExpressionFactoryImpl;
-import org.apache.myfaces.config.FacesConfigurator;
 import org.apache.myfaces.config.RuntimeConfig;
-import org.apache.myfaces.context.servlet.StartupFacesContextImpl;
 import org.apache.myfaces.view.facelets.Facelet;
 import org.apache.myfaces.view.facelets.FaceletFactory;
-import org.apache.myfaces.view.facelets.compiler.*;
 import org.apache.myfaces.view.facelets.compiler.Compiler;
 import org.apache.myfaces.view.facelets.impl.DefaultFaceletFactory;
-import org.apache.myfaces.view.facelets.tag.TagLibrary;
-import org.apache.myfaces.view.facelets.tag.composite.CompositeLibrary;
-import org.apache.myfaces.view.facelets.tag.composite.CompositeResourceLibrary;
-import org.apache.myfaces.view.facelets.tag.jsf.core.CoreLibrary;
-import org.apache.myfaces.view.facelets.tag.jsf.html.HtmlLibrary;
-import org.apache.myfaces.view.facelets.tag.jstl.core.JstlCoreLibrary;
-import org.apache.myfaces.view.facelets.tag.jstl.fn.JstlFnLibrary;
-import org.apache.myfaces.view.facelets.tag.ui.UILibrary;
 
 import javax.el.Expression;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
-import javax.faces.application.ProjectStage;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.render.RenderKitFactory;
 import javax.faces.view.Location;
-import javax.faces.view.facelets.FaceletHandler;
 import javax.faces.view.facelets.ResourceResolver;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -57,21 +45,32 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.mockito.Mockito.mock;
 
 /**
- * TODO
+ * Experiment: Rendering of parsed XHTML pages into component tree and HTML - all the "plumbing" works
+ * for component tree building, to render it we just need to connect to UIViewRoot.encodeAll(context).
+ * Plus there are some small issues described below.
+ * <p>
+ *     For the description of the idea, see
+ *     http://stackoverflow.com/questions/6625258/how-do-i-build-a-facelets-site-at-build-time/7928541#7928541
+ * </p>
+ * <p>
+ *     Notice that the component tree cannot be used to verify ELs because components with rednered=false
+ *     will not be verified (I believe).
+ * </p>
+ *
+ * <h2>Old docs</h2>
+ * TO DO
  * - try with UEL 2.2?: INFO: MyFaces Unified EL support disabled - Likely conflict between Jetty's and our EL impl.
  *  (see http://web.archiveorange.com/archive/v/PhdPRE9VfOysfTldAsTr)
  * - try with JSF 1.2, 2.0 pages - is it compatible with them?
@@ -104,17 +103,10 @@ import static org.mockito.Mockito.mock;
  * <p>
  *     Special: f:converter, f:validator
  * </p>
- *
- * <h3>FIXME</h3>
- * - EL in f:attribute and f:setPropertyActionListener not verified - perhaps these f: tags are processed differently?
- * - handle verification of in-text ELs such as {@code <h:column>#{bean.value}</h:column>} - turned into a
- *  org.apache.myfaces.view.facelets.compiler.UIInstructions (with instr=TextInstruction) - not sure how to get its
- *  ELText :-(
- * - Shall we check ui:param used to pass values to templates via ui:insert, ui:composition? And composite:attribute?
- *
  * OTHER
- * - Apply requires a converterId on a converter though the app in Jettyn works w/o it (binding issue?):
- * {@code TagException: /faceletsParsingFullTest.xhtml at line 85 and column 72 <f:converter> Default behavior invoked of requiring a converter-id passed in the constructor, must override ConvertHandler(ConverterConfig)
+ * - Apply requires a converterId on a converter though the app in Jetty works w/o it (binding issue?):
+ * {@code TagException: /faceletsParsingFullTest.xhtml at line 85 and column 72 <f:converter> Default behavior 
+ * invoked of requiring a converter-id passed in the constructor, must override ConvertHandler(ConverterConfig)
 	at org.apache.myfaces.view.facelets.tag.jsf.ConverterTagHandlerDelegate.createConverter(ConverterTagHandlerDelegate.java:115)}
  * - the same for f:validator (providing the id => tries to find a v/c registered under that id, ignores binding - maybe
  * because it cannot see the bean used in the binding?!)
@@ -122,79 +114,76 @@ import static org.mockito.Mockito.mock;
  * BEWARE
  *  - to be able to handle composites we must make sure that {@code <webdir>/resources/</webdir>} is on the resolution path!!!
  */
-public class ExperimentalFaceletsElFinder {
+public class ExperimentalFaceletsComponentBuilderAndRenderer {
 
-	private static final Logger LOG = Logger.getLogger(ExperimentalFaceletsElFinder.class.getName());
-	private ExternalContext externalContextMock;
-	private long compilationDoneMs;
-	private long componentTreeConstructionDoneMs;
+
+	private static class FilesystemResolver extends ResourceResolver {
+
+		private final File viewsRootFolder;
+
+		public FilesystemResolver(File viewsRootFolder) {
+			this.viewsRootFolder = viewsRootFolder;
+		}
+
+		@Override
+		public URL resolveUrl(String path) {
+			try {
+				if ("/".equals(path)) {
+					// Called to determine the base url to later remove it from
+					// page URLs to get short aliases
+					return viewsRootFolder.toURI().toURL();
+				} else {
+					// Path is what we pass into the Facelet factory
+					// E.g. p=/Users/jholy/.../webapp/helloWorld.xhtml
+					return new File(viewsRootFolder, path).toURI().toURL();
+				}
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to resolve " + path, e);
+			}
+		}
+	}
+
 	private final File viewsRootFolder;
-	private final Set<String> expressionsFound = new HashSet<String>();
 
-	//private FaceletContext mockFaceletContext;
 	private FacesContext facesContext;
 
 	/**
 	 * MAIN
 	 */
 	public static void main(String[] a) throws Exception {
-		long start = System.currentTimeMillis();
 		File webRoot = new File("test-webapp-jsf20-facelets_owb/src/main/webapp");
 		String viewRootRelative = "tests/valid_el";
-		ExperimentalFaceletsElFinder finder = new ExperimentalFaceletsElFinder(
+		ExperimentalFaceletsComponentBuilderAndRenderer finder = new ExperimentalFaceletsComponentBuilderAndRenderer(
 				webRoot, viewRootRelative);
 
 		String view = "/faceletsParsingFullTest.xhtml";
-
-		finder.verifyExpressionsViaCompiler(view);
-
-		// Simple page time: DONE IN 1.6s (parsing: 1.4s, component tree: 0.2s)
-		System.out.format("\n##### DONE IN %2.1fs (parsing: %2.1fs, component tree: %2.1fs)"
-				, (System.currentTimeMillis() - start)/1000.0
-				, (finder.compilationDoneMs - start)/1000.0
-				, (finder.componentTreeConstructionDoneMs - finder.compilationDoneMs)/1000.0
-		);
+		finder.verifyExpressionsViaComponentTree(view);
 	}
+
+	private MyFaces21ValidatingFaceletsParser parser;
 
 	/**
 	 * CONSTRUCTOR
 	 */
-	public ExperimentalFaceletsElFinder(File webRoot, String viewRootRelative) {
+	public ExperimentalFaceletsComponentBuilderAndRenderer(File webRoot, String viewRootRelative) {
 		this.viewsRootFolder = new File(webRoot, viewRootRelative);
 
-		// - We need a "real" context to be able to f.ex. locate resources such as
-		// facelet composites
-		// - Enable the Development mode so that location info is attached to tags
-		// when compiling a view page
-		externalContextMock = new StandaloneExternalContext(webRoot, new Hashtable<String, String>() {{
-			put(ProjectStage.PROJECT_STAGE_PARAM_NAME, ProjectStage.Development.name());
-		}});
-
-		// Also sets FacesContext.getCurrentInstance()
-		facesContext = new StartupFacesContextImpl(externalContextMock, null, null, true);
-
-		// Note: Application creation requires FacesContext.currentInstance
-		// Configures default factories, component types (so that Application can instantiate them when compiling) etc.
-		new FacesConfigurator(externalContextMock).configure();
+		parser = new MyFaces21ValidatingFaceletsParser(webRoot, new PageNodeListener() {
+			@Override public void nodeEntered(PageNode currentCustomTag) {}
+			@Override public void nodeLeft(PageNode currentCustomTag) {}
+			@Override public void fileEntered(String jspFile) {}
+			@Override public void includedFileEntered(String includedFileName) {}
+			@Override public void includedFileLeft(String includedFileName) {}
+		});
 	}
 
 	/**
 	 * VERIFY EXPRESSIONS
 	 */
-	public Set<String> verifyExpressionsViaCompiler(String view) throws Exception {
-		expressionsFound.clear();
-		Compiler compiler = createCompiler();
-		compiler.compile(new File(viewsRootFolder + view).toURI().toURL(), view);
-		return new HashSet<String>(expressionsFound);
-	}
+	public Facelet verifyExpressionsViaComponentTree(String view) throws Exception {
 
-	/**
-	 * VERIFY EXPRESSIONS
-	 */
-	public Set<String> verifyExpressionsViaComponentTree(String view) throws Exception {
-		final String viewId = view.replaceAll("^*/", "");
-		expressionsFound.clear();
-		Compiler compiler = createCompiler();
+		Compiler compiler = parser.getCompiler();
+		facesContext = null; // TBD: Get it from the parser!
 
 		// Needed to avoid NPE - used to check attribtue types etc.
 		// Must be set before we create a facelet
@@ -204,30 +193,49 @@ public class ExperimentalFaceletsElFinder {
 		FaceletFactory faceletFactory = initializeFactory(compiler);
 		Facelet facelet = faceletFactory.getFacelet(view);
 
-		compilationDoneMs = System.currentTimeMillis();
-
 		UIViewRoot viewRoot = new UIViewRoot();
 		// apply(..) tries to instinatiate the render factory
 		// TODO Is tits creation expensive? Y => use custom stub kit & implem.
 		viewRoot.setRenderKitId(RenderKitFactory.HTML_BASIC_RENDER_KIT);
+
 		// It seems the id ending is used to determine whether to use JSP or Facelets
+		final String viewId = view.replaceAll("^*/", "");
 		viewRoot.setViewId(viewId);
 
 		facesContext.setViewRoot(viewRoot);
 
 		// BEWARE: Already this may fail due to PropertyNotFoundException (TagValueExpression.setValue)
-		// - this applies only to some attributes, e.g. binding
+		// - this applies only to some attributes, e.g. binding, if the Resolver can't resolve them to a value
 		facelet.apply(facesContext, facesContext.getViewRoot());
 
-		componentTreeConstructionDoneMs = System.currentTimeMillis();
-		
-		verifyExpressionsIn(viewRoot);
-		return new HashSet<String>(expressionsFound);
+		printExpressionsIn(viewRoot);
+
+		return facelet;
+	}
+
+	/**
+	 * RENDER THE PAGES TO HTML *has not been tried out*
+	 *
+	 * TBD: Provide our custom writer to save the pages.
+	 *
+	 * @see org.apache.myfaces.view.facelets.FaceletViewHandler#renderView(javax.faces.context.FacesContext, javax.faces.component.UIViewRoot)
+	 */
+	public void renderToHtml(UIViewRoot viewRoot) throws IOException {
+		// TBD Copy setup code from FaceletViewHandler#renderView
+		viewRoot.encodeAll(facesContext);
+	}
+
+	private FaceletFactory initializeFactory(Compiler c) {
+		try {
+			return new DefaultFaceletFactory(c, new FilesystemResolver(viewsRootFolder));
+		} catch (IOException e) {
+			throw new RuntimeException("FaceletFactory init failed", e);
+		}
 	}
 
 	// #################################################################
 
-	private void verifyExpressionsIn(UIComponent viewRoot) {
+	private void printExpressionsIn(UIComponent viewRoot) {
 		printComponent(viewRoot, "");
 	}
 
@@ -291,7 +299,7 @@ public class ExperimentalFaceletsElFinder {
 						// Value expr. is e.g. UIInput's value (whose value would be null now)
 						if (valueExpression != null) {
 							attributes.put(attrName, valueExpression.getExpressionString() + "/VE");
-							expressionsFound.addAll(extractEl(valueExpression.getExpressionString()));
+							System.out.println(extractEl(valueExpression.getExpressionString()));
 						} else {
 							final Object v = m.invoke(component, (Object[]) null);
 							if (v != null) {
@@ -303,15 +311,15 @@ public class ExperimentalFaceletsElFinder {
 									String type = (v instanceof MethodExpression)? "ME"
 											: (v instanceof ValueExpression)? "VE2" : v.getClass().getSimpleName();
 									str = ((Expression) v).getExpressionString();
-									expressionsFound.addAll(extractEl(str));
+									System.out.println(extractEl(str));
 									str += "/" + type;
 								} else if (v instanceof javax.faces.el.ValueBinding) {
 									str = ((javax.faces.el.ValueBinding) v).getExpressionString();
-									expressionsFound.addAll(extractEl(str));
+									System.out.println(extractEl(str));
 									str += "/VB";
 								} else if (v instanceof javax.faces.el.MethodBinding) {
 									str = ((javax.faces.el.MethodBinding) v).getExpressionString();
-									expressionsFound.addAll(extractEl(str));
+									System.out.println(extractEl(str));
 									str += "/MB";
 								} else {
 									str = null; //*/v.toString();
@@ -357,74 +365,5 @@ public class ExperimentalFaceletsElFinder {
 			));
 		}
 		return result;
-	}
-
-	private FaceletHandler parseFaceletsViewFile(File view, Compiler compiler) {
-		try {
-			return compiler.compile(view.toURI().toURL(), "jhDummyAlias");
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to parse XHTML " + view.getAbsolutePath(), e);
-		}
-	}
-
-	private Compiler createCompiler() {
-		Compiler compiler = new JhSAXCompiler();
-
-		// From org.apache.myfaces.view.facelets.FaceletViewDeclarationLanguage.createCompiler()
-        compiler.addTagLibrary(new CoreLibrary());
-        compiler.addTagLibrary(new HtmlLibrary());
-        compiler.addTagLibrary(new UILibrary());
-        compiler.addTagLibrary(new JstlCoreLibrary());
-        compiler.addTagLibrary(new JstlFnLibrary());
-        compiler.addTagLibrary(new CompositeLibrary());
-        compiler.addTagLibrary(new CompositeResourceLibrary());
-
-		try {
-			URL taglibUrl = new File("src/main/webapp/WEB-INF/jsfelcheck.taglib.xml").toURI().toURL();
-			TagLibrary tagLib = TagLibraryConfig.create(taglibUrl);
-			compiler.addTagLibrary(tagLib);
-		} catch (IOException e) {
-			throw new RuntimeException("Taglib parsing failed", e);
-		}
-
-		RuntimeConfig runtimeConfig = RuntimeConfig.getCurrentInstance(externalContextMock);
-		compiler.setFaceletsProcessingConfigurations(
-				runtimeConfig.getFaceletProcessingConfigurations());
-
-		return compiler;
-	}
-
-	private FaceletFactory initializeFactory(Compiler c) {
-		try {
-			return new DefaultFaceletFactory(c, new FilesystemResolver(viewsRootFolder));
-		} catch (IOException e) {
-			throw new RuntimeException("FaceletFactory init failed", e);
-		}
-	}
-
-	private static class FilesystemResolver extends ResourceResolver {
-
-		private final File viewsRootFolder;
-
-		public FilesystemResolver(File viewsRootFolder) {
-			this.viewsRootFolder = viewsRootFolder;
-		}
-
-		@Override
-		public URL resolveUrl(String path) {
-			try {
-				if ("/".equals(path)) {
-					// Called to determine the base url to later remove it from
-					// page URLs to get short aliases
-					return viewsRootFolder.toURI().toURL();
-				} else {
-					// Path is what we pass into the Facelet factory
-					// E.g. p=/Users/jholy/.../webapp/helloWorld.xhtml
-					return new File(viewsRootFolder, path).toURI().toURL();
-				}
-			} catch (Exception e) {
-				throw new RuntimeException("Failed to resolve " + path, e);
-			}
-		}
 	}
 }

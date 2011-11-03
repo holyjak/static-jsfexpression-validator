@@ -33,6 +33,7 @@ import javax.el.PropertyNotWritableException;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.MockingPropertyResolver.PropertyTypeResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.PredefinedVariableResolver;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.GenericElEvaluationException;
 
 /**
  * Adapt {@link MockingPropertyResolver} and {@link PredefinedVariableResolver} to behave as a single JSF 1.2
@@ -153,7 +154,14 @@ public class ValidatingFakeValueResolver extends ELResolver implements PropertyT
 
     /** {@inheritDoc} */
     public Class<?> getType(Object target, Object property) {
-        return allResolver.getType(currentContext, target, property);
+	    try {
+		    return allResolver.getType(currentContext, target, property);
+	    } catch (PropertyNotFoundException e) {
+		    throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.PropertyNotFoundException(e);
+	    } catch (ELException e) {
+		    throw new GenericElEvaluationException(e.getMessage(), e);
+	    }
+
     }
 
     MockingPropertyResolver getPropertyResolver() {

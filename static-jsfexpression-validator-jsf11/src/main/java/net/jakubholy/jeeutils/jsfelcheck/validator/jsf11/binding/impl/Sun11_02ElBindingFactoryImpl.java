@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.validator.jsf11.binding.impl;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.application.Application;
@@ -64,8 +65,8 @@ public class Sun11_02ElBindingFactoryImpl implements ElBindingFactory { // SUPPR
             throw new NullPointerException(message + " ref " + null);
         }
         if (!(Util.isVBExpression(ref))) {
-            log.severe(" Expression " + ref
-                    + " does not follow the JSF EL syntax ");
+            log.log(Level.SEVERE, " Expression '" + ref
+		            + "' does not follow the JSF EL syntax", new IllegalArgumentException());
             throw new ReferenceSyntaxException(ref);
         }
 

@@ -24,6 +24,8 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.JsfElValidator;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidatingElResolver;
 import net.jakubholy.jeeutils.jsfelcheck.validator.ValidationResultHelper;
 import net.jakubholy.jeeutils.jsfelcheck.validator.exception.BaseEvaluationException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.exception.InvalidExpressionException;
+import net.jakubholy.jeeutils.jsfelcheck.validator.results.FailedValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationResult;
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 import org.apache.myfaces.el.unified.FacesELContext;
@@ -38,12 +40,19 @@ import javax.el.ExpressionFactory;
 import javax.el.ListELResolver;
 import javax.el.MapELResolver;
 import javax.el.MethodExpression;
+import javax.el.MethodNotFoundException;
+import javax.el.PropertyNotFoundException;
 import javax.el.ResourceBundleELResolver;
 import javax.el.ValueExpression;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.mockito.Mockito.*;
 
@@ -54,8 +63,17 @@ import static org.mockito.Mockito.*;
  */
 public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
+	private static final Logger LOG = Logger.getLogger(Jsf12ValidatingElResolver.class.getName());
+
     private static final Class<?>[] NO_PARAMS = new Class<?>[0];
-    private final MethodFakingFunctionMapper functionMapper = new MethodFakingFunctionMapper();
+
+	/**
+	 * Matches the last property in an EL expression
+	 * (i.e. a valid java identifier preceeded by '.' and followed by [optional space and] the closing '}'.
+	 */
+	public static final Pattern RE_LAST_EL_PROPERTY = Pattern.compile("\\.(?!\\d)((?:\\p{L}|[0-9_$])+)\\s*\\}");
+
+	private final MethodFakingFunctionMapper functionMapper = new MethodFakingFunctionMapper();
     private ValidatingFakeValueResolver validatingResolver;
     private ExpressionFactory expressionFactory;
     private FacesContext context;
@@ -102,25 +120,48 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 	@Override
 	/** {@inheritDoc} */
 	public ValidationResult validateElExpression(String elExpression, AttributeInfo attributeInfo) {
-		if (javax.el.MethodExpression.class.isAssignableFrom(attributeInfo.getAttributeType())) {
-			return validateMethodElExpression(elExpression);
+
+		boolean attributeTypedAsMethod = MethodExpression.class.isAssignableFrom(attributeInfo.getAttributeType());
+		boolean attributeTypedAsValue = ValueExpression.class.isAssignableFrom(attributeInfo.getAttributeType());
+
+		if (attributeTypedAsMethod) {
+			return validateMethodElExpression(elExpression, true);
+		} else if (attributeTypedAsValue) {
+			return validateValueElExpression(elExpression);
 		} else {
-			// No autodetection of value x method for Facelets => try both
+			/* EXPRESSION TYPE NOT SPECIFIED (=> FACELETS), TRY BOTH */
 			ValidationResult validationResult = validateValueElExpression(elExpression);
-			if (validationResult.hasErrors()) {
-				return tryValidateAsMethod(elExpression, validationResult);
+
+			if (isPropertyNotFoundFailure(validationResult)) {
+				return tryValidateAsMethodAfterValueFailed(elExpression, validationResult);
+			} else {
+				return validationResult;
 			}
-			return validationResult;
 		}
 	}
 
-	private ValidationResult tryValidateAsMethod(String elExpression, ValidationResult validationResult) {
+	private boolean isPropertyNotFoundFailure(ValidationResult validationResult) {
+		if (validationResult instanceof FailedValidationResult) {
+			InvalidExpressionException failure = ((FailedValidationResult) validationResult).getFailure();
+			return (failure.getCause() != null) && (failure.getCause() instanceof net.jakubholy.jeeutils.jsfelcheck.validator.exception.PropertyNotFoundException);
+		} else {
+			return false;
+		}
+	}
+
+	/** Return either {@link #validateMethodElExpression} if successful or the original result. */
+	private ValidationResult tryValidateAsMethodAfterValueFailed(String elExpression, ValidationResult validationResult) {
+		String methodValidationFailure = null;
 		try {
-			ValidationResult methodResult = validateMethodElExpression(elExpression);
+			ValidationResult methodResult = validateMethodElExpression(elExpression, false);
 			if (!methodResult.hasErrors()) {
 				return methodResult;
 			}
+			methodValidationFailure = methodResult.toString();
 		} catch (RuntimeException e) {}
+
+		LOG.info("tryValidateAsMethodAfterValueFailed: '" + elExpression + "' is neither valid ValueExpression nor "
+			+ "MethodExpression. Method validation failure: " + methodValidationFailure);
 
 		return validationResult;
 	}
@@ -144,11 +185,12 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     }
 
-    private ValidationResult validateMethodElExpression(String elExpression) {
+    private ValidationResult validateMethodElExpression(String elExpression, boolean ignoreAssertFailure) {
         functionMapper.setCurrentExpression(elExpression);      // most likely absolutely unnecessary
         try {
             final MethodExpression methodExpression = expressionFactory.createMethodExpression(
                     elContext, elExpression, Object.class, NO_PARAMS);
+	        assertMethodExists(elExpression, ignoreAssertFailure);
             return new SuccessfulValidationResult(elExpression, methodExpression)
                     .withFunctionsInExpression(functionMapper.getLastExpressionsFunctionQNames());
         } catch (ELException e) {
@@ -161,7 +203,78 @@ public class Jsf12ValidatingElResolver implements ValidatingElResolver {
 
     }
 
-    /** {@inheritDoc} */
+	/**
+	 * Assert that the method actually exists.
+	 * We cannot use {@link MethodExpression#getMethodInfo(javax.el.ELContext)}
+	 * to verify the method because it also checks that the method has the same parameters
+	 * as supplied to the MethodExpression's constructor constructor, which
+	 * won't work for us for we always pretend that there are no arguments.
+	 * (Because, in most cases, there is no way for us to find out the actual expected arguments.)
+	 * Thus this method only checks the target method name and not its arguments.
+	 */
+	private void assertMethodExists(String methodExpression, boolean ignoreAssertFailure)
+			throws PropertyNotFoundException, MethodNotFoundException, ELException {
+		try {
+			tryAssertMethodExists(methodExpression);
+		} catch (net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException e) {
+			throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException(e);
+		} catch (RuntimeException e) {
+			if (ignoreAssertFailure) {
+				LOG.log(Level.WARNING, "assertMethodExists: Method validation for " + methodExpression
+					+ " failed but we assume that it is rather due to a bug in our experimental, hacked verification "
+					+ " code. Please open an issue at "
+					+ "https://github.com/jakubholynet/static-jsfexpression-validator/issues Failure: " + e);
+			} else {
+				throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException(e);
+			}
+		} // other exceptions just propagated
+
+	}
+
+	/**
+	 * Take an expression like #{bean.property.method},
+	 * get the value and thus class of #{bean.property}
+	 * and verify that the class has a public method named 'method'.
+	 * @param elExpression (required)
+	 */
+	void tryAssertMethodExists(String elExpression) {
+
+		String[] targetObjectElAndMethod = splitAtLastProperty(elExpression);
+		String targetObjectEl = targetObjectElAndMethod[0];
+		String methodName = targetObjectElAndMethod[1];
+
+		ValueExpression targetObjectValueExpr = expressionFactory.createValueExpression(
+				elContext, targetObjectEl, Object.class);
+		final Class<? extends Object> targetClass = targetObjectValueExpr.getValue(elContext).getClass();
+
+		final Method[] methods = targetClass.getMethods();
+		for (Method method : methods) {
+			if (method.getName().equals(methodName)) {
+				return;
+			}
+		}
+
+		throw new net.jakubholy.jeeutils.jsfelcheck.validator.exception.MethodNotFoundException(
+				"No method '" + methodName + "' found in the target object's " + targetClass);
+
+	}
+
+	protected static String[] splitAtLastProperty(String elExpression) {
+		final Matcher matcher = RE_LAST_EL_PROPERTY.matcher(elExpression);
+		if (matcher.find()) {
+			final int matchGroup = 1;
+			final int propertyNameWithDotStart = matcher.start(matchGroup) - 1;
+
+			String lastProperty = matcher.group(matchGroup);
+			String elWithoutLastProperty = elExpression.substring(0, propertyNameWithDotStart) + "}";
+			return new String[] {elWithoutLastProperty, lastProperty};
+		} else {
+			throw new IllegalArgumentException("Couldn't find a trailing property name in the EL '" + elExpression
+					+ "' using " + matcher);
+		}
+	}
+
+	/** {@inheritDoc} */
     public JsfElValidator declareVariable(String name, Object value) {
         validatingResolver.getVariableResolver().declareVariable(name, value);
         return this;

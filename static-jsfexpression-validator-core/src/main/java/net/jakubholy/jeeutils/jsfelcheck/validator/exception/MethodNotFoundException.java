@@ -18,20 +18,18 @@
 package net.jakubholy.jeeutils.jsfelcheck.validator.exception;
 
 /**
- * Exception during JSF EL evaluation.
+ * The method used in a method expression (binding) doesn't exist on the target bean.
  */
-@SuppressWarnings("serial")
-public class BaseEvaluationException extends RuntimeException {
+public class MethodNotFoundException extends BaseEvaluationException {
 
     /**
-     * Constructor.
-     * @param message (required) the problem
+     * See {@link BaseEvaluationException#BaseEvaluationException(String)}.
      */
-    public BaseEvaluationException(String message) {
-        super(message);
+    public MethodNotFoundException(Throwable cause) {
+        super(cause.getMessage(), cause);
     }
 
-	public BaseEvaluationException(String message, Throwable throwable) {
-		super(message, throwable);
+	public MethodNotFoundException(String message) {
+		super(message);
 	}
 }
