@@ -22,14 +22,14 @@
     <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
     <artifactId>test-webapp-jsf20-facelets_owb</artifactId>
     <packaging>war</packaging>
-    <version>0.9.8-SNAPSHOT</version>
+    <version>0.9.7-SNAPSHOT</version>
     <name>Test JSF 2.0 webapp using Facelets and MyFaces 2.0 and CDI with OpenWebBeans</name>
     <description>Exemplifies JSF 2.0 which should be supported by the JSF EL validator for JSF 2.0 (using facelets)</description>
 
     <parent>
         <artifactId>jsfelcheck-parent</artifactId>
         <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-        <version>0.9.8-SNAPSHOT</version>
+        <version>0.9.7-SNAPSHOT</version>
     </parent>
 
     <dependencies>
