@@ -1,15 +1,14 @@
 Static JSF EL Expression Validator
 ==================================
 
-Perform analysis of JSF 1.1/1.2/2.x JSP files and validate that
+Perform analysis of JSF 1.1/1.2/2.x JSP or Facelets files and validate that
 all EL expressions reference only existing managed beans and their
 properties/action methods.
 
 USAGE
 -----
 
-See the main class [net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java#L140)
-and perhaps try to run it from the command line (it prints usage info).
+See the main class [net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java) (To actually instantiate it you need one of the JSF version specific subclasses, see e.g. static-jsfexpression-validator-jsf20 (JSF 2.0+). You can try to run it from the command line (it prints the usage info).
 
 DOWNLOADS
 ---------
@@ -26,13 +25,16 @@ MORE INFO
 See detailed description of how to use the tool at [the blog post validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator]
 (http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/)
 
+You can also check the test webapps to see how the validator is used, epsecially test-webapp-jsf12 and test-webapp-jsf20-facelets_owb.
+
 CURRENT LIMITATIONS
 -------------------
 
 - JSF 1.1 implementation distinguishes between value and method bindings only based on the attribute name
     (methods: action, actionListener, validator, valueChangeListener) and thus won't recongize other method bindings
-- The signature of methods used in a MethodBinding isn't checked (i.e. whether an action method is "String name()" etc.)
+- The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments, the only thing checked is that a public method of the name exists))
 - Functions are not checked for existence and correct signature
+- Facelets support is now only experimental, see TODO below for what remains to be done
 
 ---
 
@@ -203,13 +205,14 @@ NOTES
 
 ### Version 0.9.8
 
-- Fix: Do actually check EL for a method binding (before the check succeeded even if the method didn't exist)
-    (however we check only the name of the method, not the type and number of parameters)
-- New: Support for Facelets (stil somehow limited)
+UNDER DEVELOPMENT ...
 
 ### Version 0.9.7
 
-- Autodetection of method bindingin JSF 1.2+ (based on the tag attribute's type being javax.el.MethodExpression; before we decided what it it just based on the attribute name)
+- Fix: Do actually check EL for a method binding (before the check succeeded even if the method didn't exist)
+    (however we check only the name of the method, not the type and number of parameters)
+- New: Support for Facelets (stil somehow limited)
+- Autodetection of method binding in JSP-based JSF 1.2+ (based on the tag attribute's type being javax.el.MethodExpression; before we decided what it is just based on the attribute name)
 - Report all functions found (for they are not really validated); see net.jakubholy.jeeutils.jsfelcheck.ResultsReporter.printWarningAboutUncheckedFunctions
 
 ### Version 0.9.6
