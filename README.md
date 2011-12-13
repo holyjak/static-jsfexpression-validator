@@ -45,6 +45,10 @@ Note: Problems testing directly in -jsfXX: Faces init fails for it searches for 
 
 Facelets parsing
 - Check non-detected ELs in net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.ValidateAllExpressionsInFaceletsTest
+    1. Currently we do not process referenced pages such as templates, custom tags and composites; we likely should do it for we want to check that we're supplying valid parameters
+    (or do we trust the developer that he is sending an object of the right type?)
+    2. Also we do not process tags that produce local variables, namely ui:param, c:set, tag attribbutes (undeclared)
+    , composite attributes (expected via composite:attribute) + any custom tags by the user/a library.
 - add Facelets local var declaring tags (ui:repeat, st. else?)
 - ???{isn't heuristics enoug now} teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
 - enable filtering of views to process at least as done for JSPs now

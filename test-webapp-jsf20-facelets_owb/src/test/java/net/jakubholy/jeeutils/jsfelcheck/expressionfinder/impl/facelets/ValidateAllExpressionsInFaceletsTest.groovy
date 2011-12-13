@@ -37,18 +37,21 @@ class ValidateAllExpressionsInFaceletsTest {
 
     def private static allExpectedEls() {
         def allMapKeys = MyActionBean
-            .allMapKeys() - ["valueForCustomTag", "valueForComposite"]
+            .allMapKeys() - ["valueForCustomTag", "valueForComposite", "trickyExprKey}"]
         allMapKeys = allMapKeys.collect { "myActionBean.map.$it" }
+
+        allMapKeys.add('myActionBean.map["trickyExprKey}"]')
+
         def beanPropsAndMethods = ["doAction"
                 , "doActionListening", "doValueChangeListening"
                 , "doValidating", "value", "books"
                 , "converter", "validator", "actionsInvokedSummary"
                 , "paramFromTemplatedPage", "paramFromIncludingPage"
-                , "myTagAttribute.map.valueForCustomTag"
-                , "cc.attrs.compositeAttributeValueBean.map.valueForComposite"
                 , "derivedVar"
             ].collect { "myActionBean.$it" }
-        def localVars = ["book.name"]
+        def localVars = ["book.name"
+                , "cc.attrs.compositeAttributeValueBean.map.valueForComposite"
+                , "myTagAttribute.map.valueForCustomTag"]
         def selfmapKeys = MyActionBean.allSelfmapKeys().collect { "myActionBean.selfmap.$it" }
         return allMapKeys + selfmapKeys + beanPropsAndMethods + localVars
     }
@@ -72,18 +75,25 @@ class ValidateAllExpressionsInFaceletsTest {
 
     /**
      * EXPRESSIONS CURRENTLY NOT DETECTED:
+     * <p>
+     *     <b>Problem summary:</b>
+     *     Referenced pages (layout, tags, components) are not automatically loaded and thus they won't be checked.
+     *     (What do we want? Do we want to check the same component/tag multiple times?? Likely not but still we'd
+     *     like to check that we pass the right parameters into it, which cannot be done in any other way.)
+     *     Additionally, the validation would fail anyway for we don't define yet local variables based on the
+     *     ui:param, c:set, tag attribbutes (undeclared), composite attributes (expected via composite:attribute).
+     * </p>
      * <pre>
-     *    myActionBean.map.trickyExprKey}           - actually found but as: myActionBean.map["trickyExprKey}"]
-     *    myActionBean.map.varFromIncludingPage
-     *    myActionBean.value
-     *    myActionBean.paramFromTemplatedPage
-     *    myActionBean.paramFromIncludingPage
-     *    myActionBean.myTagAttribute.map.valueForCustomTag
-     *    myActionBean.cc.attrs.compositeAttributeValueBean.map.valueForComposite
-     *    myActionBean.derivedVar
+     *    myActionBean.map.varFromIncludingPage                                     - varFromIncludingPage
+     *    myActionBean.value                                                        - commonHeader.xhtml, layout.xhtml
+     *    myActionBean.paramFromTemplatedPage                                       - commonHeader.xhtml, layout.xhtml
+     *    myActionBean.paramFromIncludingPage                                       - commonHeader.xhtml
+     *    myTagAttribute.map.valueForCustomTag                                      - customTag.xhtml; tag attribute; doesn't parsed referenced files automatically
+     *    cc.attrs.compositeAttributeValueBean.map.valueForComposite                - at customComposite.xhtml; composite:attribute; doesn't parsed referenced files automatically
+     *    myActionBean.derivedVar                                                   - set via c:set at customComposite.xhtml; doesn't parsed referenced files automatically
      * </pre>
      */
-    @Ignore("Not integrated yet with the rest of the app")
+    @Ignore("Fails because our Facelets integration isn't yet capable of detecting all the ELs")
     @Test
     public void compile_and_listen_for_compiler_events() throws Exception {
         parser.validateExpressionsInView(toUrl("faceletsParsingFullTest.xhtml"), "/faceletsParsingFullTest.xhtml")
