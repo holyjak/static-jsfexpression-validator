@@ -77,7 +77,12 @@ public class ValidatingFaceletsParserExecutor {
 
 	@SuppressWarnings("unchecked")
 	private Collection<File> findTaglibFiles() {
-		Collection taglibs = FileUtils.listFiles(new File(webappRoot, "WEB-INF"), new String[]{"taglib.xml"}, true);
+		File webInfDir = new File(webappRoot, "WEB-INF");
+		if (!webInfDir.isDirectory()) {
+			throw new IllegalArgumentException("The provided path seems not to be a web application root " +
+					"folder - there is no " + webInfDir);
+		}
+		Collection taglibs = FileUtils.listFiles(webInfDir, new String[]{"taglib.xml"}, true);
 		LOG.info("Local taglibs found under webroot/WEB-INF: " + taglibs);
 		return taglibs;
     }

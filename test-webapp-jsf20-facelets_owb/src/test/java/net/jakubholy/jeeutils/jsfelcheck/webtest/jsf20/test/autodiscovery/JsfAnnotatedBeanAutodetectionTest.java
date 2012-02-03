@@ -15,52 +15,58 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20;
+package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
-import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.MyActionBean;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.reflections.Reflections;
 
+import javax.inject.Named;
 import java.awt.print.Book;
 import java.io.File;
+import java.util.Collection;
+import java.util.Set;
 
 import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.declareLocalVariable;
 import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.forExtraVariables;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Check EL expressions that are supposed to be  validated successfully.
+ * Verify that the JSF EL validator can auto-detect annotated managed beans used in pages.
  */
-public class JsfElExpressionValidityTest {
+public class JsfAnnotatedBeanAutodetectionTest {
 
-	@Ignore("not yet implemented")
-    @Test
-    public void verify_all_el_expressions_valid() throws Exception {
+	@Ignore("until autodiscovery fully implemented")
+	@Test
+	public void allEjExpressionWithAnnotatedBeansShouldPass() throws Exception {
 
-        JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
+	    JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
 
-        jsfStaticAnalyzer.withLocalVariablesConfiguration(
-		        declareLocalVariable("shop.books", Book.class)
-				        //.withCustomDataTableTagAlias("t:dataTable"))
-				        )
-                .withManagedBeansAndVariablesConfiguration(
-		                forExtraVariables()
-                        //fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml"))
-                            .withExtraVariable("myActionBean", MyActionBean.class))
-                ;
+		Collection autodetectedBeans = detectAnnotatedBeans();
+		jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
+				forExtraVariables().withExtraVariable("temporary", Object.class));
 
-        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp"));
+		File webappRoot = new File("src/main/webapp");
+        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
+		        webappRoot,
+		        new File(webappRoot, "tests/autodiscovery"));
 
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
-                + results.failures()
-                , 0, results.failures().size());
+		        + results.failures()
+		        , 0, results.failures().size());
+	}
 
-    }
+	private Collection detectAnnotatedBeans() {
+		// TODO Use http://code.google.com/p/reflections/
+		Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery");
+		Set<Class<?>> beanClasses = reflections.getTypesAnnotatedWith(Named.class);
+		return null;  //To change body of created methods use File | Settings | File Templates.
+	}
 
-    private JsfStaticAnalyzer createConfiguredAnalyzer() {
+	private JsfStaticAnalyzer createConfiguredAnalyzer() {
         JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forFacelets();
         jsfStaticAnalyzer.setPrintCorrectExpressions(false);
         return jsfStaticAnalyzer;

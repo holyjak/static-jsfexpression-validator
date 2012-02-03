@@ -41,14 +41,25 @@ CURRENT LIMITATIONS
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
++++
+**Possible tasks for release 1.0**:
+- Document how to use the annotated bean detector
+- Autom. extract local variable(s) from ui:repeat
+- Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
+- When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
+- Add support for declaring custom taglibs?
++++
+
 Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
 
 Facelets parsing
 - Check non-detected ELs in net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.ValidateAllExpressionsInFaceletsTest
     1. Currently we do not process referenced pages such as templates, custom tags and composites; we likely should do it for we want to check that we're supplying valid parameters
-    (or do we trust the developer that he is sending an object of the right type?)
-    2. Also we do not process tags that produce local variables, namely ui:param, c:set, tag attribbutes (undeclared)
-    , composite attributes (expected via composite:attribute) + any custom tags by the user/a library.
+    (or do we trust the developer that she is sending an object of the right type?)
+    2. Also we do not process tags that produce local variables, namely ui:param, c:set,
+        composite attributes (expected via composite:attribute) + tag attributes (undeclared) and any custom tags (ex: my:set) by the user or a library
+        (same problem as with JSP; the user should have the possibility to register custom TagJsfVariableResolver for such tags).
+        (I'd actually wouldn't mind ignoring c:set as mixing build-time and runtime components is generally a bad practice)
 - add Facelets local var declaring tags (ui:repeat, st. else?)
 - ???{isn't heuristics enoug now} teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
 - enable filtering of views to process at least as done for JSPs now

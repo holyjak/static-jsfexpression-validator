@@ -29,7 +29,7 @@ import org.junit.BeforeClass
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.pagenodes.PageNode
 
-// TODO Move this pages to static-jsfexpression-validator-jsf20 and make it running there (incl. custom component under resources/)
+// TODO Move these pages to static-jsfexpression-validator-jsf20 and make it running there (incl. custom component under resources/)
 // see org.apache.myfaces.view.facelets.compiler.NotifyingCompilationManagerTest
 class ValidateAllExpressionsInFaceletsTest {
 

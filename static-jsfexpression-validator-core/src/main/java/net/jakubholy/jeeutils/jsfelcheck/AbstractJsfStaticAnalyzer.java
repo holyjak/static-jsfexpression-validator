@@ -131,6 +131,21 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     /** Create the JSF-implementation specific valiator to use. */
     protected abstract ValidatingElResolver createValidatingElResolver();
 
+	/**
+     * Check expressions in all JSP files under the viewFilesRoot and print the failed (or all) ones
+     * to System out.
+     * <p>
+	 *     This is as calling {@link #validateElExpressions(java.io.File, java.io.File)} with both arguments same.
+     * </p>
+     *
+     * @param viewFilesRoot
+     *            (required) where to search for JSP pages
+     * @return results of the validation (never null)
+     * @throws Exception
+     */
+    public CollectedValidationResults validateElExpressions(File viewFilesRoot) {
+		return validateElExpressions(viewFilesRoot, viewFilesRoot);
+	}
 
     /**
      * Check expressions in all JSP files under the viewFilesRoot and print the failed (or all) ones
@@ -140,14 +155,18 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
      * but the first element. Example:
      * #{variable.propert1.property2['some.key']}
      *
+     * @param webappRoot
+     *            (required) the root directory of the web application (containing WEB-INF) - used e.g. to search for local tag libraries
      * @param viewFilesRoot
      *            (required) where to search for JSP pages
      * @return results of the validation (never null)
      * @throws Exception
      */
-    public CollectedValidationResults validateElExpressions(File viewFilesRoot) {
+    public CollectedValidationResults validateElExpressions(File webappRoot, File viewFilesRoot) {
 
-        assertJspDirValid(viewFilesRoot);
+        assertJspDirValid(webappRoot, "webappRoot (webapp root directory, containing WEB-INF)");
+	    //assertJspDirValid(new File(webappRoot, "WEB-INF)"), "WEB-INF (under the provided webappRoot directory)");
+	    assertJspDirValid(viewFilesRoot, "viewFilesRoot (path of the directory with JSP files)");
 
         LOG.info("validateElExpressions: entry for JSP root " + viewFilesRoot);
 
@@ -167,7 +186,6 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 				throw new RuntimeException("Jasper failed to parse your JSP files", e);
 			}
 	    } else {
-		    final File webappRoot = viewFilesRoot;
 		    JsfElValidatingFaceletsParser faceletsParser = createValidatingFaceletsParser(webappRoot, pageNodeValidator);
 		    new ValidatingFaceletsParserExecutor(viewFilesRoot, webappRoot, faceletsParser).execute();
 	    }
@@ -225,17 +243,18 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
                 .fakeValueOfType(HttpServletRequest.class, "request"));
     }
 
-    private void assertJspDirValid(File viewFilesRoot) throws IllegalArgumentException {
-        if (viewFilesRoot == null) {
-            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) may not be null");
+    private void assertJspDirValid(File directory, String dirDescription) throws IllegalArgumentException {
+        if (directory == null) {
+            throw new IllegalArgumentException(dirDescription + " may not be null");
         }
 
-        if (!viewFilesRoot.isDirectory()) {
-            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) is not a directory! "
-                    + "Path: " + viewFilesRoot + " (absolute: " + viewFilesRoot.getAbsolutePath() + ")");
-        } else if (!viewFilesRoot.canRead()) {
-            throw new IllegalArgumentException("viewFilesRoot (path of the directory with JSP files) is not readable! "
-                    + "Path: " + viewFilesRoot + " (absolute: " + viewFilesRoot.getAbsolutePath() + ")");
+	    final String pathMsg = " Path: " + directory + " (absolute: " + directory.getAbsolutePath() + ")";
+        if (!directory.exists()) {
+	        throw new IllegalArgumentException(dirDescription + " does not exist!" + pathMsg);
+        } else if (!directory.isDirectory()) {
+            throw new IllegalArgumentException(dirDescription + " is not a directory!" + pathMsg);
+        } else if (!directory.canRead()) {
+            throw new IllegalArgumentException(dirDescription + " is not readable!" + pathMsg);
         }
     }
 
