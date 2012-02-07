@@ -115,6 +115,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <!-- For annotated managed bean finder -->
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
+
 	</dependencies>
 
 </project>

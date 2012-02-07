@@ -17,6 +17,7 @@
 
 package net.jakubholy.jeeutils.jsfelcheck.config;
 
+import net.jakubholy.jeeutils.jsfelcheck.beanfinder.AnnotatedClasspathBeanFinder;
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource;
 import net.jakubholy.jeeutils.jsfelcheck.validator.FakeValueFactory;
 
@@ -52,6 +53,8 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
  * }
  */
 public class ManagedBeansAndVariablesConfiguration {
+
+	private AnnotatedClasspathBeanFinder annotatedBeanFinder = null;
 
 	private enum Type {SPRING, FACES}
 
@@ -271,7 +274,35 @@ public class ManagedBeansAndVariablesConfiguration {
         return Collections.unmodifiableMap(extraVariables);
     }
 
+	/**
+	 * internal use only
+	 */
+	public Map<String, Object> getAnnotatedBeansFound() {
+		// TODO Convert classes to instances
+		Map<String, Class<?>> annotatedBeans = Collections.emptyMap();
+		if (annotatedBeanFinder != null) {
+			annotatedBeans = annotatedBeanFinder.detect();
+		}
+		return fakeValues(annotatedBeans);
+	}
+
+	private Map<String, Object> fakeValues(Map<String, Class<?>> namedBeanTypes) {
+		Map<String, Object> namedBeanFakes = new Hashtable<String, Object>();
+		for (Map.Entry<String, Class<?>> namedBean : namedBeanTypes.entrySet()) {
+			Object fakeValue = FakeValueFactory.fakeValueOfType(namedBean.getValue(), namedBean.getKey());
+			namedBeanFakes.put(namedBean.getKey(), fakeValue);
+		}
+		return namedBeanFakes;
+	}
+
     private static Collection<File> toListNullSafe(File[] springConfigFiles) {
         return (springConfigFiles == null)? null : Arrays.asList(springConfigFiles);
     }
+
+	/**
+	 * internal use only
+	 */
+	public void setAnnotatedBeanFinder(AnnotatedClasspathBeanFinder annotatedBeanFinder) {
+		this.annotatedBeanFinder = annotatedBeanFinder;
+	}
 }

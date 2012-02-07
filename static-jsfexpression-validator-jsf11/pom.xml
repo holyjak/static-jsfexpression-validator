@@ -38,6 +38,12 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>static-jsfexpression-validator-core</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.reflections</groupId>
+					<artifactId>reflections</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
         <dependency>
