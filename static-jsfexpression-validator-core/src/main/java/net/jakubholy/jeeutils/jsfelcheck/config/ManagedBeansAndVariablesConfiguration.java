@@ -45,7 +45,7 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
  * <h3>Usage example</h3>
  * {@code
  * import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.*;
- * <p/>
+ * 
  * fromFacesConfigFiles("myBean.collectionProperty", String.class)
  * .andFromSpringConfigFiles("myBean.anotherArray", MyArrayElement.class)
  * .withExtraVariable("name", MyType.class)
@@ -197,21 +197,33 @@ public class ManagedBeansAndVariablesConfiguration {
         return Collections.unmodifiableCollection(resourcesMap.get(Type.SPRING));
     }
 
-    // ------------------------------------------------------------------------------------------------- Private
+	// ------------------------------------------------------------------------------------------------- Annotated
 
+	/**
+	 * Search for annotated beans in the given packages and subpackages.
+	 * Used to automatically detect managed beans that are not in faces-config.xml but are instead
+	 * marked with an annotation such as {@link javax.faces.bean.ManagedBean}.
+	 *
+	 * <h3>Example</h3>
+	 * <code><pre>{@code
+	 *  ManagedBeansAndVariablesConfiguration
+	 *      .fromClassesInPackages("your.package.with.annotated.managed.beans")
+	 *      .annotatedWith(ManagedBean.class, "value")    // the annotation and method holding optionally the bean name
+	 *      .config()
+	 * }</pre></code>
+	 *
+	 * @param packageNames (required) usually the root package(s) of your application - used to limit the scope of
+	 *                     search to something manageable for performance reasons. Ex.: "net.jakubholy".
+	 * @return this
+	 */
+	public static AnnotatedClasspathBeanFinder fromClassesInPackages(String... packageNames) {
+		return new ManagedBeansAndVariablesConfiguration().andFromClassesInPackages(packageNames);
+	}
 
-    private ManagedBeansAndVariablesConfiguration withResourcesFor(Type type, Collection<InputResource> resources) {
-        Collection<InputResource> nullSafeResources;
-	    if (resources == null || resources.isEmpty()) {
-            nullSafeResources = Collections.emptyList();
-        } else {
-            nullSafeResources = resources;
-        }
+	public AnnotatedClasspathBeanFinder andFromClassesInPackages(String... packageNames) {
+		return new AnnotatedClasspathBeanFinder(this, packageNames);
+	}
 
-	    this.resourcesMap.put(type, nullSafeResources);
-
-        return this;
-    }
 
     // ------------------------------------------------------------------------------------------------- Extra variables
 
@@ -295,12 +307,30 @@ public class ManagedBeansAndVariablesConfiguration {
 		return namedBeanFakes;
 	}
 
+
+	// ------------------------------------------------------------------------------------------------- Private
+
+
+	private ManagedBeansAndVariablesConfiguration withResourcesFor(Type type, Collection<InputResource> resources) {
+		Collection<InputResource> nullSafeResources;
+		if (resources == null || resources.isEmpty()) {
+			nullSafeResources = Collections.emptyList();
+		} else {
+			nullSafeResources = resources;
+		}
+
+		this.resourcesMap.put(type, nullSafeResources);
+
+		return this;
+	}
+
     private static Collection<File> toListNullSafe(File[] springConfigFiles) {
         return (springConfigFiles == null)? null : Arrays.asList(springConfigFiles);
     }
 
 	/**
-	 * internal use only
+	 * ***internal use only***
+	 * Callback for {@link AnnotatedClasspathBeanFinder}
 	 */
 	public void setAnnotatedBeanFinder(AnnotatedClasspathBeanFinder annotatedBeanFinder) {
 		this.annotatedBeanFinder = annotatedBeanFinder;

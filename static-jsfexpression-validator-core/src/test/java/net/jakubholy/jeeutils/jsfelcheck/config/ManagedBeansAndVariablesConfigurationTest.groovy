@@ -20,6 +20,8 @@ package net.jakubholy.jeeutils.jsfelcheck.config
 import org.junit.Before
 import org.junit.Test
 import net.jakubholy.jeeutils.jsfelcheck.beanfinder.InputResource
+import javax.faces.bean.ManagedBean
+import net.jakubholy.jeeutils.jsfelcheck.config.annotated.MyAnnotatedBean
 
 class ManagedBeansAndVariablesConfigurationTest {
 
@@ -163,10 +165,16 @@ class ManagedBeansAndVariablesConfigurationTest {
 
     @Test
     public void static_fromAnnotatedBeans_should_store_them() throws Exception {
-        Collection<File> springConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
-        def stream = firstStream(ManagedBeansAndVariablesConfiguration.fromSpringConfigFiles(springConfigFiles)
-                .getSpringConfigStreams())
-        assert stream.getText() == "from text file"
+        config = ManagedBeansAndVariablesConfiguration.
+                fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.config.annotated").
+                annotatedWith(ManagedBean, "value").
+                config()
+
+        // 1 bean found:
+        assert config.getAnnotatedBeansFound().every { name, mockValue ->
+            name == "myAnnotatedBean" && mockValue instanceof MyAnnotatedBean
+        }
+
     }
 
 

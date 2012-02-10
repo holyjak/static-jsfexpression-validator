@@ -39,7 +39,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class JsfAnnotatedBeanAutodetectionTest {
 
-	@Ignore("until autodiscovery fully implemented")
+	@Ignore("until annotated fully implemented")
 	@Test
 	public void allEjExpressionWithAnnotatedBeansShouldPass() throws Exception {
 
@@ -52,7 +52,7 @@ public class JsfAnnotatedBeanAutodetectionTest {
 		File webappRoot = new File("src/main/webapp");
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
 		        webappRoot,
-		        new File(webappRoot, "tests/autodiscovery"));
+		        new File(webappRoot, "tests/annotated"));
 
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
 		        + results.failures()
@@ -61,7 +61,7 @@ public class JsfAnnotatedBeanAutodetectionTest {
 
 	private Collection detectAnnotatedBeans() {
 		// TODO Use http://code.google.com/p/reflections/
-		Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery");
+		Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated");
 		Set<Class<?>> beanClasses = reflections.getTypesAnnotatedWith(Named.class);
 		return null;  //To change body of created methods use File | Settings | File Templates.
 	}

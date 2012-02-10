@@ -105,10 +105,10 @@ public class AnnotatedBeanAutodiscoveryTest {
 	@Before
 	public void setUp() {
 		// See http://code.google.com/p/reflections/
-		//Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery");
+		//Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated");
 		//beanClasses = reflections.getTypesAnnotatedWith(Named.class);
         //beanDetector =
-        beanClasses = AnnotatedBeansDetector.fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery").
+        beanClasses = AnnotatedBeansDetector.fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated").
                 annotatedWith(Named).detect();
 	}
 
