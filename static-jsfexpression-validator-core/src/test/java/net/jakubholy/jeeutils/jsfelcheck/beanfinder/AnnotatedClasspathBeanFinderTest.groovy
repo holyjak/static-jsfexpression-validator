@@ -40,7 +40,7 @@ class AnnotatedClasspathBeanFinderTest {
     public void setUp() {
         beanClasses = AnnotatedClasspathBeanFinder.
                 fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.beanfinder.annotated").
-                annotatedWith(ValuedBeanAnnotation).
+                annotatedWith(ValuedBeanAnnotation, "value").
                 annotatedWith(ManagedBean, "name")
                 .detect();
     }

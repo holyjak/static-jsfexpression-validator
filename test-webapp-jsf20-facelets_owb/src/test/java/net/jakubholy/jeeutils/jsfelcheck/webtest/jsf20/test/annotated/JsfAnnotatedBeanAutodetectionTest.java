@@ -15,23 +15,16 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery;
+package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated;
 
 import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
-import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.MyActionBean;
-import org.junit.Ignore;
+import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
 import org.junit.Test;
-import org.reflections.Reflections;
 
 import javax.inject.Named;
-import java.awt.print.Book;
 import java.io.File;
-import java.util.Collection;
-import java.util.Set;
 
-import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.declareLocalVariable;
-import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.forExtraVariables;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -39,15 +32,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class JsfAnnotatedBeanAutodetectionTest {
 
-	@Ignore("until annotated fully implemented")
 	@Test
 	public void allEjExpressionWithAnnotatedBeansShouldPass() throws Exception {
 
 	    JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
 
-		Collection autodetectedBeans = detectAnnotatedBeans();
 		jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
-				forExtraVariables().withExtraVariable("temporary", Object.class));
+				ManagedBeansAndVariablesConfiguration
+						.fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated")
+						.annotatedWith(Named.class, "value")
+						.config());
 
 		File webappRoot = new File("src/main/webapp");
         CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
@@ -57,13 +51,6 @@ public class JsfAnnotatedBeanAutodetectionTest {
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
 		        + results.failures()
 		        , 0, results.failures().size());
-	}
-
-	private Collection detectAnnotatedBeans() {
-		// TODO Use http://code.google.com/p/reflections/
-		Reflections reflections = new Reflections("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated");
-		Set<Class<?>> beanClasses = reflections.getTypesAnnotatedWith(Named.class);
-		return null;  //To change body of created methods use File | Settings | File Templates.
 	}
 
 	private JsfStaticAnalyzer createConfiguredAnalyzer() {

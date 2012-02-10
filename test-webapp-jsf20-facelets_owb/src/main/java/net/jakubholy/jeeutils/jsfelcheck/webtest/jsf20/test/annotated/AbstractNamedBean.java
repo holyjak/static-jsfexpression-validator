@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.autodiscovery;
+package net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated;
 
-import javax.inject.Named;
+public abstract class AbstractNamedBean {
 
-@Named("javaDiNamedBean")
-public class JavaDiNamedBean extends AbstractNamedBean {
-
+	public String getName() {
+		return "Managed Bean named " + getClass().getSimpleName();
+	}
 }

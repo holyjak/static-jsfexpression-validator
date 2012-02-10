@@ -519,6 +519,10 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
             elValidator.declareVariable(extraVariable.getKey(), extraVariable.getValue());
         }
 
+	    for (Map.Entry<String, Object> annotatedBean : configuration.getAnnotatedBeansFound().entrySet()) {
+		    elValidator.declareVariable(annotatedBean.getKey(), annotatedBean.getValue());
+	    }
+
         return self;
     }
 

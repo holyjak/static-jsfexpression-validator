@@ -64,6 +64,19 @@ public class AbstractJsfStaticAnalyzerTest {
         assert recordingElValidator.extraVariables == ["var1" : v1, "var2": v2]
         // Any way to check that the files will actually be loaded?!
     }
+    
+    private class StubbedManagedBeansAndVariablesConfiguration extends ManagedBeansAndVariablesConfiguration {
+        @Override public Map<String, Object> getAnnotatedBeansFound() {
+            return ["fakeAnnotatedBean": "value_of_fakeAnnotatedBean"];
+        }
+    }
+
+    @Test
+    public void "should retrieve annotated beans from ManagedBeansAndVariablesConfiguration"() throws Exception {
+        def config = new StubbedManagedBeansAndVariablesConfiguration()
+        assert analyzer.withManagedBeansAndVariablesConfiguration(config) == analyzer
+        assert recordingElValidator.extraVariables == ["fakeAnnotatedBean" : "value_of_fakeAnnotatedBean"]
+    }
 
     @Test
     public void should_propagate_extra_variables_instance_to_resolver() throws Exception {
