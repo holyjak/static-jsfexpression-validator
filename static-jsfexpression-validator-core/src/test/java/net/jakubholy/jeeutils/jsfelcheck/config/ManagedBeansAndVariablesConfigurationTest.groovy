@@ -158,6 +158,18 @@ class ManagedBeansAndVariablesConfigurationTest {
         assert ManagedBeansAndVariablesConfiguration.forExtraVariables() instanceof ManagedBeansAndVariablesConfiguration
     }
 
+    // ------------------------------------------------------------ ANNOTATED BEANS AUTO-DETECTION
+
+
+    @Test
+    public void static_fromAnnotatedBeans_should_store_them() throws Exception {
+        Collection<File> springConfigFiles = [new File("$RESOURCE_DIR/test-text-file.txt")];
+        def stream = firstStream(ManagedBeansAndVariablesConfiguration.fromSpringConfigFiles(springConfigFiles)
+                .getSpringConfigStreams())
+        assert stream.getText() == "from text file"
+    }
+
+
     // ----------------------------------------------------------------------------------------
     def asResourceArray(stream) {
         return [new InputResource(stream)].toArray()

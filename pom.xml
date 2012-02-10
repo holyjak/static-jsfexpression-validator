@@ -52,6 +52,17 @@
         <url>git@github.com:jakubholynet/static-jsfexpression-validator.git</url>
     </scm>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+        
     <dependencies>
 
         <dependency>

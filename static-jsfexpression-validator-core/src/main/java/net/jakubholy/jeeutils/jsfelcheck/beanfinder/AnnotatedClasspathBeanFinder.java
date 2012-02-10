@@ -58,27 +58,33 @@ public class AnnotatedClasspathBeanFinder {
 		reflections = new Reflections(packageNames);
 	}
 
-	/**
+	/* *
 	 * Search for classes with the given annotation. If the annotation has the method '<code>value()</code>' and it returns a
 	 * non-empty string then it is assumed to be the name of the bean otherwise the class name with the first letter
 	 * lowercased is taken as the name.
 	 * @param annotationType (required) the annotation, such as @Named or @Stateless
 	 * @return this
-	 */
-    public AnnotatedClasspathBeanFinder annotatedWith(Class<? extends java.lang.annotation.Annotation> annotationType) {
+	 * /
+	 *
+	 * DEPRECATED: It is all to easy to forget to supply the beanNameAttribute
+    private AnnotatedClasspathBeanFinder annotatedWith(Class<? extends java.lang.annotation.Annotation> annotationType) {
         return annotatedWith(annotationType, "value");
-    }
+    }*/
 
 	/**
-	 * Search for classes with the given annotation.
-	 * As {@link #annotatedWith(Class)} but the annotation is checked for the method
-	 * '<code>&lt;beanNameAttribute&gt;()</code>' instead of '<code>value()</code>'.
+	 * Search for classes with the given annotation. If the annotation has the method '<code>&lt;beanNameAttribute&gt;()</code>'
+	 * and it returns a non-empty string then it is assumed to be the name of the bean otherwise the class name with the first letter
+	 * lower-cased is taken as the name.
 	 * @param annotationType (required) the annotation, such as @Named or @Stateless
-	 * @param beanNameAttribute (required) a name of a method of the annotation that provides the name of the bean, if set
+	 * @param beanNameAttribute (required) a name of a method of the annotation that provides the name of the bean if any was set explicitly;
+	 *                          Notice that the method is often called <code>value()</code>.
 	 * @return this
 	 */
     public AnnotatedClasspathBeanFinder annotatedWith(Class<? extends java.lang.annotation.Annotation> annotationType, String beanNameAttribute) {
-        final Set<Class<?>> beanClasses = reflections.getTypesAnnotatedWith(annotationType);
+        if (beanNameAttribute == null) {
+	        throw new IllegalArgumentException("beanNameAttribute is required (try 'value' if unsure, check the JavaDoc of the annotation to be sure)");
+        }
+	    final Set<Class<?>> beanClasses = reflections.getTypesAnnotatedWith(annotationType);
         Map<String, Class<?>> beans = addNames(beanClasses, annotationType, beanNameAttribute);
         collectedNamesAndTypes.putAll(beans);
         return this;
@@ -104,7 +110,7 @@ public class AnnotatedClasspathBeanFinder {
 	/**
 	 * Extract the name of each bean and return map bean name -&gt; bean class.
 	 */
-    private static Map<String, Class<?>> addNames(Set<Class<?>> beanClasses, Class<? extends java.lang.annotation.Annotation> annotationType, String beanNameAttribute) {
+    protected static Map<String, Class<?>> addNames(Iterable<Class<?>> beanClasses, Class<? extends java.lang.annotation.Annotation> annotationType, String beanNameAttribute) {
         Map<String, Class<?>> namesAndTypes = new HashMap<String, Class<?>>();
 
         for(Class<?> beanClass: beanClasses) {
@@ -114,7 +120,6 @@ public class AnnotatedClasspathBeanFinder {
 
         return namesAndTypes;
     }
-
 
     protected static String extractBeanName(Class<?> target, Class<? extends java.lang.annotation.Annotation> annotationType, String nameField) {
 
