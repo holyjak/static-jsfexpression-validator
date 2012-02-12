@@ -43,7 +43,7 @@ TODO - FURTHER DEVELOPMENT
 
 +++
 **Possible tasks for release 1.0**:
-- Document how to use the annotated bean detector
+- // annotated bean finder: better way then .annotatedWith(annot, "value")?
 - Autom. extract local variable(s) from ui:repeat
 - Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
 - When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
@@ -87,7 +87,6 @@ Facelets parsing
 
 - full JSF 1.2+ support:
     - Facelets (the Facelets page says it has compile-type EL validation?!)
-    - detect annotated managed beans - use http://code.google.com/p/reflections/ (@ManagedBean(name="userBean") + configurable [Spring, EJB, CDI, ...]) (or http://scannotation.sourceforge.net/?)
     - support EL functions (not just 'function tolerance' as implemented now)
 
 - run Sonar & Findbugs ???
