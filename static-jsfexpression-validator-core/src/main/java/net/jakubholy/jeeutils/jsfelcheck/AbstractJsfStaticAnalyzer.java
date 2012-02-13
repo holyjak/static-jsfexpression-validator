@@ -101,7 +101,7 @@ import static org.mockito.Mockito.*;
  *
  * See the test-webapp-jsf* projects that are part of this project to see examples of usage with different
  * versions o JSF and different configurations. You can <a href="https://github.com/jakubholynet/static-jsfexpression-validator">
- *     see them at GitHub</a> or <a href="http://repo1.maven.org/maven2/net/jakubholy/jeeutils/static-jsfexpression-validator/">
+ *     see them at GitHub</a> or <a href="http://repo1.maven.org/maven2/net/jakubholy/jeeutils/jsfelcheck/">
  *     download from Maven Central</a>.
  *
  * <h3>How it works</h3>
