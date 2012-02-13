@@ -71,7 +71,8 @@ public class LocalVariableConfiguration {
      * @return this
      */
     public LocalVariableConfiguration withLocalVariable(String sourceElExpression, Class<?> type) {
-        dataTableVariableResolver.declareTypeFor(sourceElExpression, type);
+        // TODO Store local variables outside of dataTable resolver so that also custom resolvers can read them
+	    dataTableVariableResolver.declareTypeFor(sourceElExpression, type);
         return this;
     }
 
@@ -107,8 +108,7 @@ public class LocalVariableConfiguration {
      * Register a resolver that can extract local variables defined in a JSF tag.
      * Internally this is used to register the {@link DataTableVariableResolver} for the tag h:dataTable.
      *
-     *
-     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables
+     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables; ex: "ui:repeat"
      * @param customResolver (required) the resolver that can find out what local variable the tag delcares
      * @return this
      */

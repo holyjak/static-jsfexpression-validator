@@ -78,7 +78,7 @@ class LocalVariableConfigurationTest {
     @Test
     public void should_register_custom_resolver_for_tag() throws Exception {
         def customResolver = new TagJsfVariableResolver() {
-            VariableInfo extractContextVariables(Map<String, String> attributes, AttributesValidationResult resolvedJsfExpressions) {
+            VariableInfo extractContextVariables(Map<String, String> tagAttributes, AttributesValidationResult resolvedJsfExpressions) {
                 return null
             }
         };

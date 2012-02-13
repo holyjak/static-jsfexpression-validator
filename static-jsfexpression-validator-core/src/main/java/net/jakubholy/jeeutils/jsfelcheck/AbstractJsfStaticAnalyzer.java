@@ -63,11 +63,12 @@ import static org.mockito.Mockito.*;
  * perhaps Spring config) and the local variables you can declare them to the
  * validator via {@link ManagedBeansAndVariablesConfiguration#withExtraVariable(String, Object)}.
  * <p>
- * If there are other tags than h:dataTable that can create local variables, you
+ * If there are other tags than h:dataTable for JSP or ui:repeat for Facelets that can create local variables then you
  * must create and register an appropriate "resolver" (a class that can extract the local variable name and type from
  * the tag info) for them as is done with the
  * dataTable - see {@link LocalVariableConfiguration#withCustomDataTableTagAlias} and
- * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}
+ * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}.
+ * See {@link net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.DataTableVariableResolver} for an example.
  * <p>
  *     You can also help the resolver by telling it what is the type of elements in collection/maps
  *     via {@link #withPropertyTypeOverride(String, Class)}. (This is necessary even for maps/collections using
@@ -252,8 +253,15 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
                 Boolean.getBoolean("jsfelcheck.suppressOutput") || isSuppressOutput());
     }
 
+	/**
+	 * Initialize the validation subsystem after having processed all the configuration
+	 * supplied by the user based on it.
+	 */
     private JsfElValidatingPageNodeListener initializeValidationSubsystem() {
 
+	    // Declare default local variable resolvers (h:dataTable declared in the localVar.Config)
+	    // ui:repeat is sufficiently similar to h:dataTable (in: value, out: var) to be reusable:
+	    localVariableConfiguration.withCustomDataTableTagAlias("ui:repeat");
         ContextVariableRegistry contextVariableRegistry = localVariableConfiguration.toRegistry();
         
         elValidator.setUnknownVariableResolver(contextVariableRegistry);

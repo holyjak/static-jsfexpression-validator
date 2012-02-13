@@ -84,7 +84,8 @@
 
                 <h3>ui:repeat</h3>
                 <ui:repeat value="#{myActionBean.books}" var="book" varStatus="status">
-                    <p>#{book.name}</p>
+                    <p>UI:repeat var: #{book.name}</p>
+                    <!-- we could also use the 'status' variable but if would fail for it isn't supported yet) -->
                 </ui:repeat>
 
             </div>

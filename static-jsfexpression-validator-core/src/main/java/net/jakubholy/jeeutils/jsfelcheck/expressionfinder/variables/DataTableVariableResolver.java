@@ -34,10 +34,13 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 
 /**
- * Extract JSF EL variable defined in a h:dataTable and resolve its
- * type.
+ * Extract JSF EL variable defined by the <code>var</code> attribute of a tag, its value being an element of a
+ * collection referenced by the <code>value</code> attributed, and resolve its type - intended primarily for
+ * <code>h:dataTable</code>. The type is extracted from the value collection if possibly (i.e. if it is an array
+ * or a single value) or from the declared local variable types - if not found, an exception is thrown.
+ *
  * <p>
- * It is not possible to derive the type (for element type of
+ * For anything but an array of a single value it is not possible to derive the type (for element type of
  * collections is not known or only at the compile time) and therefore the
  * type of the dataTable value's elements must be declared up-front
  * via {@link #declareTypeFor(String, Class)}.
@@ -86,11 +89,11 @@ public class DataTableVariableResolver implements TagJsfVariableResolver {
     }
 
     /** {@inheritDoc} */
-    public VariableInfo extractContextVariables(Map<String, String> attributes,
+    public VariableInfo extractContextVariables(Map<String, String> tagAttributes,
             AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException {
 
-        String iterationVariableName = attributes.get("var");
-        String sourceExpression = normalizeExpression(attributes.get("value"));
+        String iterationVariableName = tagAttributes.get("var");
+        String sourceExpression = normalizeExpression(tagAttributes.get("value"));
         ValidationResult sourceModel = resolvedJsfExpressions.get("value");
 
         assertValidTagAttributes(iterationVariableName, sourceExpression, sourceModel);

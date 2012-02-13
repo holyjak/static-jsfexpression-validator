@@ -35,6 +35,12 @@ CURRENT LIMITATIONS
 - The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments, the only thing checked is that a public method of the name exists))
 - Functions are not checked for existence and correct signature
 - Facelets support is now only experimental, see TODO below for what remains to be done
+- Local variable declaring tags such as h:dataTable and ui:repeat are only allowed to declare
+    one variable, i.e. e.g. varStatus is not recognized
+
+To see some of the things that should ideally work but do not, execute
+
+    mvn -Djsfelcheck.runFailingTests=true test
 
 ---
 
@@ -43,11 +49,12 @@ TODO - FURTHER DEVELOPMENT
 
 +++
 **Possible tasks for release 1.0**:
-- // annotated bean finder: better way then .annotatedWith(annot, "value")?
 - Autom. extract local variable(s) from ui:repeat
 - Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
 - When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
 - Add support for declaring custom taglibs?
+- check JavaDoc, remove/correct references to refactored functionality
+- review this README
 +++
 
 Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
@@ -66,18 +73,12 @@ Facelets parsing
 - add support for declaring custom taglibs (File/InputStream? - what with taglibs in framework jars?)
 - see TODOs in NotifyingCompilationManager
 
-- consider enabling in-container testing (- slower, + complete & correct env. setup, no need to search for m.beans)
-
-- fixme: -jsf20 impl. currently reuses jsf12 and re-impl. some of its classes => it might happen that the original jsf12 is loaded (based on classloader impl and jar order) - too brittle!
-
--- Current limitation in Facelets: No way to detect what is value or Method expression => we try value first and method next, should autodetect somehow, min. for the standard tags and let users delcare it
-
 ---
 
 - finishing touches:
     - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper - useful?  wait til the bus-based architecture?
 
-- better support for view file filtrering (includes/excludes) - perhaps wait for the bus-based architecture
+- better support for view file filtering (includes/excludes) - perhaps wait for the bus-based architecture
 
 - JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
     - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
@@ -85,22 +86,19 @@ Facelets parsing
 
 ---
 
-- full JSF 1.2+ support:
-    - Facelets (the Facelets page says it has compile-type EL validation?!)
-    - support EL functions (not just 'function tolerance' as implemented now)
 
-- run Sonar & Findbugs ???
-
-- FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
-
-- add (more) example JSF page
-    - methid binding with params in JSF 2.?
 - test with various JSF projects ?
 - better error msgs - see below
  => make it clear the solution is st. like propertyTypeOverrides.put("bean.listProperty.*",  TheElementType.class);
-- check JavaDoc, remove/correct references to refactored functionality
 
 ---
+
+- TagJsfVariableResolvers:
+  1. Pass declared local vars to all resolvers, not only dataTable
+  2. Allow a tag to declare multiple local vars and add them to dataTable/ui:repeat
+- full JSF 1.2+ support: support EL functions (not just 'function tolerance' as implemented now)
+- Current limitation in Facelets: No way to detect what is value or Method expression => we try value first and method next, should autodetect somehow, min. for the standard tags and let users delcare it
+- FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
 - don't mock implementations of Map/Collection, instantiate them instead (eg ArrayList)
 - consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2
 - consider parallelization (take ~30s for our 200 pages on my PC)
@@ -112,6 +110,16 @@ Facelets parsing
 views into html (see stackoverflow.com/questions/6625258/how-do-i-build-a-facelets-site-at-build-time/7928541)
 
 ---
+
+Consider enabling in-container testing (- slower, + complete & correct env. setup,
+no need to search for m.beans). Not too difficult to implement - just run with an
+embedded Jetty either reading the default config & injecting our resolvers if possible
+after the initialization or with custom config defining our resolvers, trigger the tests
+form a app. state listener when everything loaded. Perhaps also support other containers
+such as Tomcat.
+
+---
+
 Architecture refactoring: Stateless objects and message passing through a central delegator with support
 for plugging-in filters. Key components:
 - Message: Contains Context, input, output (may be of the same type as the input). Context holds the
@@ -217,10 +225,13 @@ Interesting Links
 NOTES
 -----
 
-### Version 0.9.9
+### Version 0.9.10
 
 UNDER DEVELOPMENT ...
-(ui:repeat local var. extraction)
+
+### Version 0.9.9
+
+- added support for ui:repeat
 
 ### Version 0.9.8
 

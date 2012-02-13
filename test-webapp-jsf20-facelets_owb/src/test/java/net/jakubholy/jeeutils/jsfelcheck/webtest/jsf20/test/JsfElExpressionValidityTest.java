@@ -21,14 +21,16 @@ import net.jakubholy.jeeutils.jsfelcheck.CollectedValidationResults;
 import net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer;
 import net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration;
 import net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.MyActionBean;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.inject.Named;
 import java.awt.print.Book;
 import java.io.File;
 
-import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.declareLocalVariable;
-import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.forExtraVariables;
+import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.*;
+import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,23 +38,27 @@ import static org.junit.Assert.assertEquals;
  */
 public class JsfElExpressionValidityTest {
 
-	@Ignore("not yet implemented")
+	/**
+	 * Test JSF with Facelets - pages under webapp/tests.
+	 */
     @Test
     public void verify_all_el_expressions_valid() throws Exception {
 
         JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
 
-        jsfStaticAnalyzer.withLocalVariablesConfiguration(
-		        declareLocalVariable("shop.books", Book.class)
+        jsfStaticAnalyzer
+		        /*.withLocalVariablesConfiguration(
+		            declareLocalVariable("shop.books", Book.class)
 				        //.withCustomDataTableTagAlias("t:dataTable"))
-				        )
+				        )*/
                 .withManagedBeansAndVariablesConfiguration(
-		                forExtraVariables()
-                        //fromFacesConfigFiles(new File("src/main/webapp/WEB-INF/faces-config.xml"))
-                            .withExtraVariable("myActionBean", MyActionBean.class))
+		                fromClassesInPackages("net.jakubholy").annotatedWith(Named.class, "value").config()
+		                .withExtraVariable("myActionBean", MyActionBean.class))
                 ;
 
-        CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(new File("src/main/webapp"));
+	    final File webRoot = new File("src/main/webapp");
+	    final File testPages = new File(webRoot, "tests");
+	    CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(webRoot, testPages);
 
         assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
                 + results.failures()
@@ -60,10 +66,45 @@ public class JsfElExpressionValidityTest {
 
     }
 
-    private JsfStaticAnalyzer createConfiguredAnalyzer() {
-        JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forFacelets();
-        jsfStaticAnalyzer.setPrintCorrectExpressions(false);
-        return jsfStaticAnalyzer;
-    }
+	/**
+	 * Test pages under webapp/tests-inclusions/ covering templates,
+	 * custom tags and components included from other pages.
+	 * <p>
+	 *     Currently this is not supported for 1) included pages are not parsed and
+	 *     2) if parsed as top-level pages, the input parameters won't be recognized
+	 *     unless manually declared as local variables).
+	 *  </p>
+	 */
+	@Test
+	public void verify_el_in_included_pages() throws Exception {
+		Assume.assumeTrue(Boolean.getBoolean("jsfelcheck.runFailingTests"));
 
-}
+		JsfStaticAnalyzer jsfStaticAnalyzer = createConfiguredAnalyzer();
+
+		jsfStaticAnalyzer
+		/*.withLocalVariablesConfiguration(
+									  declareLocalVariable("shop.books", Book.class)
+										  //.withCustomDataTableTagAlias("t:dataTable"))
+										  )*/
+				  .withManagedBeansAndVariablesConfiguration(
+						  fromClassesInPackages("net.jakubholy").annotatedWith(Named.class, "value").config()
+								  .withExtraVariable("myActionBean", MyActionBean.class))
+		  ;
+
+		  final File webRoot = new File("src/main/webapp");
+		  final File inclusionsPages = new File(webRoot, "tests-inclusions");
+		  CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(webRoot, inclusionsPages);
+
+		  assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE "
+				  + results.failures()
+				  , 0, results.failures().size());
+
+	  }
+
+	  private JsfStaticAnalyzer createConfiguredAnalyzer() {
+		  JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forFacelets();
+		  jsfStaticAnalyzer.setPrintCorrectExpressions(false);
+		  return jsfStaticAnalyzer;
+	  }
+
+  }

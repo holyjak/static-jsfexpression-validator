@@ -29,12 +29,15 @@ public interface TagJsfVariableResolver {
 
     /**
      * Extract variables from the tag's attributes.
-     * @param attributes (required) the attributes: name to value
-     * @param resolvedJsfExpressions (required)
+     * @param tagAttributes (required) the attributes of the tag in the form of name to value map
+     * @param resolvedJsfExpressions (required) if any of the tag attributes contain JSF EL then the results
+     *                               of validating the EL are here (in the case of h:dataTable the source
+     *                               <code>value</code> attribute could be something like <code>#{bean.array}</code>
+     *                               in which case you need the value to learn the component type)
      * @return info about local variable extracted from the tag (only 1 supported) or null, if no l.v. defined there
      * @throws MissingLocalVariableTypeDeclarationException the tag defines a local variable but its type has not
      * been declared in advance (notice it cannot be derived automatically e.g. if it's an element of a Collection)
      */
-    VariableInfo extractContextVariables(Map<String, String> attributes,
+    VariableInfo extractContextVariables(Map<String, String> tagAttributes,
             AttributesValidationResult resolvedJsfExpressions) throws MissingLocalVariableTypeDeclarationException;
 }
