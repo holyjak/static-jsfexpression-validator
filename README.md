@@ -217,9 +217,17 @@ Interesting Links
 NOTES
 -----
 
-### Version 0.9.8
+### Version 0.9.9
 
 UNDER DEVELOPMENT ...
+(ui:repeat local var. extraction)
+
+### Version 0.9.8
+
+- Support for detecting managed beans based on annotations (analyzer.withManagedBeansAndVariablesConfiguration(fromClassesInPackages(..)..))
+- The directory passed to analyzer.validateElExpressions must the root of your web application; alternatively you can pass in
+    two directories - the webapp root and the directory containing the pages to analyze
+
 
 ### Version 0.9.7
 

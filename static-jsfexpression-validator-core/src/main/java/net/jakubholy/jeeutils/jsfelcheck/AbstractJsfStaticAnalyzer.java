@@ -50,7 +50,7 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
 import static org.mockito.Mockito.*;
 
 /**
- * Perform analysis of (selected) JSF 1.1 JSP files and validate that all EL
+ * Perform analysis of JSF pages implemented with Facelets or JSP and validate that all EL
  * expressions reference only existing managed beans and their properties/action
  * methods.
  * <p>
@@ -64,13 +64,45 @@ import static org.mockito.Mockito.*;
  * validator via {@link ManagedBeansAndVariablesConfiguration#withExtraVariable(String, Object)}.
  * <p>
  * If there are other tags than h:dataTable that can create local variables, you
- * must create and register an appropriate resolver for them as is done with the
+ * must create and register an appropriate "resolver" (a class that can extract the local variable name and type from
+ * the tag info) for them as is done with the
  * dataTable - see {@link LocalVariableConfiguration#withCustomDataTableTagAlias} and
  * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}
  * <p>
  *     You can also help the resolver by telling it what is the type of elements in collection/maps
- *     via {@link #withPropertyTypeOverride(String, Class)}
+ *     via {@link #withPropertyTypeOverride(String, Class)}. (This is necessary even for maps/collections using
+ *     generics as the Java compiler removes the type information; you can alternatively try to play with this
+ *     <a href="http://theholyjava.wordpress.com/2012/02/07/using-java-compiler-tree-api-to-extract-generics-types/">
+ *         experimental generics type extractor</a> based on Java Compiler API.)
  * </p>
+ *
+ * <h3>Usage example</h3>
+ * <p>
+ *     You create the analyzer, tell it where it can find your managed beans and run it on your webapp:
+ * </p>
+ *
+ * <code><pre>{@code
+ * JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forFacelets();
+ * jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
+		ManagedBeansAndVariablesConfiguration
+		.fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated")
+		.annotatedWith(Named.class, "value")
+		.config());
+
+
+ * File webappRoot = new File("src/main/webapp");
+ * CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
+		webappRoot,
+		new File(webappRoot, "tests/annotated"));
+ *
+ * assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE " + results.failures()
+ *      , 0, results.failures().size());
+ * }</pre></code>
+ *
+ * See the test-webapp-jsf* projects that are part of this project to see examples of usage with different
+ * versions o JSF and different configurations. You can <a href="https://github.com/jakubholynet/static-jsfexpression-validator">
+ *     see them at GitHub</a> or <a href="http://repo1.maven.org/maven2/net/jakubholy/jeeutils/static-jsfexpression-validator/">
+ *     download from Maven Central</a>.
  *
  * <h3>How it works</h3>
  * We use "fake value resolversIn" for a real JSF resolver; those resolversIn do not retrieve
