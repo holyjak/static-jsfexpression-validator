@@ -8,7 +8,7 @@ properties/action methods.
 USAGE
 -----
 
-See the main class [net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java) (To actually instantiate it you need one of the JSF version specific subclasses, see e.g. static-jsfexpression-validator-jsf20 (JSF 2.0+). You can try to run it from the command line (it prints the usage info).
+See the main class [net.jakubholy.jeeutils.jsfelcheck.[Abstract]JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java) (To actually instantiate it you need one of the JSF version specific subclasses, see e.g. static-jsfexpression-validator-jsf20 (JSF 2.0+). You can try to run it from the command line (it prints the usage info).
 
 DOWNLOADS
 ---------
@@ -22,7 +22,8 @@ You can get the binaries via Maven or manually from the Maven Central Repository
 MORE INFO
 ---------
 
-See detailed description of how to use the tool at [the blog post validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator]
+See detailed description of how to use the tool at the (outdated by still valuable) introductory
+[blog post Validating JSF EL Expressions in JSF Pages with static-jsfexpression-validator]
 (http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/)
 
 You can also check the test webapps to see how the validator is used, epsecially test-webapp-jsf12 and test-webapp-jsf20-facelets_owb.
@@ -31,10 +32,10 @@ CURRENT LIMITATIONS
 -------------------
 
 - JSF 1.1 implementation distinguishes between value and method bindings only based on the attribute name
-    (methods: action, actionListener, validator, valueChangeListener) and thus won't recongize other method bindings
-- The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments, the only thing checked is that a public method of the name exists))
+    (methods: action, actionListener, validator, valueChangeListener) and thus won't recognize other method bindings
+- The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments, the only thing checked is that a public method of the name exists)
 - Functions are not checked for existence and correct signature
-- Facelets support is now only experimental, see TODO below for what remains to be done
+- Facelets support could be better, namely included content (layout, custom components, custom tags) isn't checked
 - Local variable declaring tags such as h:dataTable and ui:repeat are only allowed to declare
     one variable, i.e. e.g. varStatus is not recognized
 
@@ -44,18 +45,22 @@ To see some of the things that should ideally work but do not, execute
 
 ---
 
+
+PROJECT STATUS
+--------------------------
+
+Further development of this project is driven exclusively by user demand.
+If you have a feature request then it's most welcomed if you can also collaborate on implementing it.
+
+Requests and bug reports may be submitted via the [project's GitHub issues](https://github.com/jakubholynet/static-jsfexpression-validator/issues).
+
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
-+++
-**Possible tasks for release 1.0**:
-- Autom. extract local variable(s) from ui:repeat
-- Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
-- When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
-- Add support for declaring custom taglibs?
-- check JavaDoc, remove/correct references to refactored functionality
-- review this README
-+++
+**Top Limitations**:
+- Facelets: Add support for declaring custom taglibs?
+- Facelets: When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
+- Facelets: Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
 
 Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
 
@@ -67,8 +72,8 @@ Facelets parsing
         composite attributes (expected via composite:attribute) + tag attributes (undeclared) and any custom tags (ex: my:set) by the user or a library
         (same problem as with JSP; the user should have the possibility to register custom TagJsfVariableResolver for such tags).
         (I'd actually wouldn't mind ignoring c:set as mixing build-time and runtime components is generally a bad practice)
-- add Facelets local var declaring tags (ui:repeat, st. else?)
-- ???{isn't heuristics enoug now} teach the EL validator about method x value expressions in facelets wrt. tag and attribute name, ns
+- Current limitation in Facelets: No way to detect what is value or Method expression => we try value first and method next, should autodetect somehow, min. for the standard tags and let users delcare it
+ => teach the EL validator at least about the standard tags' method and value expressions
 - enable filtering of views to process at least as done for JSPs now
 - add support for declaring custom taglibs (File/InputStream? - what with taglibs in framework jars?)
 - see TODOs in NotifyingCompilationManager
@@ -78,7 +83,7 @@ Facelets parsing
 - finishing touches:
     - add addFunctionReturnTypeOverride -> MethodFakingFunctionMapper - useful?  wait til the bus-based architecture?
 
-- better support for view file filtering (includes/excludes) - perhaps wait for the bus-based architecture
+- better support for view file filtering (includes/excludes)
 
 - JsfElFilter should take something more reasonable than ParsedElExpression - remove setters, ref.to Iterator<ElSegment>, incl.file name, tag, line
     - how does it work with "#{b\[nestedBean.itsProp].property + anotherBean}"?
@@ -97,7 +102,6 @@ Facelets parsing
   1. Pass declared local vars to all resolvers, not only dataTable
   2. Allow a tag to declare multiple local vars and add them to dataTable/ui:repeat
 - full JSF 1.2+ support: support EL functions (not just 'function tolerance' as implemented now)
-- Current limitation in Facelets: No way to detect what is value or Method expression => we try value first and method next, should autodetect somehow, min. for the standard tags and let users delcare it
 - FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
 - don't mock implementations of Map/Collection, instantiate them instead (eg ArrayList)
 - consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2
@@ -120,7 +124,7 @@ such as Tomcat.
 
 ---
 
-Architecture refactoring: Stateless objects and message passing through a central delegator with support
+IDEA: Architecture refactoring: Stateless objects and message passing through a central delegator with support
 for plugging-in filters. Key components:
 - Message: Contains Context, input, output (may be of the same type as the input). Context holds the
     static global state (e.g. user-registered local vars), public state from upstream workers
@@ -225,9 +229,9 @@ Interesting Links
 NOTES
 -----
 
-### Version 0.9.10
+### Version 1.0.0
 
-UNDER DEVELOPMENT ...
+Reviewed and corrected documentation.
 
 ### Version 0.9.9
 
