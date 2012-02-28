@@ -1,14 +1,16 @@
 Static JSF EL Expression Validator
 ==================================
 
-Perform analysis of JSF 1.1/1.2/2.x JSP or Facelets files and validate that
+Perform analysis of JSF 2.x, 1.2, or 1.1 JSP or Facelets pages and validate that
 all EL expressions reference only existing managed beans and their
-properties/action methods.
+properties or action methods.
 
 USAGE
 -----
 
-See the main class [net.jakubholy.jeeutils.jsfelcheck.[Abstract]JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java) (To actually instantiate it you need one of the JSF version specific subclasses, see e.g. static-jsfexpression-validator-jsf20 (JSF 2.0+). You can try to run it from the command line (it prints the usage info).
+See the main class [net.jakubholy.jeeutils.jsfelcheck.[Abstract]JsfStaticAnalyzer](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/static-jsfexpression-validator-core/src/main/java/net/jakubholy/jeeutils/jsfelcheck/AbstractJsfStaticAnalyzer.java)
+(To actually instantiate it you need one of the JSF version specific subclasses, see e.g. static-jsfexpression-validator-jsf20 (JSF 2.0+)).
+You can try to run it from the command line (it prints the usage info).
 
 DOWNLOADS
 ---------
@@ -22,18 +24,24 @@ You can get the binaries via Maven or manually from the Maven Central Repository
 MORE INFO
 ---------
 
-See detailed description of how to use the tool at the (outdated by still valuable) introductory
-[blog post Validating JSF EL Expressions in JSF Pages with static-jsfexpression-validator]
+See the detailed description of how to use the tool at the (outdated by still valuable) introductory
+[blog post "Validating JSF EL Expressions in JSF Pages with static-jsfexpression-validator"].
 (http://theholyjava.wordpress.com/2011/06/22/validating-jsf-el-expressions-in-jsf-pages-with-static-jsfexpression-validator/)
 
-You can also check the test webapps to see how the validator is used, epsecially test-webapp-jsf12 and test-webapp-jsf20-facelets_owb.
+You can also check the test webapps to see how the validator is used, especially
+[test-webapp-jsf12](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/test-webapp-jsf12)
+and [test-webapp-jsf20-facelets_owb](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/test-webapp-jsf20-facelets_owb),
+i.e. [JSF 2.0 Facelets test class](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/test-webapp-jsf20-facelets_owb/src/test/java/net/jakubholy/jeeutils/jsfelcheck/webtest/jsf20/test/JsfElExpressionValidityTest.java)
+and [JSF 1.2 JSP test class](https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/test-webapp-jsf12/src/test/java/net/jakubholy/jeeutils/jsfelcheck/webtest/jsf12/JsfElExpressionValidityTest.java).
+(It's best to download the complete sources of the test web application from GitHub or Maven.)
 
 CURRENT LIMITATIONS
 -------------------
 
 - JSF 1.1 implementation distinguishes between value and method bindings only based on the attribute name
     (methods: action, actionListener, validator, valueChangeListener) and thus won't recognize other method bindings
-- The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments, the only thing checked is that a public method of the name exists)
+- The signature of methods used in a MethodBinding isn't checked (i.e. whether it has the correct return type and arguments,
+the only thing checked is that a public method with the name exists)
 - Functions are not checked for existence and correct signature
 - Facelets support could be better, namely included content (layout, custom components, custom tags) isn't checked
 - Local variable declaring tags such as h:dataTable and ui:repeat are only allowed to declare
@@ -52,19 +60,21 @@ PROJECT STATUS
 Further development of this project is driven exclusively by user demand.
 If you have a feature request then it's most welcomed if you can also collaborate on implementing it.
 
-Requests and bug reports may be submitted via the [project's GitHub issues](https://github.com/jakubholynet/static-jsfexpression-validator/issues).
+Requests and bug reports may be submitted via the [project's GitHub issue tracker](https://github.com/jakubholynet/static-jsfexpression-validator/issues).
 
 TODO - FURTHER DEVELOPMENT
 --------------------------
 
 **Top Limitations**:
+
 - Facelets: Add support for declaring custom taglibs?
 - Facelets: When parsing, descend into referenced resources, handling over locally defined variables and tag attribute bindings (templates, custom tags, composites)
 - Facelets: Make it possible to extract local variables from/for ui:param, tag attributes, custom runtime tags etc.
 
 Note: Problems testing directly in -jsfXX: Faces init fails for it searches for libs under WEB-INF/lib or st. like that.
 
-Facelets parsing
+Facelets parsing:
+
 - Check non-detected ELs in net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.facelets.ValidateAllExpressionsInFaceletsTest
     1. Currently we do not process referenced pages such as templates, custom tags and composites; we likely should do it for we want to check that we're supplying valid parameters
     (or do we trust the developer that she is sending an object of the right type?)
@@ -99,23 +109,22 @@ Facelets parsing
 ---
 
 - TagJsfVariableResolvers:
-  1. Pass declared local vars to all resolvers, not only dataTable
-  2. Allow a tag to declare multiple local vars and add them to dataTable/ui:repeat
+    1. Pass declared local vars to all resolvers, not only dataTable
+    2. Allow a tag to declare multiple local vars and add them to dataTable/ui:repeat
 - full JSF 1.2+ support: support EL functions (not just 'function tolerance' as implemented now)
 - FIX: MethodFakingFunctionMapper currently allows only 1 arity for a function, i.e. not having the same fun name with different number of arguments
 - don't mock implementations of Map/Collection, instantiate them instead (eg ArrayList)
 - consider using more modern jasper for JSF2.x than 6.0.29 used in 1.2
 - consider parallelization (take ~30s for our 200 pages on my PC)
 - better handling of includes:
-    1) possibility to exclude pages from processing (the non-standalone ones)
-    2) whenever dynamic jsp include encountered, switch to processing of that page, passing local variables in
-
+    1. possibility to exclude pages from processing (the non-standalone ones)
+    2. whenever dynamic jsp include encountered, switch to processing of that page, passing local variables in
 - consider extending the Facelets compiler to be able to actually render the
 views into html (see stackoverflow.com/questions/6625258/how-do-i-build-a-facelets-site-at-build-time/7928541)
 
 ---
 
-Consider enabling in-container testing (- slower, + complete & correct env. setup,
+- Consider enabling in-container testing (- slower, + complete & correct env. setup,
 no need to search for m.beans). Not too difficult to implement - just run with an
 embedded Jetty either reading the default config & injecting our resolvers if possible
 after the initialization or with custom config defining our resolvers, trigger the tests
@@ -126,6 +135,7 @@ such as Tomcat.
 
 IDEA: Architecture refactoring: Stateless objects and message passing through a central delegator with support
 for plugging-in filters. Key components:
+
 - Message: Contains Context, input, output (may be of the same type as the input). Context holds the
     static global state (e.g. user-registered local vars), public state from upstream workers
     (e.g. current EL), and private state of each worker that needs it (e.g. per-page cache of functions),
@@ -146,9 +156,11 @@ for plugging-in filters. Key components:
     - system initialization (Compiler is created by Jasper via new C.() => can't get objects from outside)
     - how to handle exceptions in listeners/workers?
     - ...
+
 Use it:
-    - let the user decide whether an attribute is method or value binding
-    - powerful file/tag/attribute filtering
+
+- let the user decide whether an attribute is method or value binding
+- powerful file/tag/attribute filtering
 
 ### TODO - improve error messages ###
 #### Ex.1.: PropertyNotFoundException on class Error_YouMustDelcareTypeForThisVariable
@@ -185,7 +197,7 @@ DEVELOPEMET INTRO
     and composes the failures/successes report
  - ValidatingJsfElResolver - actual checks of JSF EL expressions
 
----
+Other:
 
  - net.jakubholy.jeeutils.jsfelcheck.expressionfinder.impl.jasper.PageNodeExpressionValidator.isMethodBinding(String) - distinguish value and method binding
 
@@ -196,13 +208,17 @@ http://www.roseindia.net/jsf/jsf-versions.shtml
 Expression Language, referred to as EL, was first introduced in JSTL 1.0, and later included in JSP 2.0.
   A variant of the EL was used in JSF 1.0. In JSP 2.1, JSF 1.2 and JSTL 1.2, an unified EL was defined.
 
- JSF 1.1 (27 may 2004) -   Bug fix release. No specification changes.
- 
- JSF 1.2(11 may 2006)
-  - Unified EL for JSP and JSF, introduced ELResolver => support for setters, calling methods
+JSF 1.1 (27 may 2004)
 
- JSF 2.0
-  - The Java EE 6 EL: "The expression language has changed in minor ways. Perhaps the most useful enhancement for JSF programmers is the use of arguments in action methods."
+ - Bug fix release. No specification changes.
+ 
+JSF 1.2(11 may 2006)
+
+ - Unified EL for JSP and JSF, introduced ELResolver => support for setters, calling methods
+
+JSF 2.0
+
+ - The Java EE 6 EL: "The expression language has changed in minor ways. Perhaps the most useful enhancement for JSF programmers is the use of arguments in action methods."
 
 #### IMPLEMENTATIONS
  
@@ -255,6 +271,7 @@ Reviewed and corrected documentation.
 ### Version 0.9.6
 
 Quick bugfix release:
+
 - support imported Spring subconfigx and multiple/... faces configs
 - static-jsfexpression-validator-jsf11.jar: Add missing dependencies on jasper-el to avoid ClassNotFound ex. when parsing
 - fixed EL expression recognizer to ignore immediate evaluation expr. (${..}) and only accept ordinary JSF (deffered eval.) ones
