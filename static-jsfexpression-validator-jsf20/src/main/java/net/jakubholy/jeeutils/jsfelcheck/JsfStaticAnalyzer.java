@@ -137,12 +137,12 @@ import java.util.Collection;
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyzer> {
 
-	/** {@inheritDoc} */
+	/** Instance for validation of JSF pages. */
 	public static JsfStaticAnalyzer forJsp() {
 		return new JsfStaticAnalyzer(ViewType.JSP);
 	}
 
-	/** {@inheritDoc} */
+	/** Instance for validation of Facelets pages. */
 	public static JsfStaticAnalyzer forFacelets() {
 		return new JsfStaticAnalyzer(ViewType.FACELETS);
 	}

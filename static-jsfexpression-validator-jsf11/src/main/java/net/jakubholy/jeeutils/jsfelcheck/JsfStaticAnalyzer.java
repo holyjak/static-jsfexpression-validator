@@ -137,6 +137,7 @@ import java.util.Collection;
  */
 public class JsfStaticAnalyzer extends AbstractJsfStaticAnalyzer<JsfStaticAnalyzer> {
 
+	/** Instance for validation of JSP pages. */
 	public static JsfStaticAnalyzer forJsp() {
 		return new JsfStaticAnalyzer(ViewType.JSP);
 	}
