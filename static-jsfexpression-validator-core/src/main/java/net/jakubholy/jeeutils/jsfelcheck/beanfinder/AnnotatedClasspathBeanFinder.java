@@ -29,7 +29,18 @@ import java.util.Set;
 
 /**
  * Locate managed beans on the classpath marked by particular annotations
- * recognized by JSF (such as @Named or @Stateless).
+ * (recognized by JSF) such as <code>@Named</code> or <code>@Stateless</code>.
+ *
+ * <h3>Usage example</h3>
+ * <pre>{@code
+ * import static net.jakubholy.jeeutils.jsfelcheck.beanfinder.AnnotatedClasspathBeanFinder.*;
+ *
+ * fromClassesInPackages("your.root.package.with.beans")
+ *      .annotatedWith(Named.class, "value")
+ *      .config()
+ * }</pre>
+ *
+ * @see AnnotatedClasspathBeanFinder
  */
 public class AnnotatedClasspathBeanFinder {
 
@@ -52,7 +63,10 @@ public class AnnotatedClasspathBeanFinder {
         this(null, packageNames);
     }
 
-	/** For internal use. */
+	/**
+	 * For internal use, you should call
+	 * {@link ManagedBeansAndVariablesConfiguration#fromClassesInPackages(String...)}.
+	 */
 	public AnnotatedClasspathBeanFinder(ManagedBeansAndVariablesConfiguration config, String... packageNames) {
 		this.config = config;
 		reflections = new Reflections(packageNames);
@@ -77,7 +91,7 @@ public class AnnotatedClasspathBeanFinder {
 	 * lower-cased is taken as the name.
 	 * @param annotationType (required) the annotation, such as @Named or @Stateless
 	 * @param beanNameAttribute (required) a name of a method of the annotation that provides the name of the bean if any was set explicitly;
-	 *                          Notice that the method is often called <code>value()</code>.
+	 *                          This method is often called <code>value</code>, sometimes <code>name</code>.
 	 * @return this
 	 */
     public AnnotatedClasspathBeanFinder annotatedWith(Class<? extends java.lang.annotation.Annotation> annotationType, String beanNameAttribute) {

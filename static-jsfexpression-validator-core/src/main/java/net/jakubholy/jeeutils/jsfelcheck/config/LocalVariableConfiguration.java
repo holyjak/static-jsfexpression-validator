@@ -23,18 +23,33 @@ import net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.TagJsfVariab
 
 /**
  * Declaration of local variables in JSF pages and optionally
- * resolversIn for tags that can produce local variables.
+ * resolvers for tags that can produce local variables.
+ * <p>
+ *     A "local variable" is a variable produced by a tag, such as <code>h:dataTable</code>'s <code>var</code>.
+ *     It is often impossible to guess their type because they contain elements from collections or maps that
+ *     are untyped in Java (at least in the runtime).
+ *     Therefore you need to declare of what type they are so that it can be checked that EL expressions
+ *     containing them are correct.
+ * </p>
  * <p>
  *     You will typically want to static import the static methods to make configurations more readable.
  * </p>
  *
  * <h3>Usage example</h3>
- * {@code
+ * <pre>{@code
+ * // JSP:
+ * <h:dataTable value="#{myCollectionBean.list}" var="myCollItem">
+ *     <h:column>
+ *         <h:outputText value="Item value: #{myCollItem.value}" />
+ *     </h:column>
+ * </h:dataTable>
+ *
+ * // JAVA:
  * import static net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration.*;
  *
- * declareLocalVariable("myBean.collectionProperty", String.class)
- *  .withLocalVariable("myBean.anotherArray", MyArrayElement.class)
- * }
+ * declareLocalVariable("myCollectionBean.list", MyListElementType.class)
+ *      .withLocalVariable("myBean.someArray", String.class)
+ * }</pre>
  */
 public class LocalVariableConfiguration {
 
@@ -43,7 +58,7 @@ public class LocalVariableConfiguration {
 
     /**
      * Create a new configuration and immediately also declare the type of a local variable identified by the given
-     * sourceElExpression - see {@link #withLocalVariable(String, Class)} for details.
+     * <code>sourceElExpression</code> - see {@link #withLocalVariable(String, Class)} for details.
      */
     public static LocalVariableConfiguration declareLocalVariable(String sourceElExpression, Class<?> type) {
         return new LocalVariableConfiguration().withLocalVariable(sourceElExpression, type);
@@ -62,8 +77,8 @@ public class LocalVariableConfiguration {
     }
 
     /**
-     * Declare the type of a local variable identified by the given sourceElExpression
-     * (for h:dataTable-like tags this is the EL expression that produces the collection whose elements are used
+     * Declare the type of a local variable identified by the given <code>sourceElExpression</code>
+     * (for <code>h:dataTable</code>-like tags this is the EL expression that produces the collection whose elements are used
      * consecutively as values of this variable)
      * @param sourceElExpression (required) dataTable-like tags: source EL expression producing a collection
      * whose elements will become values of the local variable defined by dataTable
@@ -77,7 +92,7 @@ public class LocalVariableConfiguration {
     }
 
     /**
-     * Declare the type of a local variable identified by the given sourceElExpression - see
+     * Declare the type of a local variable identified by the given <code>sourceElExpression</code> - see
      * {@link #withLocalVariable(String, Class)} for details.
      */
     public LocalVariableConfiguration and(String sourceElExpression, Class<?> type) {
@@ -86,15 +101,15 @@ public class LocalVariableConfiguration {
 
     /**
      * Register the default {@link DataTableVariableResolver} for another yet compatible JSF tag,
-     * namely a tag that declares its local variable in the 'var' attribute and takes values from it
-     * from a 'value' attribute. Mostly useful for use with JSF libraries that have their own extensions of
-     * the default h:dataTable compatible with how it works.
+     * namely a tag that declares its local variable in the <code>var</code> attribute and takes values for it
+     * from a <code>value</code> attribute. Mostly useful for use with JSF libraries that have their own extensions of
+     * the default <code>h:dataTable</code> compatible with how it works.
      * <p>
      *     Also necessary if you use different than the default prefix of 'h:'.
      * </p>
      *
      * @param tagQName (required)  fully qualified name of the JSF tag that can define new local variables,
-     * e.g. t:dataTable for MyFaces.
+     * e.g. <code>t:dataTable</code> for MyFaces.
      *
      * @see #withResolverForVariableProducingTag(String, net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.TagJsfVariableResolver)
      */
@@ -106,10 +121,10 @@ public class LocalVariableConfiguration {
 
     /**
      * Register a resolver that can extract local variables defined in a JSF tag.
-     * Internally this is used to register the {@link DataTableVariableResolver} for the tag h:dataTable.
+     * This is also used internally to register the {@link DataTableVariableResolver} for the tag <code>h:dataTable</code>.
      *
-     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables; ex: "ui:repeat"
-     * @param customResolver (required) the resolver that can find out what local variable the tag delcares
+     * @param tagQName (required) fully qualified name of the JSF tag that can define new local variables; ex: <code>ui:repeat</code>
+     * @param customResolver (required) the resolver that can find out what local variable the tag declares
      * @return this
      */
     public LocalVariableConfiguration withResolverForVariableProducingTag(String tagQName, TagJsfVariableResolver customResolver) {

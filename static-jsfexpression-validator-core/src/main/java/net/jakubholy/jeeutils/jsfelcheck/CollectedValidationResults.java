@@ -32,15 +32,16 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationR
 public interface CollectedValidationResults {
 
     /**
-     * Local JSF variables defined in the processed files (such as the var of h:dataTable) that couldn't be applied
-     * correctly because their type hasn't been declared.
-     *
+     * Local JSF variables defined in the processed files (such as the var of h:dataTable) that couldn't be checked
+     *  because their type hasn't been declared.
+     * <p>
      * Notice that any expression that uses such local variable will fail to validate and thus there will be
      * consecutive failures.
+     * </p>
+     * @return possibly empty collection of idintifications of local variables of unknown data types
      *
-     * @return possibly empty
-     *
-     * @see AbstractJsfStaticAnalyzer#validateElExpressions(String, java.util.Map
+     * @see AbstractJsfStaticAnalyzer#validateElExpressions
+     * @see net.jakubholy.jeeutils.jsfelcheck.config.LocalVariableConfiguration#declareLocalVariable(String, Class)
      * @see net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.DataTableVariableResolver
      * #declareTypeFor(String, Class)
      */

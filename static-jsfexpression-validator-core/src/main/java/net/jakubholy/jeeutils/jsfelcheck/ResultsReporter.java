@@ -30,7 +30,8 @@ import net.jakubholy.jeeutils.jsfelcheck.validator.results.SuccessfulValidationR
 import net.jakubholy.jeeutils.jsfelcheck.validator.results.ValidationResult;
 
 /**
- * Report validation results (print them to sysout/syserr).
+ * Report validation results by printing them to sysout/syserr.
+ * Used internally by the {@link AbstractJsfStaticAnalyzer}.
  */
 public class ResultsReporter {
 

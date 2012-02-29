@@ -43,14 +43,17 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
  * </p>
  * <p/>
  * <h3>Usage example</h3>
- * {@code
+ * <pre>{@code
  * import static net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration.*;
  * 
- * fromFacesConfigFiles("myBean.collectionProperty", String.class)
- * .andFromSpringConfigFiles("myBean.anotherArray", MyArrayElement.class)
- * .withExtraVariable("name", MyType.class)
- * .withExtraVariable("another", String.class)
- * }
+ * fromFacesConfigFiles(new File("/path/to/faces-config.xml"))
+ *      .andFromSpringConfigFiles(new File("/path/to/applicationContext.xml"))
+ *      .andFromClassesInPackages("your.root.package.with.beans").annotatedWith(Named.class, "value").config()
+ *      .withExtraVariable("name", MyType.class)
+ *      .withExtraVariable("another", String.class)
+ * }</pre>
+ *
+ * @see AnnotatedClasspathBeanFinder
  */
 public class ManagedBeansAndVariablesConfiguration {
 
@@ -72,6 +75,9 @@ public class ManagedBeansAndVariablesConfiguration {
 	}
 
     private final Map<String, Object> extraVariables = new Hashtable<String, Object>();
+
+	/** For internal use only; call some of the static methods instead. */
+	public ManagedBeansAndVariablesConfiguration() {}
 
     /**
      * New configuration set to read managed beans from the given faces-config.xml files. (Default: none.)
@@ -131,7 +137,7 @@ public class ManagedBeansAndVariablesConfiguration {
     }
 
     /**
-     * Create new. empty configuration - used if you only want to define extra variables.
+     * Create new, empty configuration - used if you only want to define extra variables.
      * @see #withExtraVariable(String, Class)
      */
     public static ManagedBeansAndVariablesConfiguration forExtraVariables() {
@@ -220,6 +226,9 @@ public class ManagedBeansAndVariablesConfiguration {
 		return new ManagedBeansAndVariablesConfiguration().andFromClassesInPackages(packageNames);
 	}
 
+	/**
+	 * Non-static version of {@link #fromClassesInPackages(String...)}.
+	 */
 	public AnnotatedClasspathBeanFinder andFromClassesInPackages(String... packageNames) {
 		return new AnnotatedClasspathBeanFinder(this, packageNames);
 	}
@@ -229,7 +238,7 @@ public class ManagedBeansAndVariablesConfiguration {
 
 
     /**
-     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
+     * Register a EL variable and its value so that when it is encountered in an EL expression, it will be possible to
      * resolve it.
      * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
      * is thrown when an undeclared/unknown variable in encountered.
@@ -255,7 +264,7 @@ public class ManagedBeansAndVariablesConfiguration {
     }
 
     /**
-     * Register a EL variable and its value so that when it encountered in an EL expression, it will be possible to
+     * Register a EL variable and its value so that when it is encountered in an EL expression, it will be possible to
      * resolve it.
      * Normally the {@link net.jakubholy.jeeutils.jsfelcheck.validator.exception.VariableNotFoundException}
      * is thrown when an undeclared/unknown variable in encountered.

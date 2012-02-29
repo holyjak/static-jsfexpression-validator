@@ -50,32 +50,12 @@ import static net.jakubholy.jeeutils.jsfelcheck.util.ArgumentAssert.assertNotNul
 import static org.mockito.Mockito.*;
 
 /**
- * Perform analysis of JSF pages implemented with Facelets or JSP and validate that all EL
+ * The validator analyses JSF pages implemented with Facelets or JSP and validates that all EL
  * expressions reference only existing managed beans and their properties/action
- * methods.
- * <p>
- * For local variables, such as the <code>var</code> produced by h:dataTable, you
- * must first declare of what type they are as this cannot be determined based
- * on the code, see
- * {@link LocalVariableConfiguration#withLocalVariable(String, Class)}.
- * <p>
- * If there are some EL variables aside of managed beans in faces-config (and
- * perhaps Spring config) and the local variables you can declare them to the
- * validator via {@link ManagedBeansAndVariablesConfiguration#withExtraVariable(String, Object)}.
- * <p>
- * If there are other tags than h:dataTable for JSP or ui:repeat for Facelets that can create local variables then you
- * must create and register an appropriate "resolver" (a class that can extract the local variable name and type from
- * the tag info) for them as is done with the
- * dataTable - see {@link LocalVariableConfiguration#withCustomDataTableTagAlias} and
- * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}.
- * See {@link net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.DataTableVariableResolver} for an example.
- * <p>
- *     You can also help the resolver by telling it what is the type of elements in collection/maps
- *     via {@link #withPropertyTypeOverride(String, Class)}. (This is necessary even for maps/collections using
- *     generics as the Java compiler removes the type information; you can alternatively try to play with this
- *     <a href="http://theholyjava.wordpress.com/2012/02/07/using-java-compiler-tree-api-to-extract-generics-types/">
- *         experimental generics type extractor</a> based on Java Compiler API.)
- * </p>
+ * methods. See the example below and
+ * <a href="https://github.com/jakubholynet/static-jsfexpression-validator/blob/master/README.md">examples in the test webapps</a>.
+ * Of course you will need one of the JSF version specific subclasses, namely
+ * <code>net.jakubholy.jeeutils.jsfelcheck.JsfStaticAnalyzer</code>.
  *
  * <h3>Usage example</h3>
  * <p>
@@ -85,18 +65,18 @@ import static org.mockito.Mockito.*;
  * <code><pre>{@code
  * JsfStaticAnalyzer jsfStaticAnalyzer = JsfStaticAnalyzer.forFacelets();
  * jsfStaticAnalyzer.withManagedBeansAndVariablesConfiguration(
-		ManagedBeansAndVariablesConfiguration
-		.fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated")
-		.annotatedWith(Named.class, "value")
-		.config());
-
-
- * File webappRoot = new File("src/main/webapp");
- * CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
-		webappRoot,
-		new File(webappRoot, "tests/annotated"));
+ *      ManagedBeansAndVariablesConfiguration
+ *      .fromClassesInPackages("net.jakubholy.jeeutils.jsfelcheck.webtest.jsf20.test.annotated")
+ *      .annotatedWith(Named.class, "value")
+ *      .config());
  *
- * assertEquals("There shall be no invalid JSF EL expressions; check System.err/.out for details. FAILURE " + results.failures()
+ * File webappRoot = new File("src/main/webapp");
+ *
+ * CollectedValidationResults results = jsfStaticAnalyzer.validateElExpressions(
+ *      webappRoot,
+ *      new File(webappRoot, "tests/annotated"));
+ *
+ * assertEquals("There shall be no invalid JSF EL expressions; check System.err.out for details. FAILURE " + results.failures()
  *      , 0, results.failures().size());
  * }</pre></code>
  *
@@ -104,6 +84,54 @@ import static org.mockito.Mockito.*;
  * versions o JSF and different configurations. You can <a href="https://github.com/jakubholynet/static-jsfexpression-validator">
  *     see them at GitHub</a> or <a href="http://repo1.maven.org/maven2/net/jakubholy/jeeutils/jsfelcheck/">
  *     download from Maven Central</a>.
+ *
+ * <h3>Configuration</h3>
+ * <p>
+ *     You usually need to configure the validator, f.ex. tell it where to find your managed beans, inform it about
+ *     the types of JSF local variables and properties that it cannot detect automatically etc.
+ *     You might prefer to just look at the examples and start using the validator over reading this
+ *     documentation and only come back to it if you find out that you need to know more.
+ * </p>
+ * <p>
+ *     See the <code>with*</code> methods - if they take an object then you usually can create it via a static
+ *     method on the object's class - it works best with static imports.
+ * </p>
+ *
+ * <h4>Managed Beans and Other (Top-Level) Variables</h4>
+ * <p>
+ *     You always have to inform the validator where to find your managed beans - in faces-config, Spring
+ *     application configuration XML, or as annotated beans on the classpath.
+ * </p>
+ * <p>
+ * If there are some EL variables aside of managed beans and the local variables you can declare them to the
+ * validator via {@link ManagedBeansAndVariablesConfiguration#withExtraVariable(String, Object)}.
+ * </p>
+ *
+ * <h4>Local Variables</h4>
+ * <p>
+ * For local variables, such as the <code>var</code> produced by <code>h:dataTable</code>, you
+ * must declare of what type they are as this cannot be determined based
+ * on the code, see
+ * {@link LocalVariableConfiguration#withLocalVariable(String, Class)}.
+ * </p>
+ * <p>
+ * If there are other tags than h:dataTable for JSP or ui:repeat for Facelets that can create local variables then you
+ * must create and register an appropriate "resolver" (a class that can extract the local variable name and type from
+ * the tag info) for them as is done with the
+ * dataTable - see {@link LocalVariableConfiguration#withCustomDataTableTagAlias} and
+ * {@link LocalVariableConfiguration#withResolverForVariableProducingTag}.
+ * </p><p>
+ *  See {@link net.jakubholy.jeeutils.jsfelcheck.expressionfinder.variables.DataTableVariableResolver} for an example.
+ * </p>
+ *
+ * <h4>Declaration of Types of Elements in Collections and Maps</h4>
+ * <p>
+ *     You can also help the validator by telling it what is the type of elements in collection/maps
+ *     via {@link #withPropertyTypeOverride(String, Class)}. (This is necessary even for maps/collections using
+ *     generics as the Java compiler removes the type information; you can alternatively try to play with this
+ *     <a href="http://theholyjava.wordpress.com/2012/02/07/using-java-compiler-tree-api-to-extract-generics-types/">
+ *         experimental generics type extractor</a> based on the Java Compiler API.)
+ * </p>
  *
  * <h3>How it works</h3>
  * We use "fake value resolversIn" for a real JSF resolver; those resolversIn do not retrieve
@@ -117,20 +145,11 @@ import static org.mockito.Mockito.*;
  *
  * <h3>Limitations</h3>
  *
- * <pre>
- * - Function in expressions do not cause failures but are not checked for validity (e.g. fn:contains(s1,s2)).
- * - Currently it's assumed that a tag can declare only 1 local variable (var in dataTable).
- * - Included files (statically or dynamically) are processed without taking their inclusion
- * into account, i.e. variables defined in the including page aren't available when checking them.
- * We have though all the information for taking inclusions into account available, it would just
- * require more work (filter the included files out not to be processed as top-level files and
- * when an inclusion tag is encountered, process the included file passing the current context on;
- * see {@link org.apache.jasper.compiler.JsfElCheckingVisitor} and
- * org.apache.jasper.compiler.Node.Visitor.visit(IncludeAction)
- * , org.apache.jasper.compiler.Node.Visitor.visit(IncludeDirective)).
- * </pre>
- *
  * @author jakubholy.net
+ *
+ * @see #validateElExpressions(java.io.File, java.io.File)
+ * @see #withManagedBeansAndVariablesConfiguration(net.jakubholy.jeeutils.jsfelcheck.config.ManagedBeansAndVariablesConfiguration)
+ * @see CollectedValidationResults#failures()
  *
  */
 public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnalyzer> {
@@ -152,7 +171,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
 
     /** New, unconfigured analyzer.
      * @param viewType*/
-    public AbstractJsfStaticAnalyzer(ViewType viewType) {
+    protected AbstractJsfStaticAnalyzer(ViewType viewType) {
         elValidator = createValidatingElResolver();
         if (elValidator == null) {
             throw new IllegalStateException("Implementation returned null elValidator: ValidatingElResolver");
@@ -494,7 +513,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     }
 
     /**
-     * Process only the given files; set to null to process all.
+     * (JSP only) Process only the given files; set to null to process all.
      * @param jspsToIncludeCommaSeparated (optional) comma-separated list of path to files to process,
      * relative to the jspDir (they shouldn't start with a '/'). Null to reset, i.e. to process all files under jspDir.
      */
@@ -503,6 +522,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
         this.jspsToIncludeCommaSeparated = jspsToIncludeCommaSeparated;
     }
 
+	/** @see #setJspsToIncludeCommaSeparated(String) */
     public String getJspsToIncludeCommaSeparated() {
         return jspsToIncludeCommaSeparated;
     }
@@ -533,6 +553,7 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
      * tags that declare local variables.
      * @param configuration (required)
      * @return this
+     * @see LocalVariableConfiguration
      */
     public T withLocalVariablesConfiguration(LocalVariableConfiguration configuration) {
         if (configuration == null) {
@@ -543,11 +564,12 @@ public abstract class AbstractJsfStaticAnalyzer<T extends AbstractJsfStaticAnaly
     }
 
     /**
-     * Configure where should be definitions of known managed beans loaded from
-     * and optionally global (as opposed to tag-local) variables that the validator cannot detect itself.
+     * Configure where definitions of known managed beans should be loaded from
+     * and optionally declare global (as opposed to tag-local) variables that the validator cannot detect itself.
      * (Basically a managed bean is also just a variable.)
      * @param configuration (required)
      * @return this
+     * @see ManagedBeansAndVariablesConfiguration
      */
     public T withManagedBeansAndVariablesConfiguration(ManagedBeansAndVariablesConfiguration configuration) {
         if (configuration == null) {

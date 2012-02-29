@@ -21,8 +21,8 @@ You can get the binaries via Maven or manually from the Maven Central Repository
 1. JSF 1.2: [static-jsfexpression-validator-jsf12](http://search.maven.org/#browse%7C1186899668)
 1. JSF 2.x: [static-jsfexpression-validator-jsf20](http://search.maven.org/#browse%7C1186900567)
 
-MORE INFO
----------
+INTRODUCTION AND EXAMPLES OF USAGE
+----------------------------------
 
 See the detailed description of how to use the tool at the (outdated by still valuable) introductory
 [blog post "Validating JSF EL Expressions in JSF Pages with static-jsfexpression-validator"].
