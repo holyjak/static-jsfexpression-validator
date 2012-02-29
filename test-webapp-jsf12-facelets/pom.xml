@@ -4,13 +4,13 @@
     <groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
     <artifactId>test-webapp-jsf12-facelets</artifactId>
     <packaging>war</packaging>
-    <version>0.9.10-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Test JSF 1.2 webapp using Facelets</name>
 
 	<parent>
 		<artifactId>jsfelcheck-parent</artifactId>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
-		<version>0.9.10-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
     <dependencies>
