@@ -2,14 +2,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 	<artifactId>static-jsfexpression-validator-core</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>EL validator common core</name>
 	<description>Static analysis of validity of JSF EL expressions embedded in JSP pages. See the readme and main class JsfStaticAnalyzer.</description>
 
 	<parent>
 		<groupId>net.jakubholy.jeeutils.jsfelcheck</groupId>
 		<artifactId>jsfelcheck-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
 	<licenses>
