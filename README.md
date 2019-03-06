@@ -274,5 +274,5 @@ Quick bugfix release:
 
 - support imported Spring subconfigx and multiple/... faces configs
 - static-jsfexpression-validator-jsf11.jar: Add missing dependencies on jasper-el to avoid ClassNotFound ex. when parsing
-- fixed EL expression recognizer to ignore immediate evaluation expr. (${..}) and only accept ordinary JSF (deffered eval.) ones
+- fixed EL expression recognizer to ignore immediate evaluation expr. (${..}) and only accept ordinary JSF (differed eval.) ones
 - added File... version of from* methods also for the non-static ones in Man.BeansAndVarConfig
